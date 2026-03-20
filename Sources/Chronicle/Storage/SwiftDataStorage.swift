@@ -15,7 +15,8 @@ public final class SwiftDataStorage: @unchecked Sendable {
             let schema = Schema([
                 PersistedEvent.self,
                 PersistedNetworkLog.self,
-                PersistedFlowEvent.self
+                PersistedFlowEvent.self,
+                PersistedErrorLog.self
             ])
             let config = ModelConfiguration(isStoredInMemoryOnly: false)
             self.modelContainer = try ModelContainer(for: schema, configurations: [config])
@@ -29,7 +30,8 @@ public final class SwiftDataStorage: @unchecked Sendable {
         let schema = Schema([
             PersistedEvent.self,
             PersistedNetworkLog.self,
-            PersistedFlowEvent.self
+            PersistedFlowEvent.self,
+            PersistedErrorLog.self
         ])
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [config])
@@ -50,6 +52,8 @@ public final class SwiftDataStorage: @unchecked Sendable {
             modelContext.insert(PersistedNetworkLog.from(networkLog))
         case let flowEvent as FlowEvent:
             modelContext.insert(PersistedFlowEvent.from(flowEvent))
+        case let errorLog as ErrorLog:
+            modelContext.insert(PersistedErrorLog.from(errorLog))
         default:
             break
         }
@@ -71,6 +75,9 @@ public final class SwiftDataStorage: @unchecked Sendable {
         }
         if categories.contains(.flow) {
             results.append(contentsOf: fetchFlowEvents(matching: query))
+        }
+        if categories.contains(.error) {
+            results.append(contentsOf: fetchErrorLogs(matching: query))
         }
 
         results.sort { $0.timestamp < $1.timestamp }
@@ -94,6 +101,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             try modelContext.delete(model: PersistedEvent.self)
             try modelContext.delete(model: PersistedNetworkLog.self)
             try modelContext.delete(model: PersistedFlowEvent.self)
+            try modelContext.delete(model: PersistedErrorLog.self)
             try modelContext.save()
         } catch {
             // Silently handle deletion errors
@@ -111,6 +119,9 @@ public final class SwiftDataStorage: @unchecked Sendable {
 
             let flowPredicate = #Predicate<PersistedFlowEvent> { $0.timestamp < date }
             try modelContext.delete(model: PersistedFlowEvent.self, where: flowPredicate)
+
+            let errorPredicate = #Predicate<PersistedErrorLog> { $0.timestamp < date }
+            try modelContext.delete(model: PersistedErrorLog.self, where: errorPredicate)
 
             try modelContext.save()
         } catch {
@@ -199,6 +210,39 @@ public final class SwiftDataStorage: @unchecked Sendable {
         }
 
         return flowEvents
+    }
+
+    private func fetchErrorLogs(matching query: StorageQuery) -> [ErrorLog] {
+        var descriptor = FetchDescriptor<PersistedErrorLog>(
+            sortBy: [SortDescriptor(\.timestamp)]
+        )
+
+        if let since = query.since, let until = query.until {
+            descriptor.predicate = #Predicate<PersistedErrorLog> {
+                $0.timestamp >= since && $0.timestamp <= until
+            }
+        } else if let since = query.since {
+            descriptor.predicate = #Predicate<PersistedErrorLog> {
+                $0.timestamp >= since
+            }
+        } else if let until = query.until {
+            descriptor.predicate = #Predicate<PersistedErrorLog> {
+                $0.timestamp <= until
+            }
+        }
+
+        let persisted = (try? modelContext.fetch(descriptor)) ?? []
+        var errorLogs = persisted.map { $0.toErrorLog() }
+
+        if let nameFilter = query.nameContains {
+            errorLogs = errorLogs.filter {
+                $0.message.localizedCaseInsensitiveContains(nameFilter) ||
+                $0.domain.localizedCaseInsensitiveContains(nameFilter) ||
+                $0.errorType.localizedCaseInsensitiveContains(nameFilter)
+            }
+        }
+
+        return errorLogs
     }
 }
 

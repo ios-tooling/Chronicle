@@ -5,6 +5,7 @@ public enum EntryCategory: String, Codable, Sendable {
     case event
     case network
     case flow
+    case error
 }
 
 /// Base protocol for all Chronicle log entries.

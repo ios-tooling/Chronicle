@@ -22,6 +22,7 @@ public struct MarkdownExporter: ExportDestination {
         let events = sorted.compactMap { $0 as? Event }
         let networkLogs = sorted.compactMap { $0 as? NetworkLog }
         let flowEvents = sorted.compactMap { $0 as? FlowEvent }
+        let errorLogs = sorted.compactMap { $0 as? ErrorLog }
 
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -46,6 +47,7 @@ public struct MarkdownExporter: ExportDestination {
         md += "| Events | \(events.count) |\n"
         md += "| Network | \(networkLogs.count) |\n"
         md += "| Flow | \(flowEvents.count) |\n"
+        md += "| Errors | \(errorLogs.count) |\n"
 
         if !networkLogs.isEmpty {
             let errorCount = networkLogs.filter { $0.error != nil || ($0.statusCode ?? 0) >= 400 }.count
@@ -98,6 +100,33 @@ public struct MarkdownExporter: ExportDestination {
                 let ts = isoFormatter.string(from: flow.timestamp)
                 let from = flow.from?.screenName ?? "—"
                 md += "| \(ts) | \(from) | \(flow.to.screenName) | \(flow.transitionType.rawValue) |\n"
+            }
+            md += "\n"
+        }
+
+        // Errors Section
+        if !errorLogs.isEmpty {
+            md += "## Errors\n\n"
+            md += "| Timestamp | Severity | Type | Domain | Code | Message | Failure Reason |\n"
+            md += "|-----------|----------|------|--------|------|---------|----------------|\n"
+            for error in errorLogs {
+                let ts = isoFormatter.string(from: error.timestamp)
+                let code = error.code.map(String.init) ?? "—"
+                let reason = error.failureReason ?? "—"
+                md += "| \(ts) | \(error.severity.rawValue.uppercased()) | \(error.errorType) | \(error.domain) | \(code) | \(error.message) | \(reason) |\n"
+            }
+            md += "\n"
+
+            // Error severity breakdown
+            let severityCounts = Dictionary(grouping: errorLogs, by: { $0.severity })
+            md += "### Error Severity Breakdown\n\n"
+            md += "| Severity | Count |\n"
+            md += "|----------|-------|\n"
+            for severity in [ErrorSeverity.critical, .error, .warning, .info, .debug] {
+                let count = severityCounts[severity]?.count ?? 0
+                if count > 0 {
+                    md += "| \(severity.rawValue.uppercased()) | \(count) |\n"
+                }
             }
             md += "\n"
         }

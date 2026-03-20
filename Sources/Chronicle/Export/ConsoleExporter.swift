@@ -49,6 +49,17 @@ public struct ConsoleExporter: ExportDestination {
             message += "\(flowEvent.to.screenName) (\(flowEvent.transitionType.rawValue))"
             return message
 
+        case let errorLog as ErrorLog:
+            var message = "[\(timestamp)] ERROR [\(errorLog.severity.rawValue.uppercased())]: \(errorLog.errorType)"
+            message += " — \(errorLog.message)"
+            if let code = errorLog.code {
+                message += " (domain: \(errorLog.domain), code: \(code))"
+            }
+            if let reason = errorLog.failureReason {
+                message += " Reason: \(reason)"
+            }
+            return message
+
         default:
             return "[\(timestamp)] \(entry.category.rawValue.uppercased()): \(entry.id)"
         }

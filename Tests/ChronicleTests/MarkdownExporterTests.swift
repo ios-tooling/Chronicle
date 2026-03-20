@@ -25,6 +25,14 @@ struct MarkdownExporterTests {
                 from: nil,
                 to: FlowStep(screenName: "HomeScreen"),
                 transitionType: .push
+            ),
+            ErrorLog(
+                domain: "com.test",
+                code: 42,
+                message: "Something broke",
+                errorType: "TestError",
+                fullDescription: "TestError: Something broke",
+                severity: .critical
             )
         ]
 
@@ -35,9 +43,12 @@ struct MarkdownExporterTests {
         #expect(markdown.contains("## Events"))
         #expect(markdown.contains("## Network"))
         #expect(markdown.contains("## Flow"))
+        #expect(markdown.contains("## Errors"))
         #expect(markdown.contains("app_launched"))
         #expect(markdown.contains("api.example.com"))
         #expect(markdown.contains("HomeScreen"))
+        #expect(markdown.contains("Something broke"))
+        #expect(markdown.contains("CRITICAL"))
     }
 
     @Test("Report contains summary statistics")

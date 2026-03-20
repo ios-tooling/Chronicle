@@ -18,6 +18,9 @@ import SwiftData
 /// // Track screen transitions
 /// Chronicle.shared.flow.trackScreen("HomeScreen", transition: .push)
 ///
+/// // Log errors
+/// Chronicle.shared.errors.log(someError, severity: .critical, context: ["screen": "checkout"])
+///
 /// // Generate a markdown report
 /// let report = try Chronicle.shared.generateReport()
 /// ```
@@ -30,6 +33,7 @@ public final class Chronicle: @unchecked Sendable {
     private var _events: EventTracker?
     private var _network: NetworkLogger?
     private var _flow: FlowTracker?
+    private var _errors: ErrorTracker?
     private var _configuration: ChronicleConfiguration?
 
     private var storage: SwiftDataStorage {
@@ -61,6 +65,11 @@ public final class Chronicle: @unchecked Sendable {
         lock.withLock { _flow! }
     }
 
+    /// The error tracker for logging arbitrary errors.
+    public var errors: ErrorTracker {
+        lock.withLock { _errors! }
+    }
+
     private init() {}
 
     /// Configures Chronicle with the given configuration.
@@ -79,6 +88,7 @@ public final class Chronicle: @unchecked Sendable {
             self._events = EventTracker(storage: storage)
             self._network = NetworkLogger(storage: storage)
             self._flow = FlowTracker(storage: storage)
+            self._errors = ErrorTracker(storage: storage)
         }
     }
 
@@ -92,6 +102,7 @@ public final class Chronicle: @unchecked Sendable {
             self._events = EventTracker(storage: storage)
             self._network = NetworkLogger(storage: storage)
             self._flow = FlowTracker(storage: storage)
+            self._errors = ErrorTracker(storage: storage)
         }
     }
 

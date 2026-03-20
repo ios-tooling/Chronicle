@@ -23,9 +23,17 @@ struct ChronicleIntegrationTests {
         chronicle.flow.trackScreen("HomeScreen")
         chronicle.flow.trackScreen("SettingsScreen", transition: .push)
 
+        // Log errors
+        let testError = NSError(
+            domain: "com.test",
+            code: 404,
+            userInfo: [NSLocalizedDescriptionKey: "Resource not found"]
+        )
+        chronicle.errors.log(testError, severity: .warning, context: ["endpoint": "/config"])
+
         // Query all entries
         let allEntries = chronicle.allEntries()
-        #expect(allEntries.count == 5) // 2 events + 1 network + 2 flow
+        #expect(allEntries.count == 6) // 2 events + 1 network + 2 flow + 1 error
 
         // Query by category
         let eventEntries = chronicle.entries(matching: StorageQuery(categories: [.event]))
@@ -37,6 +45,9 @@ struct ChronicleIntegrationTests {
         let flowEntries = chronicle.entries(matching: StorageQuery(categories: [.flow]))
         #expect(flowEntries.count == 2)
 
+        let errorEntries = chronicle.entries(matching: StorageQuery(categories: [.error]))
+        #expect(errorEntries.count == 1)
+
         // Generate report
         let report = try chronicle.generateReport(title: "Integration Test Report")
         #expect(report.contains("# Integration Test Report"))
@@ -44,6 +55,8 @@ struct ChronicleIntegrationTests {
         #expect(report.contains("api.example.com"))
         #expect(report.contains("HomeScreen"))
         #expect(report.contains("SettingsScreen"))
+        #expect(report.contains("## Errors"))
+        #expect(report.contains("Resource not found"))
 
         // Clear
         chronicle.clear()
