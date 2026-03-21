@@ -31,6 +31,11 @@ public final class ChronicleViewerModel {
         selectedCategories.contains(category)
     }
 
+    func networkLog(for id: UUID?) -> NetworkLog? {
+        guard let id else { return nil }
+        return entries.first { $0.id == id } as? NetworkLog
+    }
+
     var entryCounts: [EntryCategory: Int] {
         var counts: [EntryCategory: Int] = [:]
         for entry in entries {

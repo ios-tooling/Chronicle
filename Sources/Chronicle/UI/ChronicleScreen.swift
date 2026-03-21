@@ -55,6 +55,10 @@ public struct ChronicleScreen: View {
                 NavigationLink(destination: NetworkLogDetailScreen(log: log)) {
                     EntryRow(entry: entry)
                 }
+            } else if let error = entry as? ErrorLog, let linkedLog = model.networkLog(for: error.linkedNetworkLogID) {
+                NavigationLink(destination: NetworkLogDetailScreen(log: linkedLog)) {
+                    EntryRow(entry: entry)
+                }
             } else {
                 EntryRow(entry: entry)
             }

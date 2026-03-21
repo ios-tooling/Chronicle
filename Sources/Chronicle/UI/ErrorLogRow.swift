@@ -29,7 +29,7 @@ struct ErrorLogRow: View {
     private var severityColor: Color {
         switch error.severity {
         case .critical: .red
-        case .error: .orange
+        case .error: .red
         case .warning: .yellow
         case .info: .blue
         case .debug: .secondary
