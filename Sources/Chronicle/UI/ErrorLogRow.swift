@@ -1,0 +1,38 @@
+import SwiftUI
+
+/// Row view for an ErrorLog entry.
+struct ErrorLogRow: View {
+    let error: ErrorLog
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                Text(error.severity.rawValue.uppercased())
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(severityColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+                    .foregroundStyle(severityColor)
+
+                Text(error.errorType)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+            }
+
+            Text(error.message)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+    }
+
+    private var severityColor: Color {
+        switch error.severity {
+        case .critical: .red
+        case .error: .orange
+        case .warning: .yellow
+        case .info: .blue
+        case .debug: .secondary
+        }
+    }
+}
