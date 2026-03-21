@@ -39,7 +39,7 @@ public struct ChronicleScreen: View {
             }
             .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
                 Button("Clear All", role: .destructive) {
-                    Chronicle.shared.clear()
+                    Chronicle.instance.clear()
                     model.refresh()
                 }
             } message: {

@@ -4,7 +4,7 @@ extension Chronicle {
 
     /// Tracks a named event with optional metadata.
     nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-        shared.events?.track(name, metadata: metadata, file: file, function: function, line: line)
+        instance.events.track(name, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Logs a network request and response.
@@ -19,7 +19,7 @@ extension Chronicle {
         function: String = #function,
         line: Int = #line
     ) {
-        shared.network?.log(
+        instance.network.log(
             request: request,
             response: response,
             data: data,
@@ -34,7 +34,7 @@ extension Chronicle {
 
     /// Tracks a screen transition in the app flow.
     nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-        shared.flow?.trackScreen(name, transition: transition, metadata: metadata, file: file, function: function, line: line)
+        instance.flow.trackScreen(name, transition: transition, metadata: metadata, file: file, function: function, line: line)
     }
 
     /// Logs an error with optional severity and context.
@@ -47,7 +47,7 @@ extension Chronicle {
         function: String = #function,
         line: Int = #line
     ) {
-        shared.errors?.log(
+        instance.errors.log(
             error,
             severity: severity,
             context: context,

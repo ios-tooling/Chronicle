@@ -26,7 +26,7 @@ import SwiftData
 /// ```
 public final class Chronicle: @unchecked Sendable {
     /// The shared Chronicle instance.
-    public static let shared = Chronicle()
+    public static let instance = Chronicle()
 
     private let lock = NSLock()
     private var _storage: SwiftDataStorage?
@@ -57,23 +57,23 @@ public final class Chronicle: @unchecked Sendable {
     }
 
     /// The event tracker for recording application events.
-    public var events: EventTracker? {
-        lock.withLock { _events }
+    public var events: EventTracker {
+        lock.withLock { _events! }
     }
 
     /// The network logger for recording network requests.
-    public var network: NetworkLogger? {
-        lock.withLock { _network }
+    public var network: NetworkLogger {
+        lock.withLock { _network! }
     }
 
     /// The flow tracker for recording screen transitions.
-    public var flow: FlowTracker? {
-        lock.withLock { _flow }
+    public var flow: FlowTracker {
+        lock.withLock { _flow! }
     }
 
     /// The error tracker for logging arbitrary errors.
-    public var errors: ErrorTracker? {
-        lock.withLock { _errors }
+    public var errors: ErrorTracker {
+        lock.withLock { _errors! }
     }
 
     private init() {}

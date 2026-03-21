@@ -6,7 +6,7 @@ import Foundation
 struct ChronicleIntegrationTests {
     @Test("Full lifecycle: configure, track, query, report")
     func fullLifecycle() throws {
-        let chronicle = Chronicle.shared
+        let chronicle = Chronicle.instance
         try chronicle.configureInMemory()
 
         // Track events
