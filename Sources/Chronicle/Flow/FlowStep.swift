@@ -34,12 +34,7 @@ public struct FlowStep: Codable, Sendable, Hashable {
     /// Additional context about this step.
     public let additionalInfo: EventMetadata?
 
-    public init(
-        screenName: String,
-        transitionType: TransitionType = .push,
-        timestamp: Date = Date(),
-        additionalInfo: EventMetadata? = nil
-    ) {
+    public init(screenName: String, transitionType: TransitionType = .push, timestamp: Date = Date(), additionalInfo: EventMetadata? = nil) {
         self.screenName = screenName
         self.transitionType = transitionType
         self.timestamp = timestamp

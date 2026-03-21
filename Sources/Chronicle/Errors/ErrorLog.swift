@@ -48,6 +48,13 @@ public struct ErrorLog: ChronicleEntry {
     /// The call stack symbols at the time of logging, if captured.
     public let callStackSymbols: [String]?
 
+    /// The UUID of a linked NetworkLog, if this error came from a network request.
+    public let linkedNetworkLogID: UUID?
+
+    public let sourceFile: String?
+    public let sourceFunction: String?
+    public let sourceLine: Int?
+
     public init(
         id: UUID = UUID(),
         timestamp: Date = Date(),
@@ -61,7 +68,11 @@ public struct ErrorLog: ChronicleEntry {
         fullDescription: String,
         severity: ErrorSeverity = .error,
         context: EventMetadata? = nil,
-        callStackSymbols: [String]? = nil
+        callStackSymbols: [String]? = nil,
+        linkedNetworkLogID: UUID? = nil,
+        sourceFile: String? = nil,
+        sourceFunction: String? = nil,
+        sourceLine: Int? = nil
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -76,6 +87,10 @@ public struct ErrorLog: ChronicleEntry {
         self.severity = severity
         self.context = context
         self.callStackSymbols = callStackSymbols
+        self.linkedNetworkLogID = linkedNetworkLogID
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     // Custom Codable to handle the constant category
@@ -83,6 +98,7 @@ public struct ErrorLog: ChronicleEntry {
         case id, timestamp, category, domain, code, message, failureReason
         case recoverySuggestion, errorType, userInfo, fullDescription
         case severity, context, callStackSymbols
+        case linkedNetworkLogID, sourceFile, sourceFunction, sourceLine
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -101,6 +117,10 @@ public struct ErrorLog: ChronicleEntry {
         try container.encode(severity, forKey: .severity)
         try container.encodeIfPresent(context, forKey: .context)
         try container.encodeIfPresent(callStackSymbols, forKey: .callStackSymbols)
+        try container.encodeIfPresent(linkedNetworkLogID, forKey: .linkedNetworkLogID)
+        try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
+        try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
+        try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
     }
 
     public init(from decoder: Decoder) throws {
@@ -118,5 +138,9 @@ public struct ErrorLog: ChronicleEntry {
         severity = try container.decode(ErrorSeverity.self, forKey: .severity)
         context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
         callStackSymbols = try container.decodeIfPresent([String].self, forKey: .callStackSymbols)
+        linkedNetworkLogID = try container.decodeIfPresent(UUID.self, forKey: .linkedNetworkLogID)
+        sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
+        sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
+        sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)
     }
 }

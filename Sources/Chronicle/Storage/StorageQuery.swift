@@ -17,13 +17,7 @@ public struct StorageQuery: Sendable {
     /// Filter events/flow entries whose name contains this string.
     public var nameContains: String?
 
-    public init(
-        categories: Set<EntryCategory>? = nil,
-        since: Date? = nil,
-        until: Date? = nil,
-        limit: Int? = nil,
-        nameContains: String? = nil
-    ) {
+    public init(categories: Set<EntryCategory>? = nil, since: Date? = nil, until: Date? = nil, limit: Int? = nil, nameContains: String? = nil) {
         self.categories = categories
         self.since = since
         self.until = until

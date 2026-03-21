@@ -16,22 +16,21 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Tracks a screen transition.
-    public func trackScreen(
-        _ name: String,
-        transition: TransitionType = .push,
-        metadata: EventMetadata? = nil
-    ) {
+    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let previousStep = currentStep
         let newStep = FlowStep(
             screenName: name,
             transitionType: transition,
             additionalInfo: metadata
         )
-
+        let fileName = (file as NSString).lastPathComponent
         let flowEvent = FlowEvent(
             from: previousStep,
             to: newStep,
-            transitionType: transition
+            transitionType: transition,
+            sourceFile: fileName,
+            sourceFunction: function,
+            sourceLine: line
         )
 
         currentStep = newStep
@@ -39,16 +38,19 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Tracks an app lifecycle event.
-    public func trackLifecycle(_ event: LifecycleEvent) {
+    public func trackLifecycle(_ event: LifecycleEvent, file: String = #file, function: String = #function, line: Int = #line) {
         let step = FlowStep(
             screenName: event.rawValue,
             transitionType: .lifecycle
         )
-
+        let fileName = (file as NSString).lastPathComponent
         let flowEvent = FlowEvent(
             from: currentStep,
             to: step,
-            transitionType: .lifecycle
+            transitionType: .lifecycle,
+            sourceFile: fileName,
+            sourceFunction: function,
+            sourceLine: line
         )
 
         storage.store(flowEvent)

@@ -10,16 +10,16 @@ import SwiftData
 /// try Chronicle.shared.configure(.default)
 ///
 /// // Track events
-/// Chronicle.shared.events.track("button_tapped", metadata: ["id": "checkout"])
+/// Chronicle.track("button_tapped", metadata: ["id": "checkout"])
 ///
 /// // Log network requests
-/// Chronicle.shared.network.log(request: urlRequest, response: httpResponse, data: data)
+/// Chronicle.network(request: urlRequest, response: httpResponse, data: data)
 ///
 /// // Track screen transitions
-/// Chronicle.shared.flow.trackScreen("HomeScreen", transition: .push)
+/// Chronicle.flow("HomeScreen", transition: .push)
 ///
 /// // Log errors
-/// Chronicle.shared.errors.log(someError, severity: .critical, context: ["screen": "checkout"])
+/// Chronicle.error(someError, severity: .critical, context: ["screen": "checkout"])
 ///
 /// // Generate a markdown report
 /// let report = try Chronicle.shared.generateReport()
@@ -35,6 +35,7 @@ public final class Chronicle: @unchecked Sendable {
     private var _flow: FlowTracker?
     private var _errors: ErrorTracker?
     private var _configuration: ChronicleConfiguration?
+    private var _launchDate: Date?
 
     private var storage: SwiftDataStorage {
         lock.withLock { _storage! }
@@ -48,6 +49,11 @@ public final class Chronicle: @unchecked Sendable {
     /// Whether Chronicle has been configured.
     public var isConfigured: Bool {
         lock.withLock { _storage != nil }
+    }
+
+    /// The date when Chronicle was configured (app launch).
+    public var launchDate: Date? {
+        lock.withLock { _launchDate }
     }
 
     /// The event tracker for recording application events.
@@ -82,13 +88,15 @@ public final class Chronicle: @unchecked Sendable {
             storage = try SwiftDataStorage()
         }
 
+        let errors = ErrorTracker(storage: storage)
         lock.withLock {
+            self._launchDate = Date()
             self._configuration = configuration
             self._storage = storage
             self._events = EventTracker(storage: storage)
-            self._network = NetworkLogger(storage: storage)
+            self._errors = errors
+            self._network = NetworkLogger(storage: storage, errorTracker: errors)
             self._flow = FlowTracker(storage: storage)
-            self._errors = ErrorTracker(storage: storage)
         }
     }
 
@@ -96,13 +104,15 @@ public final class Chronicle: @unchecked Sendable {
     public func configureInMemory() throws {
         let storage = try SwiftDataStorage.inMemory()
 
+        let errors = ErrorTracker(storage: storage)
         lock.withLock {
+            self._launchDate = Date()
             self._configuration = .default
             self._storage = storage
             self._events = EventTracker(storage: storage)
-            self._network = NetworkLogger(storage: storage)
+            self._errors = errors
+            self._network = NetworkLogger(storage: storage, errorTracker: errors)
             self._flow = FlowTracker(storage: storage)
-            self._errors = ErrorTracker(storage: storage)
         }
     }
 
@@ -126,22 +136,18 @@ public final class Chronicle: @unchecked Sendable {
         storage.clear(before: date)
     }
 
-    /// Exports all entries to all configured destinations.
-    public func exportAll() throws {
-        let entries = allEntries()
-        let destinations = configuration.exportDestinations
-        for destination in destinations {
-            try destination.export(entries)
-        }
-    }
+//    /// Exports all entries to all configured destinations.
+//    public func exportAll() throws {
+//        let entries = allEntries()
+//        let destinations = configuration.exportDestinations
+//        for destination in destinations {
+//            try destination.export(entries)
+//        }
+//    }
 
     /// Generates a markdown report for entries in the given time range.
     /// If no range is specified, includes all entries.
-    public func generateReport(
-        from startDate: Date? = nil,
-        to endDate: Date? = nil,
-        title: String = "Chronicle Report"
-    ) throws -> String {
+    public func generateReport(from startDate: Date? = nil, to endDate: Date? = nil, title: String = "Chronicle Report") throws -> String {
         let query = StorageQuery(since: startDate, until: endDate)
         let entries = storage.entries(matching: query)
         let exporter = MarkdownExporter(title: title)

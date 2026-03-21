@@ -21,7 +21,7 @@ public final class ErrorTracker: Sendable {
         function: String = #function,
         line: Int = #line
     ) {
-        let errorLog = extract(
+        let errorLog = makeErrorLog(
             from: error,
             severity: severity,
             context: context,
@@ -57,11 +57,13 @@ public final class ErrorTracker: Sendable {
 
     // MARK: - Error Extraction
 
-    private func extract(
+    func makeErrorLog(
         from error: Error,
-        severity: ErrorSeverity,
-        context: EventMetadata?,
-        captureCallStack: Bool,
+        id: UUID = UUID(),
+        severity: ErrorSeverity = .error,
+        context: EventMetadata? = nil,
+        captureCallStack: Bool = false,
+        linkedNetworkLogID: UUID? = nil,
         file: String,
         function: String,
         line: Int
@@ -90,17 +92,11 @@ public final class ErrorTracker: Sendable {
         // Build full description including underlying errors
         let fullDescription = buildFullDescription(error)
 
-        // Build context with source location
-        var fullContext = context ?? EventMetadata()
-        let fileName = (file as NSString).lastPathComponent
-        fullContext["sourceFile"] = .string(fileName)
-        fullContext["sourceFunction"] = .string(function)
-        fullContext["sourceLine"] = .int(line)
-
         // Capture call stack if requested
         let stack = captureCallStack ? Thread.callStackSymbols : nil
 
         return ErrorLog(
+            id: id,
             domain: nsError.domain,
             code: nsError.code,
             message: nsError.localizedDescription,
@@ -110,8 +106,12 @@ public final class ErrorTracker: Sendable {
             userInfo: userInfoStrings,
             fullDescription: fullDescription,
             severity: severity,
-            context: fullContext,
-            callStackSymbols: stack
+            context: context,
+            callStackSymbols: stack,
+            linkedNetworkLogID: linkedNetworkLogID,
+            sourceFile: (file as NSString).lastPathComponent,
+            sourceFunction: function,
+            sourceLine: line
         )
     }
 

@@ -9,12 +9,18 @@ final class PersistedEvent {
     var timestamp: Date
     var name: String
     var metadataJSON: Data?
+    var sourceFile: String?
+    var sourceFunction: String?
+    var sourceLine: Int?
 
-    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?) {
+    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
         self.entryID = entryID
         self.timestamp = timestamp
         self.name = name
         self.metadataJSON = metadataJSON
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     func toEvent() -> Event {
@@ -22,7 +28,7 @@ final class PersistedEvent {
         if let data = metadataJSON {
             metadata = try? JSONDecoder().decode(EventMetadata.self, from: data)
         }
-        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata)
+        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
     }
 
     static func from(_ event: Event) -> PersistedEvent {
@@ -31,7 +37,10 @@ final class PersistedEvent {
             entryID: event.id,
             timestamp: event.timestamp,
             name: event.name,
-            metadataJSON: metadataJSON
+            metadataJSON: metadataJSON,
+            sourceFile: event.sourceFile,
+            sourceFunction: event.sourceFunction,
+            sourceLine: event.sourceLine
         )
     }
 }
@@ -54,6 +63,10 @@ final class PersistedNetworkLog {
     var endTime: Date?
     var bytesSent: Int64
     var bytesReceived: Int64
+    var linkedErrorID: UUID?
+    var sourceFile: String?
+    var sourceFunction: String?
+    var sourceLine: Int?
 
     init(
         entryID: UUID,
@@ -69,7 +82,11 @@ final class PersistedNetworkLog {
         startTime: Date,
         endTime: Date?,
         bytesSent: Int64,
-        bytesReceived: Int64
+        bytesReceived: Int64,
+        linkedErrorID: UUID?,
+        sourceFile: String?,
+        sourceFunction: String?,
+        sourceLine: Int?
     ) {
         self.entryID = entryID
         self.timestamp = timestamp
@@ -85,6 +102,10 @@ final class PersistedNetworkLog {
         self.endTime = endTime
         self.bytesSent = bytesSent
         self.bytesReceived = bytesReceived
+        self.linkedErrorID = linkedErrorID
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     func toNetworkLog() -> NetworkLog {
@@ -111,7 +132,11 @@ final class PersistedNetworkLog {
                 endTime: endTime,
                 bytesSent: bytesSent,
                 bytesReceived: bytesReceived
-            )
+            ),
+            linkedErrorID: linkedErrorID,
+            sourceFile: sourceFile,
+            sourceFunction: sourceFunction,
+            sourceLine: sourceLine
         )
     }
 
@@ -133,7 +158,11 @@ final class PersistedNetworkLog {
             startTime: log.metrics.startTime,
             endTime: log.metrics.endTime,
             bytesSent: log.metrics.bytesSent,
-            bytesReceived: log.metrics.bytesReceived
+            bytesReceived: log.metrics.bytesReceived,
+            linkedErrorID: log.linkedErrorID,
+            sourceFile: log.sourceFile,
+            sourceFunction: log.sourceFunction,
+            sourceLine: log.sourceLine
         )
     }
 }
@@ -153,6 +182,9 @@ final class PersistedFlowEvent {
     var toTimestamp: Date
     var toInfoJSON: Data?
     var transitionType: String
+    var sourceFile: String?
+    var sourceFunction: String?
+    var sourceLine: Int?
 
     init(
         entryID: UUID,
@@ -165,7 +197,10 @@ final class PersistedFlowEvent {
         toTransitionType: String,
         toTimestamp: Date,
         toInfoJSON: Data?,
-        transitionType: String
+        transitionType: String,
+        sourceFile: String?,
+        sourceFunction: String?,
+        sourceLine: Int?
     ) {
         self.entryID = entryID
         self.timestamp = timestamp
@@ -178,6 +213,9 @@ final class PersistedFlowEvent {
         self.toTimestamp = toTimestamp
         self.toInfoJSON = toInfoJSON
         self.transitionType = transitionType
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     func toFlowEvent() -> FlowEvent {
@@ -206,7 +244,10 @@ final class PersistedFlowEvent {
             timestamp: timestamp,
             from: fromStep,
             to: toStep,
-            transitionType: TransitionType(rawValue: transitionType) ?? .push
+            transitionType: TransitionType(rawValue: transitionType) ?? .push,
+            sourceFile: sourceFile,
+            sourceFunction: sourceFunction,
+            sourceLine: sourceLine
         )
     }
 
@@ -225,7 +266,10 @@ final class PersistedFlowEvent {
             toTransitionType: flowEvent.to.transitionType.rawValue,
             toTimestamp: flowEvent.to.timestamp,
             toInfoJSON: toInfoJSON,
-            transitionType: flowEvent.transitionType.rawValue
+            transitionType: flowEvent.transitionType.rawValue,
+            sourceFile: flowEvent.sourceFile,
+            sourceFunction: flowEvent.sourceFunction,
+            sourceLine: flowEvent.sourceLine
         )
     }
 }
@@ -247,6 +291,10 @@ final class PersistedErrorLog {
     var severity: String
     var contextJSON: Data?
     var callStackJSON: Data?
+    var linkedNetworkLogID: UUID?
+    var sourceFile: String?
+    var sourceFunction: String?
+    var sourceLine: Int?
 
     init(
         entryID: UUID,
@@ -261,7 +309,11 @@ final class PersistedErrorLog {
         fullDescription: String,
         severity: String,
         contextJSON: Data?,
-        callStackJSON: Data?
+        callStackJSON: Data?,
+        linkedNetworkLogID: UUID?,
+        sourceFile: String?,
+        sourceFunction: String?,
+        sourceLine: Int?
     ) {
         self.entryID = entryID
         self.timestamp = timestamp
@@ -276,6 +328,10 @@ final class PersistedErrorLog {
         self.severity = severity
         self.contextJSON = contextJSON
         self.callStackJSON = callStackJSON
+        self.linkedNetworkLogID = linkedNetworkLogID
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     func toErrorLog() -> ErrorLog {
@@ -297,7 +353,11 @@ final class PersistedErrorLog {
             fullDescription: fullDescription,
             severity: ErrorSeverity(rawValue: severity) ?? .error,
             context: context,
-            callStackSymbols: callStack
+            callStackSymbols: callStack,
+            linkedNetworkLogID: linkedNetworkLogID,
+            sourceFile: sourceFile,
+            sourceFunction: sourceFunction,
+            sourceLine: sourceLine
         )
     }
 
@@ -320,7 +380,11 @@ final class PersistedErrorLog {
             fullDescription: errorLog.fullDescription,
             severity: errorLog.severity.rawValue,
             contextJSON: contextJSON,
-            callStackJSON: callStackJSON
+            callStackJSON: callStackJSON,
+            linkedNetworkLogID: errorLog.linkedNetworkLogID,
+            sourceFile: errorLog.sourceFile,
+            sourceFunction: errorLog.sourceFunction,
+            sourceLine: errorLog.sourceLine
         )
     }
 }

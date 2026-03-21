@@ -21,6 +21,13 @@ public struct NetworkLog: ChronicleEntry {
     // Metrics
     public let metrics: NetworkMetrics
 
+    /// The UUID of a linked ErrorLog, if this request produced an error.
+    public let linkedErrorID: UUID?
+
+    public let sourceFile: String?
+    public let sourceFunction: String?
+    public let sourceLine: Int?
+
     public init(
         id: UUID = UUID(),
         timestamp: Date = Date(),
@@ -32,7 +39,11 @@ public struct NetworkLog: ChronicleEntry {
         responseHeaders: [String: String]? = nil,
         responseBodySize: Int? = nil,
         error: String? = nil,
-        metrics: NetworkMetrics = NetworkMetrics()
+        metrics: NetworkMetrics = NetworkMetrics(),
+        linkedErrorID: UUID? = nil,
+        sourceFile: String? = nil,
+        sourceFunction: String? = nil,
+        sourceLine: Int? = nil
     ) {
         self.id = id
         self.timestamp = timestamp
@@ -45,12 +56,17 @@ public struct NetworkLog: ChronicleEntry {
         self.responseBodySize = responseBodySize
         self.error = error
         self.metrics = metrics
+        self.linkedErrorID = linkedErrorID
+        self.sourceFile = sourceFile
+        self.sourceFunction = sourceFunction
+        self.sourceLine = sourceLine
     }
 
     // Custom Codable to handle the constant category
     private enum CodingKeys: String, CodingKey {
         case id, timestamp, category, url, method, requestHeaders, requestBodySize
         case statusCode, responseHeaders, responseBodySize, error, metrics
+        case linkedErrorID, sourceFile, sourceFunction, sourceLine
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -67,6 +83,10 @@ public struct NetworkLog: ChronicleEntry {
         try container.encodeIfPresent(responseBodySize, forKey: .responseBodySize)
         try container.encodeIfPresent(error, forKey: .error)
         try container.encode(metrics, forKey: .metrics)
+        try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
+        try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
+        try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
+        try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
     }
 
     public init(from decoder: Decoder) throws {
@@ -82,5 +102,9 @@ public struct NetworkLog: ChronicleEntry {
         responseBodySize = try container.decodeIfPresent(Int.self, forKey: .responseBodySize)
         error = try container.decodeIfPresent(String.self, forKey: .error)
         metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
+        linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
+        sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
+        sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
+        sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)
     }
 }

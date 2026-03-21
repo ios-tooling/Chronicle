@@ -20,12 +20,7 @@ public struct NetworkMetrics: Codable, Sendable, Hashable {
         return endTime.timeIntervalSince(startTime)
     }
 
-    public init(
-        startTime: Date = Date(),
-        endTime: Date? = nil,
-        bytesSent: Int64 = 0,
-        bytesReceived: Int64 = 0
-    ) {
+    public init(startTime: Date = Date(), endTime: Date? = nil, bytesSent: Int64 = 0, bytesReceived: Int64 = 0) {
         self.startTime = startTime
         self.endTime = endTime
         self.bytesSent = bytesSent

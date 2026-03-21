@@ -60,24 +60,6 @@ public final class URLSessionInterceptor: URLProtocol {
 
     private func logRequest(error: Error?) {
         guard let logger = Self.networkLogger else { return }
-
-        let endTime = Date()
-        let networkLog = NetworkLog(
-            url: request.url ?? URL(string: "https://unknown")!,
-            method: request.httpMethod ?? "GET",
-            requestHeaders: request.allHTTPHeaderFields,
-            requestBodySize: request.httpBody?.count,
-            statusCode: (response as? HTTPURLResponse)?.statusCode,
-            responseHeaders: (response as? HTTPURLResponse)?.allHeaderFields as? [String: String],
-            responseBodySize: receivedData.count,
-            error: error?.localizedDescription,
-            metrics: NetworkMetrics(
-                startTime: startTime,
-                endTime: endTime,
-                bytesSent: Int64(request.httpBody?.count ?? 0),
-                bytesReceived: Int64(receivedData.count)
-            )
-        )
-        logger.log(networkLog)
+        logger.log(request: request, response: response as? HTTPURLResponse, data: receivedData, error: error, startTime: startTime, endTime: Date())
     }
 }

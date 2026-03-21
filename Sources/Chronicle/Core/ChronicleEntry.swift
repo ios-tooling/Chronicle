@@ -1,7 +1,7 @@
 import Foundation
 
 /// Categories of entries that Chronicle can track.
-public enum EntryCategory: String, Codable, Sendable {
+public enum EntryCategory: String, Codable, Sendable, CaseIterable {
     case event
     case network
     case flow

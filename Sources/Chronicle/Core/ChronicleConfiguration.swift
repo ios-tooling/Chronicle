@@ -14,11 +14,7 @@ public struct ChronicleConfiguration: Sendable {
     public var exportDestinations: [any ExportDestination]
 
     /// Creates a configuration with the specified options.
-    public init(
-        isEnabled: Bool = true,
-        modelContainer: ModelContainer? = nil,
-        exportDestinations: [any ExportDestination] = []
-    ) {
+    public init(isEnabled: Bool = true, modelContainer: ModelContainer? = nil, exportDestinations: [any ExportDestination] = []) {
         self.isEnabled = isEnabled
         self.modelContainer = modelContainer
         self.exportDestinations = exportDestinations

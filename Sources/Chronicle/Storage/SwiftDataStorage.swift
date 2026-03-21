@@ -245,7 +245,3 @@ public final class SwiftDataStorage: @unchecked Sendable {
         return errorLogs
     }
 }
-
-// MARK: - EntryCategory + CaseIterable
-
-extension EntryCategory: CaseIterable {}
