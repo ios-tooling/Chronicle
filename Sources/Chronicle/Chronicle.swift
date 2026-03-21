@@ -37,8 +37,8 @@ public final class Chronicle: @unchecked Sendable {
     private var _configuration: ChronicleConfiguration?
     private var _launchDate: Date?
 
-    private var storage: SwiftDataStorage {
-        lock.withLock { _storage! }
+    private var storage: SwiftDataStorage? {
+        lock.withLock { _storage }
     }
 
     /// The current configuration.
@@ -57,23 +57,23 @@ public final class Chronicle: @unchecked Sendable {
     }
 
     /// The event tracker for recording application events.
-    public var events: EventTracker {
-        lock.withLock { _events! }
+    public var events: EventTracker? {
+        lock.withLock { _events }
     }
 
     /// The network logger for recording network requests.
-    public var network: NetworkLogger {
-        lock.withLock { _network! }
+    public var network: NetworkLogger? {
+        lock.withLock { _network }
     }
 
     /// The flow tracker for recording screen transitions.
-    public var flow: FlowTracker {
-        lock.withLock { _flow! }
+    public var flow: FlowTracker? {
+        lock.withLock { _flow }
     }
 
     /// The error tracker for logging arbitrary errors.
-    public var errors: ErrorTracker {
-        lock.withLock { _errors! }
+    public var errors: ErrorTracker? {
+        lock.withLock { _errors }
     }
 
     private init() {}
@@ -118,22 +118,22 @@ public final class Chronicle: @unchecked Sendable {
 
     /// Returns all stored entries.
     public func allEntries() -> [any ChronicleEntry] {
-        storage.allEntries()
+        storage?.allEntries() ?? []
     }
 
     /// Returns entries matching the given query.
     public func entries(matching query: StorageQuery) -> [any ChronicleEntry] {
-        storage.entries(matching: query)
+        storage?.entries(matching: query) ?? []
     }
 
     /// Clears all stored entries.
     public func clear() {
-        storage.clear()
+        storage?.clear()
     }
 
     /// Clears entries older than the given date.
     public func clear(before date: Date) {
-        storage.clear(before: date)
+        storage?.clear(before: date)
     }
 
 //    /// Exports all entries to all configured destinations.
@@ -149,7 +149,7 @@ public final class Chronicle: @unchecked Sendable {
     /// If no range is specified, includes all entries.
     public func generateReport(from startDate: Date? = nil, to endDate: Date? = nil, title: String = "Chronicle Report") throws -> String {
         let query = StorageQuery(since: startDate, until: endDate)
-        let entries = storage.entries(matching: query)
+        let entries = storage?.entries(matching: query) ?? []
         let exporter = MarkdownExporter(title: title)
         return exporter.generateMarkdown(from: entries)
     }

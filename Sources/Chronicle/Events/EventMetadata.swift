@@ -9,6 +9,11 @@ public struct EventMetadata: Codable, Sendable, Hashable {
         self.storage = dictionary
     }
 
+    /// Creates metadata from a string dictionary.
+    public init(_ dictionary: [String: String]) {
+        self.storage = dictionary.mapValues { .string($0) }
+    }
+
     /// Access metadata values by key.
     public subscript(key: String) -> AnyCodableValue? {
         get { storage[key] }

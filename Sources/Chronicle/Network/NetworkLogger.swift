@@ -28,10 +28,10 @@ public final class NetworkLogger: Sendable {
             url: request.url ?? URL(string: "https://unknown")!,
             method: request.httpMethod ?? "GET",
             requestHeaders: request.allHTTPHeaderFields,
-            requestBodySize: request.httpBody?.count,
+            requestBody: request.httpBody,
             statusCode: response?.statusCode,
             responseHeaders: response?.allHeaderFields as? [String: String],
-            responseBodySize: data?.count,
+            responseBody: data,
             error: error?.localizedDescription,
             metrics: NetworkMetrics(
                 startTime: startTime,

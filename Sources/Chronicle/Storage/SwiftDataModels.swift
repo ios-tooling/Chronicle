@@ -54,9 +54,11 @@ final class PersistedNetworkLog {
     var url: String
     var method: String
     var requestHeadersJSON: Data?
+    var requestBody: Data?
     var requestBodySize: Int?
     var statusCode: Int?
     var responseHeadersJSON: Data?
+    var responseBody: Data?
     var responseBodySize: Int?
     var errorMessage: String?
     var startTime: Date
@@ -74,9 +76,11 @@ final class PersistedNetworkLog {
         url: String,
         method: String,
         requestHeadersJSON: Data?,
+        requestBody: Data?,
         requestBodySize: Int?,
         statusCode: Int?,
         responseHeadersJSON: Data?,
+        responseBody: Data?,
         responseBodySize: Int?,
         errorMessage: String?,
         startTime: Date,
@@ -93,9 +97,11 @@ final class PersistedNetworkLog {
         self.url = url
         self.method = method
         self.requestHeadersJSON = requestHeadersJSON
+        self.requestBody = requestBody
         self.requestBodySize = requestBodySize
         self.statusCode = statusCode
         self.responseHeadersJSON = responseHeadersJSON
+        self.responseBody = responseBody
         self.responseBodySize = responseBodySize
         self.errorMessage = errorMessage
         self.startTime = startTime
@@ -122,9 +128,11 @@ final class PersistedNetworkLog {
             url: URL(string: url) ?? URL(string: "https://unknown")!,
             method: method,
             requestHeaders: reqHeaders,
+            requestBody: requestBody,
             requestBodySize: requestBodySize,
             statusCode: statusCode,
             responseHeaders: resHeaders,
+            responseBody: responseBody,
             responseBodySize: responseBodySize,
             error: errorMessage,
             metrics: NetworkMetrics(
@@ -150,9 +158,11 @@ final class PersistedNetworkLog {
             url: log.url.absoluteString,
             method: log.method,
             requestHeadersJSON: reqJSON,
+            requestBody: log.requestBody,
             requestBodySize: log.requestBodySize,
             statusCode: log.statusCode,
             responseHeadersJSON: resJSON,
+            responseBody: log.responseBody,
             responseBodySize: log.responseBodySize,
             errorMessage: log.error,
             startTime: log.metrics.startTime,

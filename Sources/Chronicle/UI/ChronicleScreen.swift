@@ -3,6 +3,7 @@ import SwiftUI
 /// A SwiftUI screen that displays Chronicle entry history with filtering.
 public struct ChronicleScreen: View {
     @State private var model = ChronicleViewerModel()
+    @State private var showClearConfirmation = false
 
     public init() {}
 
@@ -30,6 +31,19 @@ public struct ChronicleScreen: View {
                         Image(systemName: "arrow.clockwise")
                     }
                 }
+                ToolbarItem(placement: .automatic) {
+                    Button(role: .destructive) { showClearConfirmation = true } label: {
+                        Image(systemName: "trash")
+                    }
+                }
+            }
+            .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
+                Button("Clear All", role: .destructive) {
+                    Chronicle.shared.clear()
+                    model.refresh()
+                }
+            } message: {
+                Text("This will permanently delete all Chronicle entries.")
             }
             .onAppear { model.refresh() }
         }
@@ -37,7 +51,13 @@ public struct ChronicleScreen: View {
 
     private var entryList: some View {
         List(model.entries, id: \.id) { entry in
-            EntryRow(entry: entry)
+            if let log = entry as? NetworkLog {
+                NavigationLink(destination: NetworkLogDetailScreen(log: log)) {
+                    EntryRow(entry: entry)
+                }
+            } else {
+                EntryRow(entry: entry)
+            }
         }
         .listStyle(.plain)
     }
