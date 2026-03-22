@@ -23,7 +23,19 @@ struct ErrorLogRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
+
+            if let context = contextString {
+                Text(context)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
         }
+    }
+
+    private var contextString: String? {
+        guard let ctx = error.context, let value = ctx["context"] else { return nil }
+        return "\(value)"
     }
 
     private var severityColor: Color {

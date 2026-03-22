@@ -13,11 +13,18 @@ struct EntryRow: View {
             entryContent
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(entry.timestamp, style: .relative)
+            Text(Self.formatTimestamp(entry.timestamp))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
+    }
+
+    private static func formatTimestamp(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        return date.formatted(.dateTime.day().month().year(.twoDigits).hour().minute())
     }
 
     @ViewBuilder

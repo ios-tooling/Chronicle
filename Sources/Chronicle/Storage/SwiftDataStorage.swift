@@ -87,7 +87,11 @@ public final class SwiftDataStorage: @unchecked Sendable {
 		results.sort { $0.timestamp < $1.timestamp }
 		
 		if let limit = query.limit {
-			return Array(results.suffix(limit))
+			results = Array(results.suffix(limit))
+		}
+		
+		if let filter = query.nameContains {
+			results = results.filter { $0.matches(filter: filter) }
 		}
 		return results
 	}

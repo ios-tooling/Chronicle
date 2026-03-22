@@ -3,7 +3,7 @@ import SwiftUI
 /// View model for the Chronicle entry viewer.
 @Observable
 public final class ChronicleViewerModel {
-    var selectedCategories: Set<EntryCategory> = Set(EntryCategory.allCases)
+    var selectedCategories: Set<EntryCategory> = []
     var showCurrentRunOnly = true
     var searchText = ""
     private(set) var entries: [any ChronicleEntry] = []

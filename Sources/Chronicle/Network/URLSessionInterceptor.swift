@@ -3,7 +3,7 @@ import Foundation
 /// A URLProtocol subclass that intercepts network requests for logging.
 public final class URLSessionInterceptor: URLProtocol {
     static let handledKey = "Chronicle_Handled"
-    static var networkLogger: NetworkLogger?
+    nonisolated(unsafe) static var networkLogger: NetworkLogger?
 
     private var dataTask: URLSessionDataTask?
     private var receivedData = Data()

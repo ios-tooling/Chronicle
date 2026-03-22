@@ -21,6 +21,10 @@ public struct Event: ChronicleEntry {
         self.sourceLine = sourceLine
     }
 
+	public func matches(filter: String) -> Bool {
+		name.localizedCaseInsensitiveContains(filter)
+	}
+
     // Custom Codable to handle the constant category
     private enum CodingKeys: String, CodingKey {
         case id, timestamp, category, name, metadata
