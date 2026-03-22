@@ -64,13 +64,4 @@ public final class NetworkLogger: Sendable {
         return storage.entries(matching: query).compactMap { $0 as? NetworkLog }
     }
 
-    /// Creates a URLSession configuration with automatic network interception enabled.
-    public func interceptingSessionConfiguration(baseConfiguration: URLSessionConfiguration = .default) -> URLSessionConfiguration {
-        let config = baseConfiguration
-        var protocols = config.protocolClasses ?? []
-        protocols.insert(URLSessionInterceptor.self, at: 0)
-        config.protocolClasses = protocols
-        URLSessionInterceptor.networkLogger = self
-        return config
-    }
 }
