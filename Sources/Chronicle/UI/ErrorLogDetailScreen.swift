@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Detail screen showing full information for a logged error.
+@available(iOS 17, macOS 14, *)
 struct ErrorLogDetailScreen: View {
     let error: ErrorLog
 

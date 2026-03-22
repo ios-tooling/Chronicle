@@ -1,6 +1,7 @@
 import Foundation
 
 /// Tracks navigation flow and screen transitions in the app.
+@available(iOS 17, macOS 14, *)
 public final class FlowTracker: @unchecked Sendable {
     private let storage: SwiftDataStorage
     private var _currentStep: FlowStep?

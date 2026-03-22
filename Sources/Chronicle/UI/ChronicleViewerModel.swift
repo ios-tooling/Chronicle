@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// View model for the Chronicle entry viewer.
+@available(iOS 17, macOS 14, *)
 @Observable
 public final class ChronicleViewerModel {
     var selectedCategories: Set<EntryCategory> = []

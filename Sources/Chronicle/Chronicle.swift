@@ -24,6 +24,7 @@ import SwiftData
 /// // Generate a markdown report
 /// let report = try Chronicle.shared.generateReport()
 /// ```
+@available(iOS 17, macOS 14, *)
 public final class Chronicle: @unchecked Sendable {
     /// The shared Chronicle instance.
     public static let instance = Chronicle()

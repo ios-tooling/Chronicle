@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// The content view for a single Chronicle tab.
+@available(iOS 17, macOS 14, *)
 struct ChronicleTabContent: View {
     @Bindable var model: ChronicleViewerModel
     @Binding var showClearConfirmation: Bool

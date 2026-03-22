@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 /// SwiftData-backed storage provider for Chronicle entries.
+@available(iOS 17, macOS 14, *)
 public final class SwiftDataStorage: @unchecked Sendable {
     private let modelContainer: ModelContainer
     private let modelContext: ModelContext
@@ -127,6 +128,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
 
 // MARK: - Private Fetch Helpers
 
+@available(iOS 17, macOS 14, *)
 extension SwiftDataStorage {
     private func fetchEvents(matching query: StorageQuery) -> [Event] {
         var descriptor = FetchDescriptor<PersistedEvent>(sortBy: [SortDescriptor(\.timestamp)])
@@ -166,6 +168,7 @@ extension SwiftDataStorage {
 
 // MARK: - Date Predicate Helpers
 
+@available(iOS 17, macOS 14, *)
 extension SwiftDataStorage {
     private func applyDatePredicate(to descriptor: inout FetchDescriptor<PersistedEvent>, query: StorageQuery) {
         if let since = query.since, let until = query.until {

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Dispatches to the appropriate row view based on entry type.
+@available(iOS 17, macOS 14, *)
 struct EntryRow: View {
     let entry: any ChronicleEntry
 

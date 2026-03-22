@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Displays raw bytes or formatted JSON for a Data payload, inside a collapsible disclosure group.
+@available(iOS 17, macOS 14, *)
 struct DataBodyView: View {
     let title: String
     let data: Data

@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Row view for an Event entry.
+@available(iOS 17, macOS 14, *)
 struct EventRow: View {
     let event: Event
 

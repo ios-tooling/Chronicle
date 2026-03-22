@@ -1,5 +1,6 @@
 import Foundation
 
+@available(iOS 17, macOS 14, *)
 extension Chronicle {
 
     /// Tracks a named event with optional metadata.

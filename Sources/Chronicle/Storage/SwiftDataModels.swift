@@ -3,6 +3,7 @@ import SwiftData
 
 // MARK: - Persisted Event
 
+@available(iOS 17, macOS 14, *)
 @Model
 final class PersistedEvent {
     @Attribute(.unique) var entryID: UUID
@@ -47,6 +48,7 @@ final class PersistedEvent {
 
 // MARK: - Persisted Network Log
 
+@available(iOS 17, macOS 14, *)
 @Model
 final class PersistedNetworkLog {
     @Attribute(.unique) var entryID: UUID
@@ -179,6 +181,7 @@ final class PersistedNetworkLog {
 
 // MARK: - Persisted Flow Event
 
+@available(iOS 17, macOS 14, *)
 @Model
 final class PersistedFlowEvent {
     @Attribute(.unique) var entryID: UUID
@@ -286,6 +289,7 @@ final class PersistedFlowEvent {
 
 // MARK: - Persisted Error Log
 
+@available(iOS 17, macOS 14, *)
 @Model
 final class PersistedErrorLog {
     @Attribute(.unique) var entryID: UUID
@@ -401,6 +405,7 @@ final class PersistedErrorLog {
 
 // MARK: - Persisted Generic Entry
 
+@available(iOS 17, macOS 14, *)
 @Model
 final class PersistedGenericEntry {
     @Attribute(.unique) var entryID: UUID

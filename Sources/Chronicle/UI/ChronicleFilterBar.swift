@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Category filter controls for the Chronicle viewer.
+@available(iOS 17, macOS 14, *)
 struct ChronicleFilterBar: View {
     @Bindable var model: ChronicleViewerModel
 
@@ -19,6 +20,7 @@ struct ChronicleFilterBar: View {
     }
 }
 
+@available(iOS 17, macOS 14, *)
 private struct CategoryToggle: View {
     let category: EntryCategory
     let isSelected: Bool

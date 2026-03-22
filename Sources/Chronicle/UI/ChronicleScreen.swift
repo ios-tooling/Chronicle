@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// A SwiftUI screen that displays Chronicle entry history with filtering.
+@available(iOS 17, macOS 14, *)
 public struct ChronicleScreen: View {
     @State private var model = ChronicleViewerModel()
     @State private var showClearConfirmation = false

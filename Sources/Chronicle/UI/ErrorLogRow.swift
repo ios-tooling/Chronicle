@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Row view for an ErrorLog entry.
+@available(iOS 17, macOS 14, *)
 struct ErrorLogRow: View {
     let error: ErrorLog
 

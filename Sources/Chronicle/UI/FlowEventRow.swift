@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Row view for a FlowEvent entry.
+@available(iOS 17, macOS 14, *)
 struct FlowEventRow: View {
     let flow: FlowEvent
 

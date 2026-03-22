@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Row view for a NetworkLog entry.
+@available(iOS 17, macOS 14, *)
 struct NetworkLogRow: View {
     let log: NetworkLog
 

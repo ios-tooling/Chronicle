@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Detail screen showing full request and response information for a network log.
+@available(iOS 17, macOS 14, *)
 struct NetworkLogDetailScreen: View {
     let log: NetworkLog
 

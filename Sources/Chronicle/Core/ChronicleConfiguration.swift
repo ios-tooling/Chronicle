@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 /// Configuration for the Chronicle framework.
+@available(iOS 17, macOS 14, *)
 public struct ChronicleConfiguration: Sendable {
     /// Whether Chronicle is actively recording entries.
     public var isEnabled: Bool

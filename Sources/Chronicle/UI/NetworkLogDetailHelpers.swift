@@ -1,5 +1,6 @@
 import SwiftUI
 
+@available(iOS 17, macOS 14, *)
 extension NetworkLogDetailScreen {
     func row(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top) {

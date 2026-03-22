@@ -1,6 +1,7 @@
 import Foundation
 
 /// Tracks application events and stores them via SwiftData.
+@available(iOS 17, macOS 14, *)
 public final class EventTracker: Sendable {
     private let storage: SwiftDataStorage
 

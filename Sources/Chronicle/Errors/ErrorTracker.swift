@@ -1,6 +1,7 @@
 import Foundation
 
 /// Logs arbitrary errors, extracting as much information as possible.
+@available(iOS 17, macOS 14, *)
 public final class ErrorTracker: Sendable {
     private let storage: SwiftDataStorage
 

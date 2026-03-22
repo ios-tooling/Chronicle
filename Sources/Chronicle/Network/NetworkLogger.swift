@@ -1,6 +1,7 @@
 import Foundation
 
 /// Logs network requests and responses.
+@available(iOS 17, macOS 14, *)
 public final class NetworkLogger: Sendable {
     private let storage: SwiftDataStorage
     private let errorTracker: ErrorTracker?
