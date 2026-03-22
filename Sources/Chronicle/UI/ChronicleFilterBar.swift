@@ -5,15 +5,17 @@ struct ChronicleFilterBar: View {
     @Bindable var model: ChronicleViewerModel
 
     var body: some View {
-        HStack(spacing: 8) {
-            ForEach(EntryCategory.allCases, id: \.self) { category in
-                CategoryToggle(category: category, isSelected: model.isSelected(category), count: model.entryCounts[category] ?? 0) {
-                    model.toggleCategory(category)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(model.visibleCategories, id: \.self) { category in
+                    CategoryToggle(category: category, isSelected: model.isSelected(category), count: model.entryCounts[category] ?? 0) {
+                        model.toggleCategory(category)
+                    }
                 }
             }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
     }
 }
 
@@ -31,7 +33,7 @@ private struct CategoryToggle: View {
                 Text("\(count)")
                     .font(.caption2)
             }
-            .frame(maxWidth: .infinity)
+            .frame(minWidth: 60)
             .padding(.vertical, 8)
             .background(isSelected ? category.tintColor.opacity(0.15) : Color.clear, in: RoundedRectangle(cornerRadius: 8))
             .foregroundStyle(isSelected ? category.tintColor : .secondary)

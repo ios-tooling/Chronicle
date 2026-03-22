@@ -116,6 +116,11 @@ public final class Chronicle: @unchecked Sendable {
         }
     }
 
+    /// Stores a custom Chronicle entry.
+    public func store(_ entry: any ChronicleEntry) {
+        storage?.store(entry)
+    }
+
     /// Returns all stored entries.
     public func allEntries() -> [any ChronicleEntry] {
         storage?.allEntries() ?? []

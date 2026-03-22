@@ -50,6 +50,10 @@ struct ChronicleTabContent: View {
                 NavigationLink(destination: ErrorLogDetailScreen(error: error)) {
                     EntryRow(entry: entry)
                 }
+            } else if let detailView = entry.category.style.detailView {
+                NavigationLink(destination: detailView(entry)) {
+                    EntryRow(entry: entry)
+                }
             } else {
                 EntryRow(entry: entry)
             }

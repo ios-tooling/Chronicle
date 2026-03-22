@@ -35,8 +35,13 @@ struct EntryRow: View {
         case let flow as FlowEvent: FlowEventRow(flow: flow)
         case let error as ErrorLog: ErrorLogRow(error: error)
         default:
-            Text(entry.category.rawValue)
-                .font(.subheadline)
+            if let rowView = entry.category.style.rowView {
+                rowView(entry)
+            } else {
+                Text(entry.displaySummary)
+                    .font(.subheadline)
+                    .lineLimit(2)
+            }
         }
     }
 }

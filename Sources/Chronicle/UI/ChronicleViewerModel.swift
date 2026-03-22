@@ -36,6 +36,16 @@ public final class ChronicleViewerModel {
         return entries.first { $0.id == id } as? NetworkLog
     }
 
+    /// All categories visible in the filter bar: built-in + any custom categories found in entries.
+    var visibleCategories: [EntryCategory] {
+        var categories = EntryCategory.builtIn
+        let customInEntries = Set(entries.map(\.category)).subtracting(EntryCategory.builtIn)
+        let customRegistered = Set(EntryCategory.allRegistered).subtracting(EntryCategory.builtIn)
+        let all = customInEntries.union(customRegistered)
+        categories.append(contentsOf: all.sorted { $0.rawValue < $1.rawValue })
+        return categories
+    }
+
     var entryCounts: [EntryCategory: Int] {
         var counts: [EntryCategory: Int] = [:]
         for entry in entries {
