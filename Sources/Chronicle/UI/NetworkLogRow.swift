@@ -26,10 +26,20 @@ struct NetworkLogRow: View {
                         .foregroundStyle(statusColor(status))
                 }
 
-                if let duration = log.metrics.duration {
-                    Text(String(format: "%.0fms", duration * 1000))
+                if let size = log.responseBodySize {
+                    Text(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
                         .font(.caption.monospaced())
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.primary)
+                }
+
+                if let duration = log.metrics.duration {
+                    HStack(spacing: 2) {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                        Text(String(format: "%.0fms", duration * 1000))
+                            .font(.caption.monospaced())
+                    }
+                    .foregroundStyle(.secondary)
                 }
 
                 if log.error != nil {
@@ -48,4 +58,5 @@ struct NetworkLogRow: View {
         default: .red
         }
     }
+
 }
