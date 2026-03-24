@@ -25,7 +25,7 @@ struct ErrorLogDetailScreen: View {
             row("Severity", error.severity.rawValue.capitalized)
             row("Domain", error.domain)
             if let code = error.code { row("Code", "\(code)") }
-            row("Timestamp", error.timestamp.formatted(.dateTime))
+            row("Timestamp", error.timestamp.chronicle_formatted)
             if let id = error.linkedNetworkLogID {
                 row("Linked Network Log", id.uuidString)
             }

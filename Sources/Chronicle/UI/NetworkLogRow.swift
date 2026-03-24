@@ -17,6 +17,14 @@ struct NetworkLogRow: View {
                 Text(log.url.path())
                     .font(.subheadline)
                     .lineLimit(1)
+					
+					Spacer()
+					
+					if log.error != nil {
+						 Label("Error", systemImage: "xmark.circle.fill")
+							  .font(.caption)
+							  .foregroundStyle(.red)
+					}
             }
 
             HStack(spacing: 8) {
@@ -41,12 +49,9 @@ struct NetworkLogRow: View {
                     }
                     .foregroundStyle(.secondary)
                 }
-
-                if log.error != nil {
-                    Label("Error", systemImage: "xmark.circle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                }
+					
+					Spacer()
+					log.timestamp.timestampView
             }
         }
     }

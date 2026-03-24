@@ -15,6 +15,9 @@ struct FlowEventRow: View {
                     Image(systemName: "arrow.right")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+						 
+						 Spacer()
+						 flow.timestamp.timestampView
                 }
                 Text(flow.to.screenName)
                     .font(.subheadline.weight(.medium))

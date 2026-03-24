@@ -13,23 +13,10 @@ struct EntryRow: View {
 
             entryContent
                 .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text(Self.formatTimestamp(entry.timestamp))
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .monospacedDigit()
         }
     }
 
-    private static func formatTimestamp(_ date: Date) -> String {
-        if Calendar.current.isDateInToday(date) {
-            return date.formatted(date: .omitted, time: .shortened)
-        }
-        return date.formatted(.dateTime.day().month().year(.twoDigits).hour().minute())
-    }
-
-    @ViewBuilder
-    private var entryContent: some View {
+    @ViewBuilder private var entryContent: some View {
         switch entry {
         case let event as Event: EventRow(event: event)
 		  case let log as NetworkLog: NetworkLogRow(log: log)
@@ -45,4 +32,21 @@ struct EntryRow: View {
             }
         }
     }
+}
+
+@available(iOS 17, macOS 14, *)
+extension Date {
+	var formattedTimestamp: String {
+		 if Calendar.current.isDateInToday(self) {
+			  return self.chronicle_timeOnly
+		 }
+		 return self.chronicle_formatted
+	}
+	
+	var timestampView: some View {
+		Text(self.formattedTimestamp)
+			  .font(.caption2)
+			  .foregroundStyle(.secondary)
+			  .monospacedDigit()
+	}
 }

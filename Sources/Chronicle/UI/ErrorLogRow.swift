@@ -18,6 +18,9 @@ struct ErrorLogRow: View {
                 Text(error.errorType)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)
+					
+					Spacer()
+					error.timestamp.timestampView
             }
 
             Text(error.message)

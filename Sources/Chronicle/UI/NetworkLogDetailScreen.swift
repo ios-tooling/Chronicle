@@ -36,7 +36,7 @@ struct NetworkLogDetailScreen: View {
                         .fontWeight(.semibold)
                 }
             }
-            row("Timestamp", log.timestamp.formatted(.dateTime))
+            row("Timestamp", log.timestamp.chronicle_formatted)
         }
     }
 
