@@ -124,6 +124,17 @@ public final class SwiftDataStorage: @unchecked Sendable {
             try modelContext.save()
         } catch {}
     }
+
+    public func clear(since date: Date) {
+        do {
+            try modelContext.delete(model: PersistedEvent.self, where: #Predicate<PersistedEvent> { $0.timestamp >= date })
+            try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp >= date })
+            try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp >= date })
+            try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp >= date })
+            try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp >= date })
+            try modelContext.save()
+        } catch {}
+    }
 }
 
 // MARK: - Private Fetch Helpers

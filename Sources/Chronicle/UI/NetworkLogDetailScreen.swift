@@ -9,9 +9,7 @@ struct NetworkLogDetailScreen: View {
         List {
             overviewSection
             requestSection
-            requestBodySection
             responseSection
-            responseBodySection
             metricsSection
             if log.error != nil || log.linkedErrorID != nil {
                 errorSection
@@ -47,16 +45,11 @@ struct NetworkLogDetailScreen: View {
             if let headers = log.requestHeaders, !headers.isEmpty {
                 headersView("Headers", headers)
             }
-            if let size = log.requestBodySize {
+            if let body = log.requestBody, !body.isEmpty {
+                DataBodyView(title: "Body", data: body)
+            } else if let size = log.requestBodySize {
                 row("Body Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
             }
-        }
-    }
-
-    @ViewBuilder
-    private var requestBodySection: some View {
-        if let body = log.requestBody, !body.isEmpty {
-            DataBodyView(title: "Request Body", data: body)
         }
     }
 
@@ -65,16 +58,11 @@ struct NetworkLogDetailScreen: View {
             if let headers = log.responseHeaders, !headers.isEmpty {
                 headersView("Headers", headers)
             }
-            if let size = log.responseBodySize {
+            if let body = log.responseBody, !body.isEmpty {
+                DataBodyView(title: "Body", data: body)
+            } else if let size = log.responseBodySize {
                 row("Body Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
             }
-        }
-    }
-
-    @ViewBuilder
-    private var responseBodySection: some View {
-        if let body = log.responseBody, !body.isEmpty {
-            DataBodyView(title: "Response Body", data: body)
         }
     }
 

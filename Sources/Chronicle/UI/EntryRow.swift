@@ -32,7 +32,7 @@ struct EntryRow: View {
     private var entryContent: some View {
         switch entry {
         case let event as Event: EventRow(event: event)
-        case let log as NetworkLog: NetworkLogRow(log: log)
+		  case let log as NetworkLog: NetworkLogRow(log: log)
         case let flow as FlowEvent: FlowEventRow(flow: flow)
         case let error as ErrorLog: ErrorLogRow(error: error)
         default:

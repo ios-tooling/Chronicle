@@ -142,6 +142,11 @@ public final class Chronicle: @unchecked Sendable {
         storage?.clear(before: date)
     }
 
+    /// Clears entries from the given date onward.
+    public func clear(since date: Date) {
+        storage?.clear(since: date)
+    }
+
 //    /// Exports all entries to all configured destinations.
 //    public func exportAll() throws {
 //        let entries = allEntries()

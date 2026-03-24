@@ -27,12 +27,18 @@ struct ChronicleTabContent: View {
                 }
             }
             .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
-                Button("Clear All", role: .destructive) {
-                    Chronicle.instance.clear()
+                Button(currentRunOnly ? "Clear Current Run" : "Clear All", role: .destructive) {
+                    if currentRunOnly, let launchDate = Chronicle.instance.launchDate {
+                        Chronicle.instance.clear(since: launchDate)
+                    } else {
+                        Chronicle.instance.clear()
+                    }
                     model.refresh()
                 }
             } message: {
-                Text("This will permanently delete all Chronicle entries.")
+                Text(currentRunOnly
+                     ? "This will permanently delete entries from this session."
+                     : "This will permanently delete all Chronicle entries.")
             }
             .onAppear {
                 model.showCurrentRunOnly = currentRunOnly
