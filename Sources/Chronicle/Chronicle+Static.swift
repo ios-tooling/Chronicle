@@ -8,29 +8,88 @@ extension Chronicle {
 		instance.events.track(name, metadata: metadata, file: file, function: function, line: line)
 	}
 	
-	/// Logs a network request and response.
+	/// Logs a network request and response from a URLRequest/HTTPURLResponse pair.
 	nonisolated public static func network(
 		request: URLRequest,
 		response: HTTPURLResponse? = nil,
 		data: Data? = nil,
 		error: Error? = nil,
+		metrics: NetworkMetrics? = nil,
+		linkedErrorID: UUID? = nil,
 		startTime: Date = Date(),
 		endTime: Date? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
 	) {
-		instance.network.log(
-			request: request,
-			response: response,
-			data: data,
+		if metrics != nil || linkedErrorID != nil {
+			let log = NetworkLog(
+				url: request.url ?? URL(string: "https://unknown")!,
+				method: request.httpMethod ?? "GET",
+				requestHeaders: request.allHTTPHeaderFields,
+				requestBody: request.httpBody,
+				statusCode: response?.statusCode,
+				responseHeaders: response?.allHeaderFields as? [String: String],
+				responseBody: data,
+				error: error?.localizedDescription,
+				metrics: metrics ?? NetworkMetrics(startTime: startTime, endTime: endTime ?? Date(), bytesSent: Int64(request.httpBody?.count ?? 0), bytesReceived: Int64(data?.count ?? 0)),
+				linkedErrorID: linkedErrorID,
+				sourceFile: (file as NSString).lastPathComponent,
+				sourceFunction: function,
+				sourceLine: line
+			)
+			instance.network.log(log)
+		} else {
+			instance.network.log(
+				request: request,
+				response: response,
+				data: data,
+				error: error,
+				startTime: startTime,
+				endTime: endTime,
+				file: file,
+				function: function,
+				line: line
+			)
+		}
+	}
+
+	/// Logs a network request and response from individual parameters.
+	nonisolated public static func network(
+		url: URL,
+		method: String = "GET",
+		requestHeaders: [String: String]? = nil,
+		requestBody: Data? = nil,
+		requestBodySize: Int? = nil,
+		statusCode: Int? = nil,
+		responseHeaders: [String: String]? = nil,
+		responseBody: Data? = nil,
+		responseBodySize: Int? = nil,
+		error: String? = nil,
+		metrics: NetworkMetrics = NetworkMetrics(),
+		linkedErrorID: UUID? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		let log = NetworkLog(
+			url: url,
+			method: method,
+			requestHeaders: requestHeaders,
+			requestBody: requestBody,
+			requestBodySize: requestBodySize,
+			statusCode: statusCode,
+			responseHeaders: responseHeaders,
+			responseBody: responseBody,
+			responseBodySize: responseBodySize,
 			error: error,
-			startTime: startTime,
-			endTime: endTime,
-			file: file,
-			function: function,
-			line: line
+			metrics: metrics,
+			linkedErrorID: linkedErrorID,
+			sourceFile: (file as NSString).lastPathComponent,
+			sourceFunction: function,
+			sourceLine: line
 		)
+		instance.network.log(log)
 	}
 	
 	/// Tracks a screen transition in the app flow.
