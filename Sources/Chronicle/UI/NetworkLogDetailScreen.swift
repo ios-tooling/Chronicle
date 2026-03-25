@@ -93,10 +93,10 @@ struct NetworkLogDetailScreen: View {
         if log.sourceFile != nil || log.sourceFunction != nil {
             Section("Source") {
                 if let file = log.sourceFile, let line = log.sourceLine {
-                    row("Location", "\(file):\(line)")
+                    monoRow("Location", "\(file):\(line)")
                 }
                 if let function = log.sourceFunction {
-                    row("Function", function)
+                    monoRow("Function", function)
                 }
             }
         }

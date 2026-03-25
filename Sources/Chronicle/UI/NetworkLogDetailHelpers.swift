@@ -13,6 +13,18 @@ extension NetworkLogDetailScreen {
         }
     }
 
+    func monoRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .top) {
+            Text(label)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.footnote.monospaced())
+                .multilineTextAlignment(.trailing)
+                .textSelection(.enabled)
+        }
+    }
+
     func headersView(_ title: String, _ headers: [String: String]) -> some View {
         DisclosureGroup(title) {
             ForEach(headers.keys.sorted(), id: \.self) { key in

@@ -19,7 +19,8 @@ public struct NetworkLog: ChronicleEntry {
 	public let responseBody: Data?
 	public let responseBodySize: Int?
 	public let error: String?
-	
+	public let wasCancelled: Bool
+
 	// Metrics
 	public let metrics: NetworkMetrics
 	
@@ -47,6 +48,7 @@ public struct NetworkLog: ChronicleEntry {
 		responseBody: Data? = nil,
 		responseBodySize: Int? = nil,
 		error: String? = nil,
+		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
 		sourceFile: String? = nil,
@@ -65,6 +67,7 @@ public struct NetworkLog: ChronicleEntry {
 		self.responseBody = responseBody
 		self.responseBodySize = responseBodySize ?? responseBody?.count
 		self.error = error
+		self.wasCancelled = wasCancelled
 		self.metrics = metrics
 		self.linkedErrorID = linkedErrorID
 		self.sourceFile = sourceFile
@@ -75,7 +78,7 @@ public struct NetworkLog: ChronicleEntry {
 	// Custom Codable to handle the constant category
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, url, method, requestHeaders, requestBody, requestBodySize
-		case statusCode, responseHeaders, responseBody, responseBodySize, error, metrics
+		case statusCode, responseHeaders, responseBody, responseBodySize, error, wasCancelled, metrics
 		case linkedErrorID, sourceFile, sourceFunction, sourceLine
 	}
 	
@@ -94,6 +97,7 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encodeIfPresent(responseBody, forKey: .responseBody)
 		try container.encodeIfPresent(responseBodySize, forKey: .responseBodySize)
 		try container.encodeIfPresent(error, forKey: .error)
+		try container.encode(wasCancelled, forKey: .wasCancelled)
 		try container.encode(metrics, forKey: .metrics)
 		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
@@ -115,6 +119,7 @@ public struct NetworkLog: ChronicleEntry {
 		responseBody = try container.decodeIfPresent(Data.self, forKey: .responseBody)
 		responseBodySize = try container.decodeIfPresent(Int.self, forKey: .responseBodySize)
 		error = try container.decodeIfPresent(String.self, forKey: .error)
+		wasCancelled = try container.decodeIfPresent(Bool.self, forKey: .wasCancelled) ?? false
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
 		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)

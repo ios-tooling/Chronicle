@@ -63,6 +63,7 @@ final class PersistedNetworkLog {
     var responseBody: Data?
     var responseBodySize: Int?
     var errorMessage: String?
+    var wasCancelled: Bool?
     var startTime: Date
     var endTime: Date?
     var bytesSent: Int64
@@ -85,6 +86,7 @@ final class PersistedNetworkLog {
         responseBody: Data?,
         responseBodySize: Int?,
         errorMessage: String?,
+        wasCancelled: Bool = false,
         startTime: Date,
         endTime: Date?,
         bytesSent: Int64,
@@ -106,6 +108,7 @@ final class PersistedNetworkLog {
         self.responseBody = responseBody
         self.responseBodySize = responseBodySize
         self.errorMessage = errorMessage
+        self.wasCancelled = wasCancelled
         self.startTime = startTime
         self.endTime = endTime
         self.bytesSent = bytesSent
@@ -137,6 +140,7 @@ final class PersistedNetworkLog {
             responseBody: responseBody,
             responseBodySize: responseBodySize,
             error: errorMessage,
+            wasCancelled: wasCancelled ?? false,
             metrics: NetworkMetrics(
                 startTime: startTime,
                 endTime: endTime,
@@ -167,6 +171,7 @@ final class PersistedNetworkLog {
             responseBody: log.responseBody,
             responseBodySize: log.responseBodySize,
             errorMessage: log.error,
+            wasCancelled: log.wasCancelled,
             startTime: log.metrics.startTime,
             endTime: log.metrics.endTime,
             bytesSent: log.metrics.bytesSent,

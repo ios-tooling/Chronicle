@@ -20,7 +20,11 @@ struct NetworkLogRow: View {
 					
 					Spacer()
 					
-					if log.error != nil {
+					if log.wasCancelled {
+						Label("Cancelled", systemImage: "nosign")
+							.font(.caption)
+							.foregroundStyle(.orange)
+					} else if log.error != nil {
 						 Label("Error", systemImage: "xmark.circle.fill")
 							  .font(.caption)
 							  .foregroundStyle(.red)

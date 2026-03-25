@@ -93,10 +93,10 @@ struct ErrorLogDetailScreen: View {
         if error.sourceFile != nil || error.sourceFunction != nil {
             Section("Source") {
                 if let file = error.sourceFile, let line = error.sourceLine {
-                    row("Location", "\(file):\(line)")
+                    monoRow("Location", "\(file):\(line)")
                 }
                 if let function = error.sourceFunction {
-                    row("Function", function)
+                    monoRow("Function", function)
                 }
             }
         }
@@ -107,6 +107,14 @@ struct ErrorLogDetailScreen: View {
             Text(label).foregroundStyle(.secondary)
             Spacer()
             Text(value).multilineTextAlignment(.trailing).textSelection(.enabled)
+        }
+    }
+
+    private func monoRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .top) {
+            Text(label).foregroundStyle(.secondary)
+            Spacer()
+            Text(value).font(.footnote.monospaced()).multilineTextAlignment(.trailing).textSelection(.enabled)
         }
     }
 }
