@@ -24,7 +24,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             let dir = URL.cachesDirectory.appendingPathComponent("com.chronicle.history")
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let url = dir.appendingPathComponent("history.db")
-            let config = ModelConfiguration(url: url)
+            let config = ModelConfiguration(url: url, cloudKitDatabase: .none)
             self.modelContainer = try ModelContainer(for: Self.schema, configurations: [config])
         }
         self.modelContext = ModelContext(self.modelContainer)
