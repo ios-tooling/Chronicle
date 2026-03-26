@@ -26,6 +26,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             let url = dir.appendingPathComponent("history.db")
             let config = ModelConfiguration(url: url, cloudKitDatabase: .none)
             self.modelContainer = try ModelContainer(for: Self.schema, configurations: [config])
+			  print("Chronicle database setup at \(url.path(percentEncoded: false))")
         }
         self.modelContext = ModelContext(self.modelContainer)
         self.modelContext.autosaveEnabled = true

@@ -17,14 +17,17 @@ public struct EntryCategory: RawRepresentable, Hashable, Codable, Sendable {
 
 /// Base protocol for all Chronicle log entries.
 public protocol ChronicleEntry: Codable, Sendable {
-    var id: UUID { get }
-    var timestamp: Date { get }
-    var category: EntryCategory { get }
-    func matches(filter: String) -> Bool
-    var displaySummary: String { get }
+	var id: UUID { get }
+	var timestamp: Date { get }
+	var category: EntryCategory { get }
+	func matches(filter: String) -> Bool
+	var displaySummary: String { get }
+	var sourceFile: String? { get }
+	var sourceFunction: String? { get }
+	var sourceLine: Int? { get }
 }
 
 extension ChronicleEntry {
-    public var displaySummary: String { category.displayName }
-    public func matches(filter: String) -> Bool { false }
+	public var displaySummary: String { category.displayName }
+	public func matches(filter: String) -> Bool { false }
 }

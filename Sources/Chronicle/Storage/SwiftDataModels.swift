@@ -445,9 +445,9 @@ final class PersistedGenericEntry {
             category: entry.category.rawValue,
             summary: entry.displaySummary,
             payloadJSON: payload,
-            sourceFile: nil,
-            sourceFunction: nil,
-            sourceLine: nil
+				sourceFile: entry.sourceFile,
+            sourceFunction: entry.sourceFunction,
+            sourceLine: entry.sourceLine
         )
     }
 }
