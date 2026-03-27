@@ -90,10 +90,14 @@ private struct ChronicleQueryContent: View {
 
     public var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                ChronicleFilterBar(model: model, entries: filteredEntries)
-                Divider()
+            Group {
                 if filteredEntries.isEmpty { emptyState } else { entryList }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                VStack(spacing: 0) {
+                    ChronicleFilterBar(model: model, entries: filteredEntries)
+                    Divider()
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .automatic) {
