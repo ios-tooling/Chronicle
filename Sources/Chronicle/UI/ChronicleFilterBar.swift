@@ -3,13 +3,28 @@ import SwiftUI
 /// Category filter controls for the Chronicle viewer.
 @available(iOS 17, macOS 14, *)
 struct ChronicleFilterBar: View {
-    @Bindable var model: ChronicleViewerModel
+    var model: ChronicleViewerModel
+    let entries: [any ChronicleEntry]
+
+    private var visibleCategories: [EntryCategory] {
+        var categories = EntryCategory.builtIn
+        let customInEntries = Set(entries.map(\.category)).subtracting(EntryCategory.builtIn)
+        let customRegistered = Set(EntryCategory.allRegistered).subtracting(EntryCategory.builtIn)
+        categories.append(contentsOf: customInEntries.union(customRegistered).sorted { $0.rawValue < $1.rawValue })
+        return categories
+    }
+
+    private var entryCounts: [EntryCategory: Int] {
+        var counts: [EntryCategory: Int] = [:]
+        for entry in entries { counts[entry.category, default: 0] += 1 }
+        return counts
+    }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(model.visibleCategories, id: \.self) { category in
-                    CategoryToggle(category: category, isSelected: model.isSelected(category), count: model.entryCounts[category] ?? 0) {
+                ForEach(visibleCategories, id: \.self) { category in
+                    CategoryToggle(category: category, isSelected: model.isSelected(category), count: entryCounts[category] ?? 0) {
                         model.toggleCategory(category)
                     }
                 }

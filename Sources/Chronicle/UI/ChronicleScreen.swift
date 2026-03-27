@@ -19,11 +19,6 @@ public struct ChronicleScreen: View {
         }
         .onChange(of: selectedTab) {
             model.showCurrentRunOnly = selectedTab == 0
-            model.refresh()
-        }
-        .onSubmit(of: .search) { model.refresh() }
-        .onChange(of: model.searchText) {
-            if model.searchText.isEmpty { model.refresh() }
         }
     }
 
