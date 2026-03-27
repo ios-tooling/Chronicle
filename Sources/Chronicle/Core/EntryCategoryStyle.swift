@@ -26,6 +26,8 @@ extension EntryCategory {
         .network: EntryCategoryStyle(displayName: "Network", systemImage: "network", tintColor: .green),
         .flow: EntryCategoryStyle(displayName: "Flow", systemImage: "arrow.triangle.swap", tintColor: .purple),
         .error: EntryCategoryStyle(displayName: "Errors", systemImage: "exclamationmark.triangle.fill", tintColor: .red),
+        .cloudKitUpload: EntryCategoryStyle(displayName: "CK Uploads", systemImage: "icloud.and.arrow.up.fill", tintColor: .orange),
+        .cloudKitDownload: EntryCategoryStyle(displayName: "CK Downloads", systemImage: "icloud.and.arrow.down.fill", tintColor: .cyan),
     ]
 
     /// Registers a display style for a custom category.

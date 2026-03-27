@@ -408,6 +408,97 @@ final class PersistedErrorLog {
     }
 }
 
+// MARK: - Persisted CloudKit Log
+
+@available(iOS 17, macOS 14, *)
+@Model
+final class PersistedCloudKitLog {
+	@Attribute(.unique) var entryID: UUID
+	var timestamp: Date
+	var direction: String
+	var recordName: String
+	var recordType: String
+	var zoneName: String
+	var zoneOwner: String
+	var recordSize: Int?
+	var fieldCount: Int?
+	var duration: Double?
+	var errorMessage: String?
+	var sourceFile: String?
+	var sourceFunction: String?
+	var sourceLine: Int?
+
+	init(
+		entryID: UUID,
+		timestamp: Date,
+		direction: String,
+		recordName: String,
+		recordType: String,
+		zoneName: String,
+		zoneOwner: String,
+		recordSize: Int?,
+		fieldCount: Int?,
+		duration: Double?,
+		errorMessage: String?,
+		sourceFile: String?,
+		sourceFunction: String?,
+		sourceLine: Int?
+	) {
+		self.entryID = entryID
+		self.timestamp = timestamp
+		self.direction = direction
+		self.recordName = recordName
+		self.recordType = recordType
+		self.zoneName = zoneName
+		self.zoneOwner = zoneOwner
+		self.recordSize = recordSize
+		self.fieldCount = fieldCount
+		self.duration = duration
+		self.errorMessage = errorMessage
+		self.sourceFile = sourceFile
+		self.sourceFunction = sourceFunction
+		self.sourceLine = sourceLine
+	}
+
+	func toCloudKitLog() -> CloudKitLog {
+		CloudKitLog(
+			id: entryID,
+			timestamp: timestamp,
+			direction: CloudKitDirection(rawValue: direction) ?? .download,
+			recordName: recordName,
+			recordType: recordType,
+			zoneName: zoneName,
+			zoneOwner: zoneOwner,
+			recordSize: recordSize,
+			fieldCount: fieldCount,
+			duration: duration,
+			error: errorMessage,
+			sourceFile: sourceFile,
+			sourceFunction: sourceFunction,
+			sourceLine: sourceLine
+		)
+	}
+
+	static func from(_ log: CloudKitLog) -> PersistedCloudKitLog {
+		PersistedCloudKitLog(
+			entryID: log.id,
+			timestamp: log.timestamp,
+			direction: log.direction.rawValue,
+			recordName: log.recordName,
+			recordType: log.recordType,
+			zoneName: log.zoneName,
+			zoneOwner: log.zoneOwner,
+			recordSize: log.recordSize,
+			fieldCount: log.fieldCount,
+			duration: log.duration,
+			errorMessage: log.error,
+			sourceFile: log.sourceFile,
+			sourceFunction: log.sourceFunction,
+			sourceLine: log.sourceLine
+		)
+	}
+}
+
 // MARK: - Persisted Generic Entry
 
 @available(iOS 17, macOS 14, *)

@@ -123,6 +123,52 @@ extension Chronicle {
 		)
 	}
 	
+	/// Logs a CloudKit record upload.
+	nonisolated public static func cloudKitUpload(
+		recordName: String,
+		recordType: String,
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		recordSize: Int? = nil,
+		fieldCount: Int? = nil,
+		duration: TimeInterval? = nil,
+		error: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logUpload(
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			recordSize: recordSize, fieldCount: fieldCount,
+			duration: duration, error: error,
+			file: file, function: function, line: line
+		)
+	}
+
+	/// Logs a CloudKit record download.
+	nonisolated public static func cloudKitDownload(
+		recordName: String,
+		recordType: String,
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		recordSize: Int? = nil,
+		fieldCount: Int? = nil,
+		duration: TimeInterval? = nil,
+		error: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logDownload(
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			recordSize: recordSize, fieldCount: fieldCount,
+			duration: duration, error: error,
+			file: file, function: function, line: line
+		)
+	}
+
 	/// Logs an error with a string context.
 	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }

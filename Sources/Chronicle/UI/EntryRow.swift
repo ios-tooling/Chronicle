@@ -22,6 +22,7 @@ struct EntryRow: View {
 		  case let log as NetworkLog: NetworkLogRow(log: log)
         case let flow as FlowEvent: FlowEventRow(flow: flow)
         case let error as ErrorLog: ErrorLogRow(error: error)
+        case let ck as CloudKitLog: CloudKitLogRow(log: ck)
         default:
             if let rowView = entry.category.style.rowView {
                 rowView(entry)

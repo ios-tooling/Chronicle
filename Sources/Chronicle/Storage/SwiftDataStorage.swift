@@ -13,6 +13,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             PersistedNetworkLog.self,
             PersistedFlowEvent.self,
             PersistedErrorLog.self,
+            PersistedCloudKitLog.self,
             PersistedGenericEntry.self,
         ])
     }
@@ -52,6 +53,8 @@ public final class SwiftDataStorage: @unchecked Sendable {
             modelContext.insert(PersistedFlowEvent.from(flowEvent))
         case let errorLog as ErrorLog:
             modelContext.insert(PersistedErrorLog.from(errorLog))
+        case let cloudKitLog as CloudKitLog:
+            modelContext.insert(PersistedCloudKitLog.from(cloudKitLog))
         default:
             if let generic = PersistedGenericEntry.from(entry) {
                 modelContext.insert(generic)
@@ -78,6 +81,9 @@ public final class SwiftDataStorage: @unchecked Sendable {
         }
         if fetchBuiltIn || categories!.contains(.error) {
             results.append(contentsOf: fetchErrorLogs(matching: query))
+        }
+        if fetchBuiltIn || categories!.contains(.cloudKitUpload) || categories!.contains(.cloudKitDownload) {
+            results.append(contentsOf: fetchCloudKitLogs(matching: query, categories: categories))
         }
 
         // Always fetch generic entries (custom categories)
@@ -110,6 +116,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             try modelContext.delete(model: PersistedNetworkLog.self)
             try modelContext.delete(model: PersistedFlowEvent.self)
             try modelContext.delete(model: PersistedErrorLog.self)
+            try modelContext.delete(model: PersistedCloudKitLog.self)
             try modelContext.delete(model: PersistedGenericEntry.self)
             try modelContext.save()
         } catch {}
@@ -121,6 +128,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp < date })
             try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp < date })
             try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp < date })
+            try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp < date })
             try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp < date })
             try modelContext.save()
         } catch {}
@@ -132,6 +140,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp >= date })
             try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp >= date })
             try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp >= date })
+            try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp >= date })
             try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp >= date })
             try modelContext.save()
         } catch {}
@@ -164,6 +173,16 @@ extension SwiftDataStorage {
         var descriptor = FetchDescriptor<PersistedErrorLog>(sortBy: [SortDescriptor(\.timestamp)])
         applyDatePredicate(to: &descriptor, query: query)
         return ((try? modelContext.fetch(descriptor)) ?? []).map { $0.toErrorLog() }
+    }
+
+    private func fetchCloudKitLogs(matching query: StorageQuery, categories: Set<EntryCategory>?) -> [CloudKitLog] {
+        var descriptor = FetchDescriptor<PersistedCloudKitLog>(sortBy: [SortDescriptor(\.timestamp)])
+        applyDatePredicate(to: &descriptor, query: query)
+        let logs = ((try? modelContext.fetch(descriptor)) ?? []).map { $0.toCloudKitLog() }
+        if let categories {
+            return logs.filter { categories.contains($0.category) }
+        }
+        return logs
     }
 
     private func fetchGenericEntries(matching query: StorageQuery, categories: Set<EntryCategory>?) -> [GenericChronicleEntry] {
@@ -219,6 +238,16 @@ extension SwiftDataStorage {
             descriptor.predicate = #Predicate<PersistedErrorLog> { $0.timestamp >= since }
         } else if let until = query.until {
             descriptor.predicate = #Predicate<PersistedErrorLog> { $0.timestamp <= until }
+        }
+    }
+
+    private func applyDatePredicate(to descriptor: inout FetchDescriptor<PersistedCloudKitLog>, query: StorageQuery) {
+        if let since = query.since, let until = query.until {
+            descriptor.predicate = #Predicate<PersistedCloudKitLog> { $0.timestamp >= since && $0.timestamp <= until }
+        } else if let since = query.since {
+            descriptor.predicate = #Predicate<PersistedCloudKitLog> { $0.timestamp >= since }
+        } else if let until = query.until {
+            descriptor.predicate = #Predicate<PersistedCloudKitLog> { $0.timestamp <= until }
         }
     }
 

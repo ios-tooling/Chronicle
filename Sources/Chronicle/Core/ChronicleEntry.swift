@@ -10,9 +10,11 @@ public struct EntryCategory: RawRepresentable, Hashable, Codable, Sendable {
     public static let network = EntryCategory("network")
     public static let flow = EntryCategory("flow")
     public static let error = EntryCategory("error")
+    public static let cloudKitUpload = EntryCategory("cloudKitUpload")
+    public static let cloudKitDownload = EntryCategory("cloudKitDownload")
 
-    /// The four built-in categories.
-    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error]
+    /// The built-in categories.
+    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error, .cloudKitUpload, .cloudKitDownload]
 }
 
 /// Base protocol for all Chronicle log entries.

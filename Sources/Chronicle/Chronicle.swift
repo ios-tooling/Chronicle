@@ -35,6 +35,7 @@ public final class Chronicle: @unchecked Sendable {
     private var _network: NetworkLogger?
     private var _flow: FlowTracker?
     private var _errors: ErrorTracker?
+    private var _cloudKit: CloudKitLogger?
     private var _configuration: ChronicleConfiguration?
     private var _launchDate: Date?
 
@@ -77,6 +78,11 @@ public final class Chronicle: @unchecked Sendable {
         lock.withLock { _errors! }
     }
 
+    /// The CloudKit logger for recording record uploads and downloads.
+    public var cloudKit: CloudKitLogger {
+        lock.withLock { _cloudKit! }
+    }
+
     private init() {}
 
     /// Configures Chronicle with the given configuration.
@@ -98,6 +104,7 @@ public final class Chronicle: @unchecked Sendable {
             self._errors = errors
             self._network = NetworkLogger(storage: storage, errorTracker: errors)
             self._flow = FlowTracker(storage: storage)
+            self._cloudKit = CloudKitLogger(storage: storage)
         }
     }
 
@@ -114,6 +121,7 @@ public final class Chronicle: @unchecked Sendable {
             self._errors = errors
             self._network = NetworkLogger(storage: storage, errorTracker: errors)
             self._flow = FlowTracker(storage: storage)
+            self._cloudKit = CloudKitLogger(storage: storage)
         }
     }
 
