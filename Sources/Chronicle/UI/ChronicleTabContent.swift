@@ -88,16 +88,29 @@ private struct ChronicleQueryContent: View {
         return entries
     }
 
+	public var filterBar: some View {
+		VStack(spacing: 0) {
+			 ChronicleFilterBar(model: model, entries: filteredEntries)
+			 Divider()
+		}
+	}
+	
+	var backgroundColor: Color {
+		#if os(macOS)
+		Color(nsColor: NSColor.windowBackgroundColor)
+		#else
+		Color(uiColor: UIColor.systemBackground)
+		#endif
+	}
+	
     public var body: some View {
         NavigationStack {
-            Group {
+            VStack {
                 if filteredEntries.isEmpty { emptyState } else { entryList }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                VStack(spacing: 0) {
-                    ChronicleFilterBar(model: model, entries: filteredEntries)
-                    Divider()
-                }
+					filterBar
+						.background(backgroundColor)
             }
             .toolbar {
                 ToolbarItem(placement: .automatic) {
