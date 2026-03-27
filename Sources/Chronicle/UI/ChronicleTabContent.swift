@@ -2,12 +2,18 @@ import SwiftUI
 
 /// The content view for a single Chronicle tab.
 @available(iOS 17, macOS 14, *)
-struct ChronicleTabContent: View {
+public struct ChronicleTabContent: View {
     @Bindable var model: ChronicleViewerModel
     @Binding var showClearConfirmation: Bool
     let currentRunOnly: Bool
 
-    var body: some View {
+    public init(model: ChronicleViewerModel, showClearConfirmation: Binding<Bool>, currentRunOnly: Bool) {
+        self.model = model
+        self._showClearConfirmation = showClearConfirmation
+        self.currentRunOnly = currentRunOnly
+    }
+
+    public var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 ChronicleFilterBar(model: model)
@@ -78,5 +84,6 @@ struct ChronicleTabContent: View {
                 Text("No entries match the current filters.")
             }
         }
+        .frame(maxHeight: .infinity)
     }
 }

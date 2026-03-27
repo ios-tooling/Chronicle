@@ -4,14 +4,14 @@ import SwiftUI
 @available(iOS 17, macOS 14, *)
 @Observable
 public final class ChronicleViewerModel {
-    var selectedCategories: Set<EntryCategory> = []
-    var showCurrentRunOnly = true
-    var searchText = ""
+    public var selectedCategories: Set<EntryCategory> = []
+    public var showCurrentRunOnly = true
+    public var searchText = ""
     private(set) var entries: [any ChronicleEntry] = []
 
     public init() {}
 
-    func refresh() {
+    public func refresh() {
         let since = showCurrentRunOnly ? Chronicle.instance.launchDate : nil
         let categories = selectedCategories.isEmpty ? nil : selectedCategories
         let nameFilter = searchText.isEmpty ? nil : searchText
