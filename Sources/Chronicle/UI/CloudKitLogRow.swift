@@ -9,7 +9,7 @@ struct CloudKitLogRow: View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 6) {
 				Image(systemName: log.direction == .upload ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-					.foregroundStyle(log.direction == .upload ? .orange : .cyan)
+					.foregroundStyle(log.direction == .upload ? .orange : .blue)
 
 				Text(log.recordType)
 					.font(.subheadline.weight(.medium))

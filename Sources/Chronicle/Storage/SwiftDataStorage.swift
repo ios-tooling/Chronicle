@@ -1,11 +1,16 @@
 import Foundation
+import os
 import SwiftData
 
 /// SwiftData-backed storage provider for Chronicle entries.
+///
+/// All `ModelContext` access is serialized via an internal lock,
+/// making this class safe to use from any thread.
 @available(iOS 17, macOS 14, *)
 public final class SwiftDataStorage: @unchecked Sendable {
     private let modelContainer: ModelContainer
     private let modelContext: ModelContext
+    private let contextLock = OSAllocatedUnfairLock()
 
     private static var schema: Schema {
         Schema([
@@ -44,64 +49,68 @@ public final class SwiftDataStorage: @unchecked Sendable {
     // MARK: - Store
 
     public func store(_ entry: any ChronicleEntry) {
-        switch entry {
-        case let event as Event:
-            modelContext.insert(PersistedEvent.from(event))
-        case let networkLog as NetworkLog:
-            modelContext.insert(PersistedNetworkLog.from(networkLog))
-        case let flowEvent as FlowEvent:
-            modelContext.insert(PersistedFlowEvent.from(flowEvent))
-        case let errorLog as ErrorLog:
-            modelContext.insert(PersistedErrorLog.from(errorLog))
-        case let cloudKitLog as CloudKitLog:
-            modelContext.insert(PersistedCloudKitLog.from(cloudKitLog))
-        default:
-            if let generic = PersistedGenericEntry.from(entry) {
-                modelContext.insert(generic)
+        contextLock.withLock {
+            switch entry {
+            case let event as Event:
+                modelContext.insert(PersistedEvent.from(event))
+            case let networkLog as NetworkLog:
+                modelContext.insert(PersistedNetworkLog.from(networkLog))
+            case let flowEvent as FlowEvent:
+                modelContext.insert(PersistedFlowEvent.from(flowEvent))
+            case let errorLog as ErrorLog:
+                modelContext.insert(PersistedErrorLog.from(errorLog))
+            case let cloudKitLog as CloudKitLog:
+                modelContext.insert(PersistedCloudKitLog.from(cloudKitLog))
+            default:
+                if let generic = PersistedGenericEntry.from(entry) {
+                    modelContext.insert(generic)
+                }
             }
+            try? modelContext.save()
         }
-        try? modelContext.save()
     }
 
     // MARK: - Query
 
     public func entries(matching query: StorageQuery) -> [any ChronicleEntry] {
-        var results: [any ChronicleEntry] = []
-        let categories = query.categories
+        contextLock.withLock {
+            var results: [any ChronicleEntry] = []
+            let categories = query.categories
 
-        let fetchBuiltIn = categories == nil
-        if fetchBuiltIn || categories!.contains(.event) {
-            results.append(contentsOf: fetchEvents(matching: query))
-        }
-        if fetchBuiltIn || categories!.contains(.network) {
-            results.append(contentsOf: fetchNetworkLogs(matching: query))
-        }
-        if fetchBuiltIn || categories!.contains(.flow) {
-            results.append(contentsOf: fetchFlowEvents(matching: query))
-        }
-        if fetchBuiltIn || categories!.contains(.error) {
-            results.append(contentsOf: fetchErrorLogs(matching: query))
-        }
-        if fetchBuiltIn || categories!.contains(.cloudKitUpload) || categories!.contains(.cloudKitDownload) {
-            results.append(contentsOf: fetchCloudKitLogs(matching: query, categories: categories))
-        }
+            let fetchBuiltIn = categories == nil
+            if fetchBuiltIn || categories!.contains(.event) {
+                results.append(contentsOf: fetchEvents(matching: query))
+            }
+            if fetchBuiltIn || categories!.contains(.network) {
+                results.append(contentsOf: fetchNetworkLogs(matching: query))
+            }
+            if fetchBuiltIn || categories!.contains(.flow) {
+                results.append(contentsOf: fetchFlowEvents(matching: query))
+            }
+            if fetchBuiltIn || categories!.contains(.error) {
+                results.append(contentsOf: fetchErrorLogs(matching: query))
+            }
+            if fetchBuiltIn || categories!.contains(.cloudKitUpload) || categories!.contains(.cloudKitDownload) {
+                results.append(contentsOf: fetchCloudKitLogs(matching: query, categories: categories))
+            }
 
-        // Always fetch generic entries (custom categories)
-        let customCategories = categories?.filter { !EntryCategory.builtIn.contains($0) }
-        if categories == nil || customCategories?.isEmpty == false {
-            results.append(contentsOf: fetchGenericEntries(matching: query, categories: customCategories))
-        }
+            // Always fetch generic entries (custom categories)
+            let customCategories = categories?.filter { !EntryCategory.builtIn.contains($0) }
+            if categories == nil || customCategories?.isEmpty == false {
+                results.append(contentsOf: fetchGenericEntries(matching: query, categories: customCategories))
+            }
 
-        results.sort { $0.timestamp < $1.timestamp }
+            results.sort { $0.timestamp < $1.timestamp }
 
-        if let limit = query.limit {
-            results = Array(results.suffix(limit))
-        }
+            if let limit = query.limit {
+                results = Array(results.suffix(limit))
+            }
 
-        if let filter = query.nameContains {
-            results = results.filter { $0.matches(filter: filter) }
+            if let filter = query.nameContains {
+                results = results.filter { $0.matches(filter: filter) }
+            }
+            return results
         }
-        return results
     }
 
     public func allEntries() -> [any ChronicleEntry] {
@@ -111,39 +120,45 @@ public final class SwiftDataStorage: @unchecked Sendable {
     // MARK: - Clear
 
     public func clear() {
-        do {
-            try modelContext.delete(model: PersistedEvent.self)
-            try modelContext.delete(model: PersistedNetworkLog.self)
-            try modelContext.delete(model: PersistedFlowEvent.self)
-            try modelContext.delete(model: PersistedErrorLog.self)
-            try modelContext.delete(model: PersistedCloudKitLog.self)
-            try modelContext.delete(model: PersistedGenericEntry.self)
-            try modelContext.save()
-        } catch {}
+        contextLock.withLock {
+            do {
+                try modelContext.delete(model: PersistedEvent.self)
+                try modelContext.delete(model: PersistedNetworkLog.self)
+                try modelContext.delete(model: PersistedFlowEvent.self)
+                try modelContext.delete(model: PersistedErrorLog.self)
+                try modelContext.delete(model: PersistedCloudKitLog.self)
+                try modelContext.delete(model: PersistedGenericEntry.self)
+                try modelContext.save()
+            } catch {}
+        }
     }
 
     public func clear(before date: Date) {
-        do {
-            try modelContext.delete(model: PersistedEvent.self, where: #Predicate<PersistedEvent> { $0.timestamp < date })
-            try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp < date })
-            try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp < date })
-            try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp < date })
-            try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp < date })
-            try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp < date })
-            try modelContext.save()
-        } catch {}
+        contextLock.withLock {
+            do {
+                try modelContext.delete(model: PersistedEvent.self, where: #Predicate<PersistedEvent> { $0.timestamp < date })
+                try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp < date })
+                try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp < date })
+                try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp < date })
+                try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp < date })
+                try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp < date })
+                try modelContext.save()
+            } catch {}
+        }
     }
 
     public func clear(since date: Date) {
-        do {
-            try modelContext.delete(model: PersistedEvent.self, where: #Predicate<PersistedEvent> { $0.timestamp >= date })
-            try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp >= date })
-            try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp >= date })
-            try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp >= date })
-            try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp >= date })
-            try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp >= date })
-            try modelContext.save()
-        } catch {}
+        contextLock.withLock {
+            do {
+                try modelContext.delete(model: PersistedEvent.self, where: #Predicate<PersistedEvent> { $0.timestamp >= date })
+                try modelContext.delete(model: PersistedNetworkLog.self, where: #Predicate<PersistedNetworkLog> { $0.timestamp >= date })
+                try modelContext.delete(model: PersistedFlowEvent.self, where: #Predicate<PersistedFlowEvent> { $0.timestamp >= date })
+                try modelContext.delete(model: PersistedErrorLog.self, where: #Predicate<PersistedErrorLog> { $0.timestamp >= date })
+                try modelContext.delete(model: PersistedCloudKitLog.self, where: #Predicate<PersistedCloudKitLog> { $0.timestamp >= date })
+                try modelContext.delete(model: PersistedGenericEntry.self, where: #Predicate<PersistedGenericEntry> { $0.timestamp >= date })
+                try modelContext.save()
+            } catch {}
+        }
     }
 }
 
