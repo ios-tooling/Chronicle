@@ -1,4 +1,5 @@
 import SwiftUI
+import TagAlong
 
 /// Dispatches to the appropriate row view based on entry type.
 @available(iOS 17, macOS 14, *)
@@ -11,8 +12,13 @@ struct EntryRow: View {
                 .foregroundStyle(entry.category.tintColor)
                 .frame(width: 24)
 
-            entryContent
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 4) {
+                entryContent
+                if !entry.tags.isEmpty {
+                    TagsView(tags: entry.tags)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

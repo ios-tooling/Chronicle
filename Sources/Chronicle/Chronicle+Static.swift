@@ -1,11 +1,12 @@
 import Foundation
+import TagAlong
 
 @available(iOS 17, macOS 14, *)
 extension Chronicle {
 	
 	/// Tracks a named event with optional metadata.
-	nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		instance.events.track(name, metadata: metadata, file: file, function: function, line: line)
+	nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+		instance.events.track(name, metadata: metadata, tags: tags, file: file, function: function, line: line)
 	}
 	
 	/// Logs a network request and response from a URLRequest/HTTPURLResponse pair.
@@ -17,6 +18,7 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics? = nil,
 		linkedErrorID: UUID? = nil,
+		tags: [Tag] = [],
 		startTime: Date = Date(),
 		endTime: Date? = nil,
 		file: String = #file,
@@ -36,6 +38,7 @@ extension Chronicle {
 				wasCancelled: wasCancelled,
 				metrics: metrics ?? NetworkMetrics(startTime: startTime, endTime: endTime ?? Date(), bytesSent: Int64(request.httpBody?.count ?? 0), bytesReceived: Int64(data?.count ?? 0)),
 				linkedErrorID: linkedErrorID,
+				tags: tags,
 				sourceFile: (file as NSString).lastPathComponent,
 				sourceFunction: function,
 				sourceLine: line
@@ -48,6 +51,7 @@ extension Chronicle {
 				data: data,
 				error: error,
 				wasCancelled: wasCancelled,
+				tags: tags,
 				startTime: startTime,
 				endTime: endTime,
 				file: file,
@@ -72,6 +76,7 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -90,6 +95,7 @@ extension Chronicle {
 			wasCancelled: wasCancelled,
 			metrics: metrics,
 			linkedErrorID: linkedErrorID,
+			tags: tags,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function,
 			sourceLine: line
@@ -98,8 +104,8 @@ extension Chronicle {
 	}
 	
 	/// Tracks a screen transition in the app flow.
-	nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		instance.flow.trackScreen(name, transition: transition, metadata: metadata, file: file, function: function, line: line)
+	nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+		instance.flow.trackScreen(name, transition: transition, metadata: metadata, tags: tags, file: file, function: function, line: line)
 	}
 	
 	/// Logs an error with optional severity and context.
@@ -108,6 +114,7 @@ extension Chronicle {
 		severity: ErrorSeverity = .error,
 		context: EventMetadata? = nil,
 		captureCallStack: Bool = false,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -117,6 +124,7 @@ extension Chronicle {
 			severity: severity,
 			context: context,
 			captureCallStack: captureCallStack,
+			tags: tags,
 			file: file,
 			function: function,
 			line: line
@@ -133,6 +141,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -141,7 +150,7 @@ extension Chronicle {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error,
+			duration: duration, error: error, tags: tags,
 			file: file, function: function, line: line
 		)
 	}
@@ -156,6 +165,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -164,16 +174,16 @@ extension Chronicle {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error,
+			duration: duration, error: error, tags: tags,
 			file: file, function: function, line: line
 		)
 	}
 
 	/// Logs an error with a string context.
-	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }
 		let metadata: EventMetadata = ["context": .string(context)]
-		self.error(error, severity: severity, context: metadata, captureCallStack: captureCallStack, file: file, function: function, line: line)
+		self.error(error, severity: severity, context: metadata, captureCallStack: captureCallStack, tags: tags, file: file, function: function, line: line)
 	}
 }
 

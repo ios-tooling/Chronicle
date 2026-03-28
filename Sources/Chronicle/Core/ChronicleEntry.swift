@@ -1,4 +1,5 @@
 import Foundation
+@_exported import TagAlong
 
 /// A string-backed category identifier for Chronicle entries. Extensible with custom categories.
 public struct EntryCategory: RawRepresentable, Hashable, Codable, Sendable {
@@ -32,4 +33,5 @@ public protocol ChronicleEntry: Codable, Sendable {
 extension ChronicleEntry {
 	public var displaySummary: String { category.displayName }
 	public func matches(filter: String) -> Bool { false }
+	public var tags: [Tag] { [] }
 }

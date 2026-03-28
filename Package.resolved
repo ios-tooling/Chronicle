@@ -1,0 +1,15 @@
+{
+  "originHash" : "fcc91ee6a5e81077e439e798afffc4260d706c535bc69de963892e7a4d73da68",
+  "pins" : [
+    {
+      "identity" : "tagalong",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ios-tooling/TagAlong",
+      "state" : {
+        "branch" : "main",
+        "revision" : "8b93a4882ac596d5c502e6839faa9f9cc8ddff1e"
+      }
+    }
+  ],
+  "version" : 3
+}

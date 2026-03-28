@@ -1,4 +1,5 @@
 import Foundation
+import TagAlong
 
 /// Logs arbitrary errors, extracting as much information as possible.
 @available(iOS 17, macOS 14, *)
@@ -18,6 +19,7 @@ public final class ErrorTracker: Sendable {
         severity: ErrorSeverity = .error,
         context: EventMetadata? = nil,
         captureCallStack: Bool = false,
+        tags: [Tag] = [],
         file: String = #file,
         function: String = #function,
         line: Int = #line
@@ -27,6 +29,7 @@ public final class ErrorTracker: Sendable {
             severity: severity,
             context: context,
             captureCallStack: captureCallStack,
+            tags: tags,
             file: file,
             function: function,
             line: line
@@ -64,6 +67,7 @@ public final class ErrorTracker: Sendable {
         severity: ErrorSeverity = .error,
         context: EventMetadata? = nil,
         captureCallStack: Bool = false,
+        tags: [Tag] = [],
         linkedNetworkLogID: UUID? = nil,
         file: String,
         function: String,
@@ -110,6 +114,7 @@ public final class ErrorTracker: Sendable {
             context: context,
             callStackSymbols: stack,
             linkedNetworkLogID: linkedNetworkLogID,
+            tags: tags,
             sourceFile: (file as NSString).lastPathComponent,
             sourceFunction: function,
             sourceLine: line

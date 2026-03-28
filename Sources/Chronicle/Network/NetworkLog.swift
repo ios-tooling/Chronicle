@@ -1,4 +1,5 @@
 import Foundation
+import TagAlong
 
 /// Represents a logged network request and its response.
 public struct NetworkLog: ChronicleEntry {
@@ -26,7 +27,8 @@ public struct NetworkLog: ChronicleEntry {
 	
 	/// The UUID of a linked ErrorLog, if this request produced an error.
 	public let linkedErrorID: UUID?
-	
+
+	public let tags: [Tag]
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -51,6 +53,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
+		tags: [Tag] = [],
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -70,6 +73,7 @@ public struct NetworkLog: ChronicleEntry {
 		self.wasCancelled = wasCancelled
 		self.metrics = metrics
 		self.linkedErrorID = linkedErrorID
+		self.tags = tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
@@ -79,7 +83,7 @@ public struct NetworkLog: ChronicleEntry {
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, url, method, requestHeaders, requestBody, requestBodySize
 		case statusCode, responseHeaders, responseBody, responseBodySize, error, wasCancelled, metrics
-		case linkedErrorID, sourceFile, sourceFunction, sourceLine
+		case linkedErrorID, tags, sourceFile, sourceFunction, sourceLine
 	}
 	
 	public func encode(to encoder: Encoder) throws {
@@ -100,6 +104,7 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encode(wasCancelled, forKey: .wasCancelled)
 		try container.encode(metrics, forKey: .metrics)
 		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
+		if !tags.isEmpty { try container.encode(tags, forKey: .tags) }
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -122,6 +127,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled = try container.decodeIfPresent(Bool.self, forKey: .wasCancelled) ?? false
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
 		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
+		tags = try container.decodeIfPresent([Tag].self, forKey: .tags) ?? []
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

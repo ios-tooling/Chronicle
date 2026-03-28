@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import TagAlong
 
 // MARK: - Persisted Event
 
@@ -10,15 +11,17 @@ final class PersistedEvent {
     var timestamp: Date
     var name: String
     var metadataJSON: Data?
+    var tagsJSON: Data?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
 
-    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
+    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?, tagsJSON: Data?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
         self.entryID = entryID
         self.timestamp = timestamp
         self.name = name
         self.metadataJSON = metadataJSON
+        self.tagsJSON = tagsJSON
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -29,16 +32,19 @@ final class PersistedEvent {
         if let data = metadataJSON {
             metadata = try? JSONDecoder().decode(EventMetadata.self, from: data)
         }
-        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
+        let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) } ?? []
+        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata, tags: tags, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
     }
 
     static func from(_ event: Event) -> PersistedEvent {
         let metadataJSON = event.metadata.flatMap { try? JSONEncoder().encode($0) }
+        let tagsJSON = event.tags.isEmpty ? nil : (try? JSONEncoder().encode(event.tags))
         return PersistedEvent(
             entryID: event.id,
             timestamp: event.timestamp,
             name: event.name,
             metadataJSON: metadataJSON,
+            tagsJSON: tagsJSON,
             sourceFile: event.sourceFile,
             sourceFunction: event.sourceFunction,
             sourceLine: event.sourceLine
@@ -69,6 +75,7 @@ final class PersistedNetworkLog {
     var bytesSent: Int64
     var bytesReceived: Int64
     var linkedErrorID: UUID?
+    var tagsJSON: Data?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -92,6 +99,7 @@ final class PersistedNetworkLog {
         bytesSent: Int64,
         bytesReceived: Int64,
         linkedErrorID: UUID?,
+        tagsJSON: Data?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -114,6 +122,7 @@ final class PersistedNetworkLog {
         self.bytesSent = bytesSent
         self.bytesReceived = bytesReceived
         self.linkedErrorID = linkedErrorID
+        self.tagsJSON = tagsJSON
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -127,6 +136,7 @@ final class PersistedNetworkLog {
         let resHeaders = responseHeadersJSON.flatMap {
             try? decoder.decode([String: String].self, from: $0)
         }
+        let tags = tagsJSON.flatMap { try? decoder.decode([Tag].self, from: $0) } ?? []
         return NetworkLog(
             id: entryID,
             timestamp: timestamp,
@@ -148,6 +158,7 @@ final class PersistedNetworkLog {
                 bytesReceived: bytesReceived
             ),
             linkedErrorID: linkedErrorID,
+            tags: tags,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -158,6 +169,7 @@ final class PersistedNetworkLog {
         let encoder = JSONEncoder()
         let reqJSON = log.requestHeaders.flatMap { try? encoder.encode($0) }
         let resJSON = log.responseHeaders.flatMap { try? encoder.encode($0) }
+        let tagsJSON = log.tags.isEmpty ? nil : (try? encoder.encode(log.tags))
         return PersistedNetworkLog(
             entryID: log.id,
             timestamp: log.timestamp,
@@ -177,6 +189,7 @@ final class PersistedNetworkLog {
             bytesSent: log.metrics.bytesSent,
             bytesReceived: log.metrics.bytesReceived,
             linkedErrorID: log.linkedErrorID,
+            tagsJSON: tagsJSON,
             sourceFile: log.sourceFile,
             sourceFunction: log.sourceFunction,
             sourceLine: log.sourceLine
@@ -200,6 +213,7 @@ final class PersistedFlowEvent {
     var toTimestamp: Date
     var toInfoJSON: Data?
     var transitionType: String
+    var tagsJSON: Data?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -216,6 +230,7 @@ final class PersistedFlowEvent {
         toTimestamp: Date,
         toInfoJSON: Data?,
         transitionType: String,
+        tagsJSON: Data?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -231,6 +246,7 @@ final class PersistedFlowEvent {
         self.toTimestamp = toTimestamp
         self.toInfoJSON = toInfoJSON
         self.transitionType = transitionType
+        self.tagsJSON = tagsJSON
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -257,12 +273,14 @@ final class PersistedFlowEvent {
             timestamp: toTimestamp,
             additionalInfo: toInfo
         )
+        let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) } ?? []
         return FlowEvent(
             id: entryID,
             timestamp: timestamp,
             from: fromStep,
             to: toStep,
             transitionType: TransitionType(rawValue: transitionType) ?? .push,
+            tags: tags,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -273,6 +291,7 @@ final class PersistedFlowEvent {
         let encoder = JSONEncoder()
         let fromInfoJSON = flowEvent.from?.additionalInfo.flatMap { try? encoder.encode($0) }
         let toInfoJSON = flowEvent.to.additionalInfo.flatMap { try? encoder.encode($0) }
+        let tagsJSON = flowEvent.tags.isEmpty ? nil : (try? encoder.encode(flowEvent.tags))
         return PersistedFlowEvent(
             entryID: flowEvent.id,
             timestamp: flowEvent.timestamp,
@@ -285,6 +304,7 @@ final class PersistedFlowEvent {
             toTimestamp: flowEvent.to.timestamp,
             toInfoJSON: toInfoJSON,
             transitionType: flowEvent.transitionType.rawValue,
+            tagsJSON: tagsJSON,
             sourceFile: flowEvent.sourceFile,
             sourceFunction: flowEvent.sourceFunction,
             sourceLine: flowEvent.sourceLine
@@ -311,6 +331,7 @@ final class PersistedErrorLog {
     var contextJSON: Data?
     var callStackJSON: Data?
     var linkedNetworkLogID: UUID?
+    var tagsJSON: Data?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -330,6 +351,7 @@ final class PersistedErrorLog {
         contextJSON: Data?,
         callStackJSON: Data?,
         linkedNetworkLogID: UUID?,
+        tagsJSON: Data?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -348,6 +370,7 @@ final class PersistedErrorLog {
         self.contextJSON = contextJSON
         self.callStackJSON = callStackJSON
         self.linkedNetworkLogID = linkedNetworkLogID
+        self.tagsJSON = tagsJSON
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -358,6 +381,7 @@ final class PersistedErrorLog {
         let userInfo = userInfoJSON.flatMap { try? decoder.decode([String: String].self, from: $0) }
         let context = contextJSON.flatMap { try? decoder.decode(EventMetadata.self, from: $0) }
         let callStack = callStackJSON.flatMap { try? decoder.decode([String].self, from: $0) }
+        let tags = tagsJSON.flatMap { try? decoder.decode([Tag].self, from: $0) } ?? []
 
         return ErrorLog(
             id: entryID,
@@ -374,6 +398,7 @@ final class PersistedErrorLog {
             context: context,
             callStackSymbols: callStack,
             linkedNetworkLogID: linkedNetworkLogID,
+            tags: tags,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -385,6 +410,7 @@ final class PersistedErrorLog {
         let userInfoJSON = errorLog.userInfo.flatMap { try? encoder.encode($0) }
         let contextJSON = errorLog.context.flatMap { try? encoder.encode($0) }
         let callStackJSON = errorLog.callStackSymbols.flatMap { try? encoder.encode($0) }
+        let tagsJSON = errorLog.tags.isEmpty ? nil : (try? encoder.encode(errorLog.tags))
 
         return PersistedErrorLog(
             entryID: errorLog.id,
@@ -401,6 +427,7 @@ final class PersistedErrorLog {
             contextJSON: contextJSON,
             callStackJSON: callStackJSON,
             linkedNetworkLogID: errorLog.linkedNetworkLogID,
+            tagsJSON: tagsJSON,
             sourceFile: errorLog.sourceFile,
             sourceFunction: errorLog.sourceFunction,
             sourceLine: errorLog.sourceLine
@@ -424,6 +451,7 @@ final class PersistedCloudKitLog {
 	var fieldCount: Int?
 	var duration: Double?
 	var errorMessage: String?
+	var tagsJSON: Data?
 	var sourceFile: String?
 	var sourceFunction: String?
 	var sourceLine: Int?
@@ -440,6 +468,7 @@ final class PersistedCloudKitLog {
 		fieldCount: Int?,
 		duration: Double?,
 		errorMessage: String?,
+		tagsJSON: Data?,
 		sourceFile: String?,
 		sourceFunction: String?,
 		sourceLine: Int?
@@ -455,13 +484,15 @@ final class PersistedCloudKitLog {
 		self.fieldCount = fieldCount
 		self.duration = duration
 		self.errorMessage = errorMessage
+		self.tagsJSON = tagsJSON
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
 	}
 
 	func toCloudKitLog() -> CloudKitLog {
-		CloudKitLog(
+		let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) } ?? []
+		return CloudKitLog(
 			id: entryID,
 			timestamp: timestamp,
 			direction: CloudKitDirection(rawValue: direction) ?? .download,
@@ -473,6 +504,7 @@ final class PersistedCloudKitLog {
 			fieldCount: fieldCount,
 			duration: duration,
 			error: errorMessage,
+			tags: tags,
 			sourceFile: sourceFile,
 			sourceFunction: sourceFunction,
 			sourceLine: sourceLine
@@ -480,7 +512,8 @@ final class PersistedCloudKitLog {
 	}
 
 	static func from(_ log: CloudKitLog) -> PersistedCloudKitLog {
-		PersistedCloudKitLog(
+		let tagsJSON = log.tags.isEmpty ? nil : (try? JSONEncoder().encode(log.tags))
+		return PersistedCloudKitLog(
 			entryID: log.id,
 			timestamp: log.timestamp,
 			direction: log.direction.rawValue,
@@ -492,6 +525,7 @@ final class PersistedCloudKitLog {
 			fieldCount: log.fieldCount,
 			duration: log.duration,
 			errorMessage: log.error,
+			tagsJSON: tagsJSON,
 			sourceFile: log.sourceFile,
 			sourceFunction: log.sourceFunction,
 			sourceLine: log.sourceLine
@@ -509,34 +543,39 @@ final class PersistedGenericEntry {
     var category: String
     var summary: String
     var payloadJSON: Data
+    var tagsJSON: Data?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
 
-    init(entryID: UUID, timestamp: Date, category: String, summary: String, payloadJSON: Data, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
+    init(entryID: UUID, timestamp: Date, category: String, summary: String, payloadJSON: Data, tagsJSON: Data?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
         self.entryID = entryID
         self.timestamp = timestamp
         self.category = category
         self.summary = summary
         self.payloadJSON = payloadJSON
+        self.tagsJSON = tagsJSON
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
     }
 
     func toGenericEntry() -> GenericChronicleEntry {
-        GenericChronicleEntry(id: entryID, timestamp: timestamp, category: EntryCategory(category), summary: summary, payload: payloadJSON, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
+        let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) } ?? []
+        return GenericChronicleEntry(id: entryID, timestamp: timestamp, category: EntryCategory(category), summary: summary, payload: payloadJSON, tags: tags, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
     }
 
     static func from(_ entry: any ChronicleEntry) -> PersistedGenericEntry? {
         guard let payload = try? JSONEncoder().encode(entry) else { return nil }
+        let tagsJSON = entry.tags.isEmpty ? nil : (try? JSONEncoder().encode(entry.tags))
         return PersistedGenericEntry(
             entryID: entry.id,
             timestamp: entry.timestamp,
             category: entry.category.rawValue,
             summary: entry.displaySummary,
             payloadJSON: payload,
-				sourceFile: entry.sourceFile,
+            tagsJSON: tagsJSON,
+            sourceFile: entry.sourceFile,
             sourceFunction: entry.sourceFunction,
             sourceLine: entry.sourceLine
         )

@@ -1,4 +1,5 @@
 import Foundation
+import TagAlong
 
 /// Tracks navigation flow and screen transitions in the app.
 @available(iOS 17, macOS 14, *)
@@ -17,7 +18,7 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Tracks a screen transition.
-    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
         let previousStep = currentStep
         let newStep = FlowStep(
             screenName: name,
@@ -29,6 +30,7 @@ public final class FlowTracker: @unchecked Sendable {
             from: previousStep,
             to: newStep,
             transitionType: transition,
+            tags: tags,
             sourceFile: fileName,
             sourceFunction: function,
             sourceLine: line

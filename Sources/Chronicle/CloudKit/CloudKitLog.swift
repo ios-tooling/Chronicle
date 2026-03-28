@@ -1,4 +1,5 @@
 import Foundation
+import TagAlong
 
 /// The direction of a CloudKit record transfer.
 public enum CloudKitDirection: String, Codable, Sendable, Hashable {
@@ -39,6 +40,7 @@ public struct CloudKitLog: ChronicleEntry {
 	/// Error description if the operation failed.
 	public let error: String?
 
+	public let tags: [Tag]
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -66,6 +68,7 @@ public struct CloudKitLog: ChronicleEntry {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		tags: [Tag] = [],
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -81,6 +84,7 @@ public struct CloudKitLog: ChronicleEntry {
 		self.fieldCount = fieldCount
 		self.duration = duration
 		self.error = error
+		self.tags = tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

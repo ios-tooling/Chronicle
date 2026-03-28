@@ -5,8 +5,8 @@ import PackageDescription
 let package = Package(
     name: "Chronicle",
     platforms: [
-        .iOS(.v14),
-        .macOS(.v11)
+        .iOS(.v15),
+        .macOS(.v13)
     ],
     products: [
         .library(
@@ -14,9 +14,13 @@ let package = Package(
             targets: ["Chronicle"]
         )
     ],
+	 dependencies: [
+		.package(url: "https://github.com/ios-tooling/TagAlong", branch: "main"),
+	 ],
     targets: [
         .target(
             name: "Chronicle",
+				dependencies: ["TagAlong"],
             path: "Sources/Chronicle"
         ),
         .testTarget(

@@ -1,4 +1,5 @@
 import Foundation
+import TagAlong
 
 /// Logs CloudKit record uploads and downloads.
 @available(iOS 17, macOS 14, *)
@@ -19,6 +20,7 @@ public final class CloudKitLogger: Sendable {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -33,6 +35,7 @@ public final class CloudKitLogger: Sendable {
 			fieldCount: fieldCount,
 			duration: duration,
 			error: error,
+			tags: tags,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function,
 			sourceLine: line
@@ -50,6 +53,7 @@ public final class CloudKitLogger: Sendable {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		tags: [Tag] = [],
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -64,6 +68,7 @@ public final class CloudKitLogger: Sendable {
 			fieldCount: fieldCount,
 			duration: duration,
 			error: error,
+			tags: tags,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function,
 			sourceLine: line
