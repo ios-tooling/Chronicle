@@ -23,7 +23,7 @@ struct ChronicleFilterBar: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(visibleCategories, id: \.self) { category in
+                ForEach(visibleCategories.filter { entryCounts[$0, default: 0] > 0 }, id: \.self) { category in
                     CategoryToggle(category: category, isSelected: model.isSelected(category), count: entryCounts[category] ?? 0) {
                         model.toggleCategory(category)
                     }

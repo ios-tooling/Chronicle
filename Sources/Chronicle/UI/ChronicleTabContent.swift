@@ -90,7 +90,7 @@ private struct ChronicleQueryContent: View {
 
 	public var filterBar: some View {
 		VStack(spacing: 0) {
-			 ChronicleFilterBar(model: model, entries: filteredEntries)
+			 ChronicleFilterBar(model: model, entries: allEntries)
 			 Divider()
 		}
 	}
