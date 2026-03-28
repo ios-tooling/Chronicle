@@ -95,6 +95,7 @@ public final class Chronicle: @unchecked Sendable {
             storage = try SwiftDataStorage()
         }
 
+        storage.maxEntries = configuration.maxEntries
         let errors = ErrorTracker(storage: storage)
         lock.withLock {
             self._launchDate = Date()
@@ -111,7 +112,7 @@ public final class Chronicle: @unchecked Sendable {
     /// Configures Chronicle with an in-memory store (useful for testing).
     public func configureInMemory() throws {
         let storage = try SwiftDataStorage.inMemory()
-
+        storage.maxEntries = ChronicleConfiguration.default.maxEntries
         let errors = ErrorTracker(storage: storage)
         lock.withLock {
             self._launchDate = Date()

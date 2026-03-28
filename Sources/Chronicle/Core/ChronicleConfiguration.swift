@@ -7,6 +7,10 @@ public struct ChronicleConfiguration: Sendable {
     /// Whether Chronicle is actively recording entries.
     public var isEnabled: Bool
 
+    /// Maximum number of entries to store across all types.
+    /// Oldest entries are discarded when this limit is reached.
+    public var maxEntries: Int
+
     /// The SwiftData model container used for persistence.
     /// If nil, Chronicle creates a default container.
     public var modelContainer: ModelContainer?
@@ -15,8 +19,9 @@ public struct ChronicleConfiguration: Sendable {
     public var exportDestinations: [any ExportDestination]
 
     /// Creates a configuration with the specified options.
-    public init(isEnabled: Bool = true, modelContainer: ModelContainer? = nil, exportDestinations: [any ExportDestination] = []) {
+    public init(isEnabled: Bool = true, maxEntries: Int = 1000, modelContainer: ModelContainer? = nil, exportDestinations: [any ExportDestination] = []) {
         self.isEnabled = isEnabled
+        self.maxEntries = maxEntries
         self.modelContainer = modelContainer
         self.exportDestinations = exportDestinations
     }

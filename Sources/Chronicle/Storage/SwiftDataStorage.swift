@@ -11,6 +11,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
     private let modelContainer: ModelContainer
     private let modelContext: ModelContext
     private let contextLock = OSAllocatedUnfairLock()
+    public var maxEntries: Int?
 
     private static var schema: Schema {
         Schema([
@@ -66,7 +67,44 @@ public final class SwiftDataStorage: @unchecked Sendable {
                     modelContext.insert(generic)
                 }
             }
+            if let maxEntries { enforceLimit(maxEntries) }
             try? modelContext.save()
+        }
+    }
+
+    /// Deletes the oldest entries across all types until the total count is at or below `maxEntries`.
+    private func enforceLimit(_ maxEntries: Int) {
+        var total = 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedEvent>())) ?? 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedNetworkLog>())) ?? 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedFlowEvent>())) ?? 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedErrorLog>())) ?? 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedCloudKitLog>())) ?? 0
+        total += (try? modelContext.fetchCount(FetchDescriptor<PersistedGenericEntry>())) ?? 0
+
+        guard total > maxEntries else { return }
+        let excess = total - maxEntries
+
+        var candidates: [(timestamp: Date, model: any PersistentModel)] = []
+
+        func collectOldest<T: PersistentModel>(_ type: T.Type, _ key: KeyPath<T, Date> & Sendable) {
+            var descriptor = FetchDescriptor<T>(sortBy: [SortDescriptor(key)])
+            descriptor.fetchLimit = excess
+            if let results = try? modelContext.fetch(descriptor) {
+                candidates += results.map { ($0[keyPath: key], $0) }
+            }
+        }
+
+        collectOldest(PersistedEvent.self, \.timestamp)
+        collectOldest(PersistedNetworkLog.self, \.timestamp)
+        collectOldest(PersistedFlowEvent.self, \.timestamp)
+        collectOldest(PersistedErrorLog.self, \.timestamp)
+        collectOldest(PersistedCloudKitLog.self, \.timestamp)
+        collectOldest(PersistedGenericEntry.self, \.timestamp)
+
+        candidates.sort { $0.timestamp < $1.timestamp }
+        for candidate in candidates.prefix(excess) {
+            modelContext.delete(candidate.model)
         }
     }
 
