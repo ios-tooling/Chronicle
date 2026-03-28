@@ -40,7 +40,7 @@ public struct CloudKitLog: ChronicleEntry {
 	/// Error description if the operation failed.
 	public let error: String?
 
-	public let tags: [Tag]
+	public let tags: [Tag]?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -68,7 +68,7 @@ public struct CloudKitLog: ChronicleEntry {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -84,7 +84,7 @@ public struct CloudKitLog: ChronicleEntry {
 		self.fieldCount = fieldCount
 		self.duration = duration
 		self.error = error
-		self.tags = tags
+		self.tags = tags?.tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

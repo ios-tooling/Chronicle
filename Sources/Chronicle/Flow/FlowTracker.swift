@@ -18,7 +18,7 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Tracks a screen transition.
-    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let previousStep = currentStep
         let newStep = FlowStep(
             screenName: name,

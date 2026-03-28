@@ -52,7 +52,7 @@ public struct ErrorLog: ChronicleEntry {
 	/// The UUID of a linked NetworkLog, if this error came from a network request.
 	public let linkedNetworkLogID: UUID?
 
-	public let tags: [Tag]
+	public let tags: [Tag]?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -72,7 +72,7 @@ public struct ErrorLog: ChronicleEntry {
 		context: EventMetadata? = nil,
 		callStackSymbols: [String]? = nil,
 		linkedNetworkLogID: UUID? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -91,7 +91,7 @@ public struct ErrorLog: ChronicleEntry {
 		self.context = context
 		self.callStackSymbols = callStackSymbols
 		self.linkedNetworkLogID = linkedNetworkLogID
-		self.tags = tags
+		self.tags = tags?.tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

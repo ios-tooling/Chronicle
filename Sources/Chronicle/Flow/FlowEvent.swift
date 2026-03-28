@@ -16,18 +16,18 @@ public struct FlowEvent: ChronicleEntry {
 	/// The type of transition.
 	public let transitionType: TransitionType
 
-	public let tags: [Tag]
+	public let tags: [Tag]?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
 	
-	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, tags: [Tag] = [], sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
+	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, tags: TagCollection? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
 		self.id = id
 		self.timestamp = timestamp
 		self.from = from
 		self.to = to
 		self.transitionType = transitionType
-		self.tags = tags
+		self.tags = tags?.tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

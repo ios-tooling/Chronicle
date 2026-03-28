@@ -20,7 +20,7 @@ public final class CloudKitLogger: Sendable {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -53,7 +53,7 @@ public final class CloudKitLogger: Sendable {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line

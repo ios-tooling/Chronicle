@@ -28,7 +28,7 @@ public struct NetworkLog: ChronicleEntry {
 	/// The UUID of a linked ErrorLog, if this request produced an error.
 	public let linkedErrorID: UUID?
 
-	public let tags: [Tag]
+	public let tags: [Tag]?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -53,7 +53,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -73,7 +73,7 @@ public struct NetworkLog: ChronicleEntry {
 		self.wasCancelled = wasCancelled
 		self.metrics = metrics
 		self.linkedErrorID = linkedErrorID
-		self.tags = tags
+		self.tags = tags?.tags
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

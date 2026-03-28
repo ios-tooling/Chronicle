@@ -5,7 +5,7 @@ import TagAlong
 extension Chronicle {
 	
 	/// Tracks a named event with optional metadata.
-	nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		instance.events.track(name, metadata: metadata, tags: tags, file: file, function: function, line: line)
 	}
 	
@@ -18,7 +18,7 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics? = nil,
 		linkedErrorID: UUID? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		startTime: Date = Date(),
 		endTime: Date? = nil,
 		file: String = #file,
@@ -76,7 +76,7 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -104,7 +104,7 @@ extension Chronicle {
 	}
 	
 	/// Tracks a screen transition in the app flow.
-	nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		instance.flow.trackScreen(name, transition: transition, metadata: metadata, tags: tags, file: file, function: function, line: line)
 	}
 	
@@ -114,7 +114,7 @@ extension Chronicle {
 		severity: ErrorSeverity = .error,
 		context: EventMetadata? = nil,
 		captureCallStack: Bool = false,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -141,7 +141,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -165,7 +165,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
-		tags: [Tag] = [],
+		tags: TagCollection? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -180,7 +180,7 @@ extension Chronicle {
 	}
 
 	/// Logs an error with a string context.
-	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: TagCollection? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }
 		let metadata: EventMetadata = ["context": .string(context)]
 		self.error(error, severity: severity, context: metadata, captureCallStack: captureCallStack, tags: tags, file: file, function: function, line: line)

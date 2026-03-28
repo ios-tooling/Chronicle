@@ -14,7 +14,7 @@ public final class NetworkLogger: Sendable {
 
     /// Manually log a network request/response.
     /// If an error is provided and an ErrorTracker is available, automatically creates a linked ErrorLog.
-    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, tags: [Tag] = [], startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, tags: TagCollection? = nil, startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let networkLogID = UUID()
         var linkedErrorID: UUID?
 

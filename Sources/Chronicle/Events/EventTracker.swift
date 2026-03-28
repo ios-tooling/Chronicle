@@ -11,7 +11,7 @@ public final class EventTracker: Sendable {
     }
 
     /// Records a named event with optional metadata.
-    public func track(_ name: String, metadata: EventMetadata? = nil, tags: [Tag] = [], file: String = #file, function: String = #function, line: Int = #line) {
+    public func track(_ name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let event = Event(name: name, metadata: metadata, tags: tags, sourceFile: (file as NSString).lastPathComponent, sourceFunction: function, sourceLine: line)
         storage.store(event)
     }

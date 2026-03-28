@@ -19,7 +19,7 @@ public final class ErrorTracker: Sendable {
         severity: ErrorSeverity = .error,
         context: EventMetadata? = nil,
         captureCallStack: Bool = false,
-        tags: [Tag] = [],
+        tags: TagCollection? = nil,
         file: String = #file,
         function: String = #function,
         line: Int = #line
@@ -67,7 +67,7 @@ public final class ErrorTracker: Sendable {
         severity: ErrorSeverity = .error,
         context: EventMetadata? = nil,
         captureCallStack: Bool = false,
-        tags: [Tag] = [],
+        tags: TagCollection? = nil,
         linkedNetworkLogID: UUID? = nil,
         file: String,
         function: String,

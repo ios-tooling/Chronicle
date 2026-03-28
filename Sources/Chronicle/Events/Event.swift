@@ -8,17 +8,17 @@ public struct Event: ChronicleEntry {
     public let category: EntryCategory = .event
     public let name: String
     public let metadata: EventMetadata?
-    public let tags: [Tag]
+    public let tags: [Tag]?
     public let sourceFile: String?
     public let sourceFunction: String?
     public let sourceLine: Int?
 
-    public init(id: UUID = UUID(), timestamp: Date = Date(), name: String, metadata: EventMetadata? = nil, tags: [Tag] = [], sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
+    public init(id: UUID = UUID(), timestamp: Date = Date(), name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
         self.id = id
         self.timestamp = timestamp
         self.name = name
         self.metadata = metadata
-        self.tags = tags
+		 self.tags = tags?.tags
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
