@@ -127,7 +127,7 @@ public struct ErrorLog: ChronicleEntry {
 		try container.encodeIfPresent(context, forKey: .context)
 		try container.encodeIfPresent(callStackSymbols, forKey: .callStackSymbols)
 		try container.encodeIfPresent(linkedNetworkLogID, forKey: .linkedNetworkLogID)
-		if !tags.isEmpty { try container.encode(tags, forKey: .tags) }
+		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -149,7 +149,7 @@ public struct ErrorLog: ChronicleEntry {
 		context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
 		callStackSymbols = try container.decodeIfPresent([String].self, forKey: .callStackSymbols)
 		linkedNetworkLogID = try container.decodeIfPresent(UUID.self, forKey: .linkedNetworkLogID)
-		tags = try container.decodeIfPresent([Tag].self, forKey: .tags) ?? []
+		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

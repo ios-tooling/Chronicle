@@ -41,7 +41,7 @@ public struct Event: ChronicleEntry {
         try container.encode(category, forKey: .category)
         try container.encode(name, forKey: .name)
         try container.encodeIfPresent(metadata, forKey: .metadata)
-        if !tags.isEmpty { try container.encode(tags, forKey: .tags) }
+        try container.encodeIfPresent(tags, forKey: .tags)
         try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
         try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
         try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -53,7 +53,7 @@ public struct Event: ChronicleEntry {
         timestamp = try container.decode(Date.self, forKey: .timestamp)
         name = try container.decode(String.self, forKey: .name)
         metadata = try container.decodeIfPresent(EventMetadata.self, forKey: .metadata)
-        tags = try container.decodeIfPresent([Tag].self, forKey: .tags) ?? []
+        tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
         sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
         sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
         sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

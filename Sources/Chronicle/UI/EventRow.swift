@@ -1,4 +1,5 @@
 import SwiftUI
+import TagAlong
 
 /// Row view for an Event entry.
 @available(iOS 17, macOS 14, *)
@@ -8,6 +9,8 @@ struct EventRow: View {
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack {
+				if let tags = event.tags { TagsView(tags: tags) }
+
 				Text(event.name)
 					.font(.subheadline.weight(.medium))
 					.lineLimit(1)

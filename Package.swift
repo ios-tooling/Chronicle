@@ -6,7 +6,7 @@ let package = Package(
     name: "Chronicle",
     platforms: [
         .iOS(.v15),
-        .macOS(.v13)
+        .macOS(.v14)
     ],
     products: [
         .library(

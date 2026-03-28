@@ -1,4 +1,5 @@
 import SwiftUI
+import TagAlong
 
 /// Row view for a NetworkLog entry.
 @available(iOS 17, macOS 14, *)
@@ -13,6 +14,8 @@ struct NetworkLogRow: View {
                     .padding(.horizontal, 5)
                     .padding(.vertical, 1)
                     .background(Color.secondary.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+
+					if let tags = log.tags { TagsView(tags: tags) }
 
                 Text(log.url.path())
                     .font(.subheadline)

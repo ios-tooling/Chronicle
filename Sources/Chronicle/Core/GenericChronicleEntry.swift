@@ -8,7 +8,7 @@ public struct GenericChronicleEntry: ChronicleEntry {
     public let category: EntryCategory
     public let summary: String
     public let payload: Data
-    public let tags: [Tag]
+    public let tags: [Tag]?
     public let sourceFile: String?
     public let sourceFunction: String?
     public let sourceLine: Int?

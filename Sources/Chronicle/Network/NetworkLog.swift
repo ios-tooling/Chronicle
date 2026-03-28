@@ -104,7 +104,7 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encode(wasCancelled, forKey: .wasCancelled)
 		try container.encode(metrics, forKey: .metrics)
 		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
-		if !tags.isEmpty { try container.encode(tags, forKey: .tags) }
+		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -127,7 +127,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled = try container.decodeIfPresent(Bool.self, forKey: .wasCancelled) ?? false
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
 		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
-		tags = try container.decodeIfPresent([Tag].self, forKey: .tags) ?? []
+		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

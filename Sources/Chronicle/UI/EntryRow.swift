@@ -12,11 +12,10 @@ struct EntryRow: View {
                 .foregroundStyle(entry.category.tintColor)
                 .frame(width: 24)
 
-            VStack(alignment: .leading, spacing: 4) {
+			  if let tags = entry.tags { TagsView(tags: tags) }
+
+			  VStack(alignment: .leading, spacing: 4) {
                 entryContent
-                if !entry.tags.isEmpty {
-                    TagsView(tags: entry.tags)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

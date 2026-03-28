@@ -23,6 +23,7 @@ public protocol ChronicleEntry: Codable, Sendable {
 	var id: UUID { get }
 	var timestamp: Date { get }
 	var category: EntryCategory { get }
+	var tags: [Tag]? { get }
 	func matches(filter: String) -> Bool
 	var displaySummary: String { get }
 	var sourceFile: String? { get }
@@ -33,5 +34,5 @@ public protocol ChronicleEntry: Codable, Sendable {
 extension ChronicleEntry {
 	public var displaySummary: String { category.displayName }
 	public func matches(filter: String) -> Bool { false }
-	public var tags: [Tag] { [] }
+	public var tags: [Tag]? { nil }
 }

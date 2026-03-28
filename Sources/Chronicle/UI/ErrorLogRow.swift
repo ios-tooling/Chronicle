@@ -15,7 +15,9 @@ struct ErrorLogRow: View {
                     .background(severityColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
                     .foregroundStyle(severityColor)
 
-                Text(error.errorType)
+					if let tags = error.tags { TagsView(tags: tags) }
+
+					Text(error.errorType)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)
 					

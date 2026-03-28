@@ -1,4 +1,5 @@
 import SwiftUI
+import TagAlong
 
 /// Row view for a FlowEvent entry.
 @available(iOS 17, macOS 14, *)
@@ -8,6 +9,8 @@ struct FlowEventRow: View {
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 4) {
+				if let tags = flow.tags { TagsView(tags: tags) }
+
 				if let from = flow.from, from.screenName.caseInsensitiveCompare(flow.to.screenName) != .orderedSame {
 					Text(from.screenName)
 						.font(.subheadline)

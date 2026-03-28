@@ -51,7 +51,7 @@ public struct FlowEvent: ChronicleEntry {
 		try container.encodeIfPresent(from, forKey: .from)
 		try container.encode(to, forKey: .to)
 		try container.encode(transitionType, forKey: .transitionType)
-		if !tags.isEmpty { try container.encode(tags, forKey: .tags) }
+		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -64,7 +64,7 @@ public struct FlowEvent: ChronicleEntry {
 		self.from = try container.decodeIfPresent(FlowStep.self, forKey: .from)
 		to = try container.decode(FlowStep.self, forKey: .to)
 		transitionType = try container.decode(TransitionType.self, forKey: .transitionType)
-		tags = try container.decodeIfPresent([Tag].self, forKey: .tags) ?? []
+		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)
