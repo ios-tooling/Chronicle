@@ -12,8 +12,6 @@ struct EntryRow: View {
                 .foregroundStyle(entry.category.tintColor)
                 .frame(width: 24)
 
-			  if let tags = entry.tags { TagsView(tags: tags) }
-
 			  VStack(alignment: .leading, spacing: 4) {
                 entryContent
             }

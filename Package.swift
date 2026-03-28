@@ -15,7 +15,7 @@ let package = Package(
         )
     ],
 	 dependencies: [
-		.package(url: "https://github.com/ios-tooling/TagAlong", branch: "main"),
+		.package(url: "https://github.com/ios-tooling/TagAlong", from: "0.0.1"),
 	 ],
     targets: [
         .target(
