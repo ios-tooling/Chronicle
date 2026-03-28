@@ -110,6 +110,7 @@ private struct ChronicleQueryContent: View {
             }
             .safeAreaInset(edge: .top, spacing: 0) {
 					filterBar
+						.frame(maxWidth: .infinity)
 						.background(backgroundColor)
             }
             .toolbar {

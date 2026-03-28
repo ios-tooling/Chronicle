@@ -9,9 +9,6 @@ struct CloudKitLogRow: View {
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 6) {
-				Image(systemName: log.direction == .upload ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-					.foregroundStyle(log.direction == .upload ? .orange : .blue)
-
 				if let tags = log.tags { TagsView(tags: tags) }
 
 				Text(log.recordType)

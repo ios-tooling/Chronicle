@@ -30,7 +30,6 @@ struct ChronicleFilterBar: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.vertical, 8)
         }
     }
 }
