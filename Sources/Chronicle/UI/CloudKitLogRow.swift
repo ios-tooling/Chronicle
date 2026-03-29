@@ -5,11 +5,12 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 struct CloudKitLogRow: View {
 	let log: CloudKitLog
+	@Environment(\.showTags) private var showTags
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 6) {
-				if let tags = log.tags { TagsView(tags: tags) }
+				if showTags, let tags = log.tags { TagsView(tags: tags) }
 
 				Text(log.recordType)
 					.font(.subheadline.weight(.medium))

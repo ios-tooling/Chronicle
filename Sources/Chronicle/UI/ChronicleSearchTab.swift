@@ -73,6 +73,7 @@ private struct ChronicleSearchContent: View {
 	
 	private var entryList: some View {
 		ChronicleEntryList(entries: filteredEntries)
+			.environment(\.showTags, model.showTags)
 	}
 	
 	private var emptyState: some View {

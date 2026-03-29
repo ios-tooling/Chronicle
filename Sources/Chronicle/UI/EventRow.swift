@@ -5,11 +5,12 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 struct EventRow: View {
 	let event: Event
-	
+	@Environment(\.showTags) private var showTags
+
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack {
-				if let tags = event.tags { TagsView(tags: tags) }
+				if showTags, let tags = event.tags { TagsView(tags: tags) }
 
 				Text(event.name)
 					.font(.subheadline.weight(.medium))

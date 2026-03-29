@@ -5,11 +5,12 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 struct FlowEventRow: View {
 	let flow: FlowEvent
-	
+	@Environment(\.showTags) private var showTags
+
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 4) {
-				if let tags = flow.tags { TagsView(tags: tags) }
+				if showTags, let tags = flow.tags { TagsView(tags: tags) }
 
 				if let from = flow.from, from.screenName.caseInsensitiveCompare(flow.to.screenName) != .orderedSame {
 					Text(from.screenName)

@@ -4,6 +4,7 @@ import SwiftUI
 @available(iOS 17, macOS 14, *)
 struct ErrorLogRow: View {
     let error: ErrorLog
+    @Environment(\.showTags) private var showTags
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -15,7 +16,7 @@ struct ErrorLogRow: View {
                     .background(severityColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
                     .foregroundStyle(severityColor)
 
-					if let tags = error.tags { TagsView(tags: tags) }
+					if showTags, let tags = error.tags { TagsView(tags: tags) }
 
 					Text(error.errorType)
                     .font(.subheadline.weight(.medium))

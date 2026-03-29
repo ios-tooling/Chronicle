@@ -90,9 +90,40 @@ private struct ChronicleQueryContent: View {
 
 	public var filterBar: some View {
 		VStack(spacing: 0) {
-			 ChronicleFilterBar(model: model, entries: allEntries)
-			 Divider()
+			HStack {
+				tagsToggle
+					.padding(.leading)
+				ChronicleFilterBar(model: model, entries: allEntries)
+				exportButton
+					.padding(.trailing)
+			}
+			Divider()
 		}
+	}
+
+	private var tagsToggle: some View {
+		Button { model.showTags.toggle() } label: {
+            Image(systemName: model.showTags ? "tag.fill" : "tag")
+				.font(.body)
+				.foregroundStyle(model.showTags ? .primary : .secondary)
+		}
+		.buttonStyle(.plain)
+		.accessibilityLabel(model.showTags ? "Hide tags" : "Show tags")
+	}
+
+	private var exportButton: some View {
+		ShareLink(item: exportMarkdown, preview: SharePreview("Chronicle Report", image: Image(systemName: "doc.text"))) {
+			Image(systemName: "square.and.arrow.up")
+				.font(.body)
+		}
+		.buttonStyle(.plain)
+		.foregroundStyle(.secondary)
+	}
+
+	private var exportMarkdown: String {
+		let md = MarkdownExporter().generateMarkdown(from: filteredEntries)
+        print(md)
+        return md
 	}
 	
 	var backgroundColor: Color {
@@ -129,6 +160,7 @@ private struct ChronicleQueryContent: View {
 
     private var entryList: some View {
         ChronicleEntryList(entries: filteredEntries)
+            .environment(\.showTags, model.showTags)
     }
 
     private var emptyState: some View {

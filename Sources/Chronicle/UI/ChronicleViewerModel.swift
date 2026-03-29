@@ -9,6 +9,7 @@ import SwiftData
 public final class ChronicleViewerModel {
     public var selectedCategories: Set<EntryCategory> = []
     public var showCurrentRunOnly = true
+    public var showTags = true
     public var searchText = ""
 
     public let modelContext: ModelContext
