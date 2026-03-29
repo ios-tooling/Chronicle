@@ -104,12 +104,14 @@ private struct ChronicleQueryContent: View {
 	}
 	
     public var body: some View {
-        VStack(spacing: 0) {
-            filterBar
-                .frame(maxWidth: .infinity)
-                .background(backgroundColor)
-            if filteredEntries.isEmpty { emptyState } else { entryList }
-        }
+		 NavigationStack {
+			 VStack(spacing: 0) {
+				 filterBar
+					 .frame(maxWidth: .infinity)
+					 .background(backgroundColor)
+				 if filteredEntries.isEmpty { emptyState } else { entryList }
+			 }
+		 }
         .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
             Button(currentRunOnly ? "Clear Current Run" : "Clear All", role: .destructive) {
                 if currentRunOnly, let launchDate = Chronicle.instance.launchDate {

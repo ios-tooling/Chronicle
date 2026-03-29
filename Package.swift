@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "Chronicle",
     platforms: [
-        .iOS(.v15),
+        .iOS(.v14),
         .macOS(.v14)
     ],
     products: [
@@ -15,7 +15,7 @@ let package = Package(
         )
     ],
 	 dependencies: [
-		.package(url: "https://github.com/ios-tooling/TagAlong", from: "0.0.2"),
+		.package(url: "https://github.com/ios-tooling/TagAlong", from: "0.0.3"),
 	 ],
     targets: [
         .target(
