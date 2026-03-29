@@ -32,8 +32,7 @@ public struct ChronicleScreen: View {
                 ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: false)
             }
             Tab(value: 2, role: .search) {
-                ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: model.showCurrentRunOnly)
-                    .searchable(text: $model.searchText, prompt: "Filter entries")
+                ChronicleSearchTab(model: model, showClearConfirmation: $showClearConfirmation)
             }
         }
     }

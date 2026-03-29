@@ -53,6 +53,7 @@ private struct CategoryToggle: View {
             .padding(.vertical, 8)
             .background(isSelected ? category.tintColor.opacity(0.15) : Color.clear, in: RoundedRectangle(cornerRadius: 8))
             .foregroundStyle(isSelected ? category.tintColor : .secondary)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(category.displayName): \(count)")

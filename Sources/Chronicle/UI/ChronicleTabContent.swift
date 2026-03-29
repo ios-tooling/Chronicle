@@ -104,51 +104,29 @@ private struct ChronicleQueryContent: View {
 	}
 	
     public var body: some View {
-        NavigationStack {
-            VStack {
-                if filteredEntries.isEmpty { emptyState } else { entryList }
-            }
-            .safeAreaInset(edge: .top, spacing: 0) {
-					filterBar
-						.frame(maxWidth: .infinity)
-						.background(backgroundColor)
-            }
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button(role: .destructive) { showClearConfirmation = true } label: {
-                        Image(systemName: "trash")
-                    }
+        VStack(spacing: 0) {
+            filterBar
+                .frame(maxWidth: .infinity)
+                .background(backgroundColor)
+            if filteredEntries.isEmpty { emptyState } else { entryList }
+        }
+        .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
+            Button(currentRunOnly ? "Clear Current Run" : "Clear All", role: .destructive) {
+                if currentRunOnly, let launchDate = Chronicle.instance.launchDate {
+                    Chronicle.instance.clear(since: launchDate)
+                } else {
+                    Chronicle.instance.clear()
                 }
             }
-            .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
-                Button(currentRunOnly ? "Clear Current Run" : "Clear All", role: .destructive) {
-                    if currentRunOnly, let launchDate = Chronicle.instance.launchDate {
-                        Chronicle.instance.clear(since: launchDate)
-                    } else {
-                        Chronicle.instance.clear()
-                    }
-                }
-            } message: {
-                Text(currentRunOnly
-                     ? "This will permanently delete entries from this session."
-                     : "This will permanently delete all Chronicle entries.")
-            }
+        } message: {
+            Text(currentRunOnly
+                 ? "This will permanently delete entries from this session."
+                 : "This will permanently delete all Chronicle entries.")
         }
     }
 
     private var entryList: some View {
-        List(filteredEntries, id: \.id) { entry in
-            if let log = entry as? NetworkLog {
-                NavigationLink(destination: NetworkLogDetailScreen(log: log)) { EntryRow(entry: entry) }
-            } else if let error = entry as? ErrorLog {
-                NavigationLink(destination: ErrorLogDetailScreen(error: error)) { EntryRow(entry: entry) }
-            } else if let detailView = entry.category.style.detailView {
-                NavigationLink(destination: detailView(entry)) { EntryRow(entry: entry) }
-            } else {
-                EntryRow(entry: entry)
-            }
-        }
-        .listStyle(.plain)
+        ChronicleEntryList(entries: filteredEntries)
     }
 
     private var emptyState: some View {
