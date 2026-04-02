@@ -6,11 +6,12 @@ import TagAlong
 struct CloudKitLogRow: View {
 	let log: CloudKitLog
 	@Environment(\.showTags) private var showTags
+	@Environment(\.tagTapAction) private var tagTapAction
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 6) {
-				if showTags, let tags = log.tags { TagsView(tags: tags) }
+				if showTags, let tags = log.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
 				Text(log.recordType)
 					.font(.subheadline.weight(.medium))

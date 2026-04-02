@@ -76,11 +76,17 @@ private struct ChronicleQueryContent: View {
         return results.sorted { $0.timestamp > $1.timestamp }
     }
 
-    /// Entries after applying category and search filters.
+    /// Entries after applying category, tag, and search filters.
     private var filteredEntries: [any ChronicleEntry] {
         var entries = allEntries
         if !model.selectedCategories.isEmpty {
             entries = entries.filter { model.selectedCategories.contains($0.category) }
+        }
+        if !model.selectedTags.isEmpty {
+            entries = entries.filter { entry in
+                guard let tags = entry.tags else { return false }
+                return model.selectedTags.isSubset(of: tags)
+            }
         }
         if !model.searchText.isEmpty {
             entries = entries.filter { $0.matches(filter: model.searchText) }
@@ -122,7 +128,6 @@ private struct ChronicleQueryContent: View {
 
 	private var exportMarkdown: String {
 		let md = MarkdownExporter().generateMarkdown(from: filteredEntries)
-        print(md)
         return md
 	}
 	
@@ -140,6 +145,7 @@ private struct ChronicleQueryContent: View {
 				 filterBar
 					 .frame(maxWidth: .infinity)
 					 .background(backgroundColor)
+				 selectedTagsBar
 				 if filteredEntries.isEmpty { emptyState } else { entryList }
 			 }
 		 }
@@ -158,9 +164,22 @@ private struct ChronicleQueryContent: View {
         }
     }
 
+	@ViewBuilder
+	private var selectedTagsBar: some View {
+		if !model.selectedTags.isEmpty {
+			ScrollView(.horizontal, showsIndicators: false) {
+				TagsView(tags: Array(model.selectedTags), showRemove: true, onTap: model.toggleTag)
+					.padding(.horizontal)
+					.padding(.vertical, 6)
+			}
+			Divider()
+		}
+	}
+
     private var entryList: some View {
         ChronicleEntryList(entries: filteredEntries)
             .environment(\.showTags, model.showTags)
+            .environment(\.tagTapAction, model.toggleTag)
     }
 
     private var emptyState: some View {

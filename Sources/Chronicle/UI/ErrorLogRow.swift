@@ -5,6 +5,7 @@ import SwiftUI
 struct ErrorLogRow: View {
     let error: ErrorLog
     @Environment(\.showTags) private var showTags
+    @Environment(\.tagTapAction) private var tagTapAction
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -16,7 +17,7 @@ struct ErrorLogRow: View {
                     .background(severityColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
                     .foregroundStyle(severityColor)
 
-					if showTags, let tags = error.tags { TagsView(tags: tags) }
+					if showTags, let tags = error.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
 					Text(error.errorType)
                     .font(.subheadline.weight(.medium))

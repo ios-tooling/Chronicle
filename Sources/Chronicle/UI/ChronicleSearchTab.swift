@@ -47,6 +47,12 @@ private struct ChronicleSearchContent: View {
 		if !model.selectedCategories.isEmpty {
 			entries = entries.filter { model.selectedCategories.contains($0.category) }
 		}
+		if !model.selectedTags.isEmpty {
+			entries = entries.filter { entry in
+				guard let tags = entry.tags else { return false }
+				return model.selectedTags.isSubset(of: tags)
+			}
+		}
 		if !model.searchText.isEmpty {
 			entries = entries.filter { $0.matches(filter: model.searchText) }
 		}
@@ -74,6 +80,7 @@ private struct ChronicleSearchContent: View {
 	private var entryList: some View {
 		ChronicleEntryList(entries: filteredEntries)
 			.environment(\.showTags, model.showTags)
+			.environment(\.tagTapAction, model.toggleTag)
 	}
 	
 	private var emptyState: some View {

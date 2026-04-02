@@ -8,6 +8,7 @@ import SwiftData
 @MainActor
 public final class ChronicleViewerModel {
     public var selectedCategories: Set<EntryCategory> = []
+    public var selectedTags: Set<Tag> = []
     public var showCurrentRunOnly = true
     public var showTags = true
     public var searchText = ""
@@ -37,5 +38,13 @@ public final class ChronicleViewerModel {
 
     func isSelected(_ category: EntryCategory) -> Bool {
         selectedCategories.contains(category)
+    }
+
+    func toggleTag(_ tag: Tag) {
+        if selectedTags.contains(tag) {
+            selectedTags.remove(tag)
+        } else {
+            selectedTags.insert(tag)
+        }
     }
 }

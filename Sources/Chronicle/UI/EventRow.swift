@@ -6,11 +6,12 @@ import TagAlong
 struct EventRow: View {
 	let event: Event
 	@Environment(\.showTags) private var showTags
+	@Environment(\.tagTapAction) private var tagTapAction
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack {
-				if showTags, let tags = event.tags { TagsView(tags: tags) }
+				if showTags, let tags = event.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
 				Text(event.name)
 					.font(.subheadline.weight(.medium))

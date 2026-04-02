@@ -6,6 +6,7 @@ import TagAlong
 struct NetworkLogRow: View {
     let log: NetworkLog
     @Environment(\.showTags) private var showTags
+    @Environment(\.tagTapAction) private var tagTapAction
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -16,7 +17,7 @@ struct NetworkLogRow: View {
                     .padding(.vertical, 1)
                     .background(Color.secondary.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
 
-					if showTags, let tags = log.tags { TagsView(tags: tags) }
+					if showTags, let tags = log.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
                 Text(log.url.path())
                     .font(.subheadline)
