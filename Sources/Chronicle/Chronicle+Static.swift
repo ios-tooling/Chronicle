@@ -5,8 +5,9 @@ import TagAlong
 extension Chronicle {
 	
 	/// Tracks a named event with optional metadata.
-	nonisolated public static func track(_ name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		instance.events.track(name, metadata: metadata, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+	nonisolated public static func track(_ name: String, description: String? = nil, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+		let merged = mergeDescription(description, into: metadata)
+		instance.events.track(name, metadata: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 	
 	/// Logs a network request and response from a URLRequest/HTTPURLResponse pair.
@@ -114,13 +115,15 @@ extension Chronicle {
 	}
 	
 	/// Tracks a screen transition in the app flow.
-	nonisolated public static func flow(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		instance.flow.trackScreen(name, transition: transition, metadata: metadata, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+	nonisolated public static func flow(_ name: String, description: String? = nil, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+		let merged = mergeDescription(description, into: metadata)
+		instance.flow.trackScreen(name, transition: transition, metadata: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 	
 	/// Logs an error with optional severity and context.
 	nonisolated public static func error(
 		_ error: Error,
+		description: String? = nil,
 		severity: ErrorSeverity = .error,
 		context: EventMetadata? = nil,
 		captureCallStack: Bool = false,
@@ -131,10 +134,11 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.errors.log(
 			error,
 			severity: severity,
-			context: context,
+			context: merged,
 			captureCallStack: captureCallStack,
 			tags: tags,
 			referenceURL: referenceURL,
@@ -200,11 +204,20 @@ extension Chronicle {
 	}
 
 	/// Logs an error with a string context.
-	nonisolated public static func error(_ error: Error, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func error(_ error: Error, description: String? = nil, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }
-		let metadata: EventMetadata = ["context": .string(context)]
+		var metadata: EventMetadata = ["context": .string(context)]
+		if let description { metadata["description"] = .string(description) }
 		self.error(error, severity: severity, context: metadata, captureCallStack: captureCallStack, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
+}
+
+@available(iOS 17, macOS 14, *)
+private func mergeDescription(_ description: String?, into metadata: EventMetadata?) -> EventMetadata? {
+	guard let description else { return metadata }
+	var result = metadata ?? EventMetadata()
+	result["description"] = .string(description)
+	return result
 }
 
 fileprivate extension Error {

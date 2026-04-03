@@ -31,12 +31,20 @@ struct DataBodyScreen: View {
 			
 			#if targetEnvironment(simulator)
 				ToolbarItem(placement: .automatic) {
-					Button(action: {
-						print(rawText)
-					}) { Text("Log") }
+					Button(action: { logToConsole() }) { Text("Log") }
 						.toggleStyle(.button)
 				}
 			#endif
+		}
+	}
+
+	private func logToConsole() {
+		if let obj = try? JSONSerialization.jsonObject(with: data),
+		   let pretty = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted, .sortedKeys]),
+		   let str = String(data: pretty, encoding: .utf8) {
+			print(str)
+		} else {
+			print(rawText)
 		}
 	}
 
