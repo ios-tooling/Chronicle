@@ -86,8 +86,13 @@ public struct MarkdownExporter: ExportDestination {
             case .upload: "Upload"
             case .download: "Download"
             case .deleted: "Delete"
+            case .zoneCreated: "Zone Created"
+            case .zoneDeleted: "Zone Deleted"
             }
-            var md = "**\(dir)** \(ck.recordType) `\(ck.recordName)` in \(ck.zoneName)"
+            var md: String = switch ck.operation {
+            case .zoneCreated, .zoneDeleted: "**\(dir)** `\(ck.zoneName)`"
+            default: "**\(dir)** \(ck.recordType) `\(ck.recordName)` in \(ck.zoneName)"
+            }
             if let size = ck.recordSize { md += " (\(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)))" }
             if let duration = ck.duration { md += String(format: " %.0fms", duration * 1000) }
             md += "\n"

@@ -6,6 +6,8 @@ public enum CloudKitOperation: String, Codable, Sendable, Hashable {
 	case upload
 	case download
 	case deleted
+	case zoneCreated
+	case zoneDeleted
 }
 
 /// Represents a logged CloudKit record operation.
@@ -16,7 +18,8 @@ public struct CloudKitLog: ChronicleEntry {
 		switch operation {
 		case .upload: .cloudKitUpload
 		case .download: .cloudKitDownload
-		case .deleted: .cloudKitDelete
+		case .deleted, .zoneDeleted: .cloudKitDelete
+		case .zoneCreated: .cloudKitDownload
 		}
 	}
 
@@ -55,12 +58,13 @@ public struct CloudKitLog: ChronicleEntry {
 	public let sourceLine: Int?
 
 	public var displaySummary: String {
-		let prefix: String = switch operation {
-		case .upload: "up"
-		case .download: "down"
-		case .deleted: "del"
+		switch operation {
+		case .upload: "up \(recordType) — \(recordName)"
+		case .download: "down \(recordType) — \(recordName)"
+		case .deleted: "del \(recordType) — \(recordName)"
+		case .zoneCreated: "zone created — \(zoneName)"
+		case .zoneDeleted: "zone deleted — \(zoneName)"
 		}
-		return "\(prefix) \(recordType) — \(recordName)"
 	}
 
 	public func matches(filter: String) -> Bool {
