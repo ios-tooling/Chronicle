@@ -101,6 +101,7 @@ private struct WebViewRepresentable {
 }
 
 #if os(macOS)
+@available(iOS 17, macOS 14, *)
 extension WebViewRepresentable: NSViewRepresentable {
 	func makeNSView(context: Context) -> WKWebView {
 		let webView = WKWebView()
@@ -110,6 +111,7 @@ extension WebViewRepresentable: NSViewRepresentable {
 	func updateNSView(_ nsView: WKWebView, context: Context) {}
 }
 #else
+@available(iOS 17, macOS 14, *)
 extension WebViewRepresentable: UIViewRepresentable {
 	func makeUIView(context: Context) -> WKWebView {
 		let webView = WKWebView()
