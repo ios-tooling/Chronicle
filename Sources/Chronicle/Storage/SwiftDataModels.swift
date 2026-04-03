@@ -542,7 +542,7 @@ final class PersistedCloudKitLog {
 		return CloudKitLog(
 			id: entryID,
 			timestamp: timestamp,
-			direction: CloudKitDirection(rawValue: direction) ?? .download,
+			operation: CloudKitOperation(rawValue: direction) ?? .download,
 			recordName: recordName,
 			recordType: recordType,
 			zoneName: zoneName,
@@ -565,7 +565,7 @@ final class PersistedCloudKitLog {
 		return PersistedCloudKitLog(
 			entryID: log.id,
 			timestamp: log.timestamp,
-			direction: log.direction.rawValue,
+			direction: log.operation.rawValue,
 			recordName: log.recordName,
 			recordType: log.recordType,
 			zoneName: log.zoneName,

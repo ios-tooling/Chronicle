@@ -1,7 +1,7 @@
 import Foundation
 import TagAlong
 
-/// Logs CloudKit record uploads and downloads.
+/// Logs CloudKit record uploads, downloads, and deletions.
 @available(iOS 17, macOS 14, *)
 public final class CloudKitLogger: Sendable {
 	private let storage: SwiftDataStorage
@@ -28,21 +28,14 @@ public final class CloudKitLogger: Sendable {
 		line: Int = #line
 	) {
 		let log = CloudKitLog(
-			direction: .upload,
-			recordName: recordName,
-			recordType: recordType,
-			zoneName: zoneName,
-			zoneOwner: zoneOwner,
-			recordSize: recordSize,
-			fieldCount: fieldCount,
-			duration: duration,
-			error: error,
-			tags: tags,
-			referenceURL: referenceURL,
-			referenceID: referenceID,
+			operation: .upload,
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			recordSize: recordSize, fieldCount: fieldCount,
+			duration: duration, error: error, tags: tags,
+			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
-			sourceFunction: function,
-			sourceLine: line
+			sourceFunction: function, sourceLine: line
 		)
 		storage.store(log)
 	}
@@ -65,21 +58,39 @@ public final class CloudKitLogger: Sendable {
 		line: Int = #line
 	) {
 		let log = CloudKitLog(
-			direction: .download,
-			recordName: recordName,
-			recordType: recordType,
-			zoneName: zoneName,
-			zoneOwner: zoneOwner,
-			recordSize: recordSize,
-			fieldCount: fieldCount,
-			duration: duration,
-			error: error,
-			tags: tags,
-			referenceURL: referenceURL,
-			referenceID: referenceID,
+			operation: .download,
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			recordSize: recordSize, fieldCount: fieldCount,
+			duration: duration, error: error, tags: tags,
+			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
-			sourceFunction: function,
-			sourceLine: line
+			sourceFunction: function, sourceLine: line
+		)
+		storage.store(log)
+	}
+
+	/// Log a CloudKit record deletion.
+	public func logDeletion(
+		recordName: String,
+		recordType: String,
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		let log = CloudKitLog(
+			operation: .deleted,
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			tags: tags,
+			referenceURL: referenceURL, referenceID: referenceID,
+			sourceFile: (file as NSString).lastPathComponent,
+			sourceFunction: function, sourceLine: line
 		)
 		storage.store(log)
 	}
@@ -89,15 +100,17 @@ public final class CloudKitLogger: Sendable {
 		storage.store(cloudKitLog)
 	}
 
-	/// Returns recent CloudKit logs (both uploads and downloads).
+	private static let allCloudKitCategories: Set<EntryCategory> = [.cloudKitUpload, .cloudKitDownload, .cloudKitDelete]
+
+	/// Returns recent CloudKit logs.
 	public func recentLogs(limit: Int = 100) -> [CloudKitLog] {
-		let query = StorageQuery(categories: [.cloudKitUpload, .cloudKitDownload], limit: limit)
+		let query = StorageQuery(categories: Self.allCloudKitCategories, limit: limit)
 		return storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
 	}
 
 	/// Returns all stored CloudKit logs.
 	public func allLogs() -> [CloudKitLog] {
-		let query = StorageQuery(categories: [.cloudKitUpload, .cloudKitDownload])
+		let query = StorageQuery(categories: Self.allCloudKitCategories)
 		return storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
 	}
 }

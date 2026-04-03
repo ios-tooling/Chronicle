@@ -203,6 +203,28 @@ extension Chronicle {
 		)
 	}
 
+	/// Logs a CloudKit record deletion.
+	nonisolated public static func cloudKitDelete(
+		recordName: String,
+		recordType: String,
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logDeletion(
+			recordName: recordName, recordType: recordType,
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			tags: tags,
+			referenceURL: referenceURL, referenceID: referenceID,
+			file: file, function: function, line: line
+		)
+	}
+
 	/// Logs an error with a string context.
 	nonisolated public static func error(_ error: Error, description: String? = nil, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }

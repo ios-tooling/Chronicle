@@ -82,7 +82,11 @@ public struct MarkdownExporter: ExportDestination {
             return md
 
         case let ck as CloudKitLog:
-            let dir = ck.direction == .upload ? "Upload" : "Download"
+            let dir: String = switch ck.operation {
+            case .upload: "Upload"
+            case .download: "Download"
+            case .deleted: "Delete"
+            }
             var md = "**\(dir)** \(ck.recordType) `\(ck.recordName)` in \(ck.zoneName)"
             if let size = ck.recordSize { md += " (\(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)))" }
             if let duration = ck.duration { md += String(format: " %.0fms", duration * 1000) }

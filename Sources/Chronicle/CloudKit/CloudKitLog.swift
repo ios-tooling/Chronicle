@@ -1,20 +1,27 @@
 import Foundation
 import TagAlong
 
-/// The direction of a CloudKit record transfer.
-public enum CloudKitDirection: String, Codable, Sendable, Hashable {
+/// The type of CloudKit record operation.
+public enum CloudKitOperation: String, Codable, Sendable, Hashable {
 	case upload
 	case download
+	case deleted
 }
 
-/// Represents a logged CloudKit record upload or download.
+/// Represents a logged CloudKit record operation.
 public struct CloudKitLog: ChronicleEntry {
 	public let id: UUID
 	public let timestamp: Date
-	public var category: EntryCategory { direction == .upload ? .cloudKitUpload : .cloudKitDownload }
+	public var category: EntryCategory {
+		switch operation {
+		case .upload: .cloudKitUpload
+		case .download: .cloudKitDownload
+		case .deleted: .cloudKitDelete
+		}
+	}
 
-	/// Whether this was an upload or download.
-	public let direction: CloudKitDirection
+	/// The type of operation performed.
+	public let operation: CloudKitOperation
 
 	/// The CKRecord.ID recordName.
 	public let recordName: String
@@ -48,8 +55,12 @@ public struct CloudKitLog: ChronicleEntry {
 	public let sourceLine: Int?
 
 	public var displaySummary: String {
-		let arrow = direction == .upload ? "up" : "down"
-		return "\(arrow) \(recordType) — \(recordName)"
+		let prefix: String = switch operation {
+		case .upload: "up"
+		case .download: "down"
+		case .deleted: "del"
+		}
+		return "\(prefix) \(recordType) — \(recordName)"
 	}
 
 	public func matches(filter: String) -> Bool {
@@ -61,7 +72,7 @@ public struct CloudKitLog: ChronicleEntry {
 	public init(
 		id: UUID = UUID(),
 		timestamp: Date = Date(),
-		direction: CloudKitDirection,
+		operation: CloudKitOperation,
 		recordName: String,
 		recordType: String,
 		zoneName: String,
@@ -79,7 +90,7 @@ public struct CloudKitLog: ChronicleEntry {
 	) {
 		self.id = id
 		self.timestamp = timestamp
-		self.direction = direction
+		self.operation = operation
 		self.recordName = recordName
 		self.recordType = recordType
 		self.zoneName = zoneName

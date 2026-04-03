@@ -128,7 +128,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
             if fetchBuiltIn || categories!.contains(.error) {
                 results.append(contentsOf: fetchErrorLogs(matching: query))
             }
-            if fetchBuiltIn || categories!.contains(.cloudKitUpload) || categories!.contains(.cloudKitDownload) {
+            if fetchBuiltIn || categories!.contains(.cloudKitUpload) || categories!.contains(.cloudKitDownload) || categories!.contains(.cloudKitDelete) {
                 results.append(contentsOf: fetchCloudKitLogs(matching: query, categories: categories))
             }
 
