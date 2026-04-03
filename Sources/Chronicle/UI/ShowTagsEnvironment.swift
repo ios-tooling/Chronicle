@@ -8,7 +8,12 @@ struct ShowTagsKey: EnvironmentKey {
 
 @available(iOS 17, macOS 14, *)
 struct TagTapActionKey: EnvironmentKey {
-	nonisolated(unsafe) static let defaultValue: (@MainActor (Tag) -> Void)? = nil
+	static let defaultValue: (@MainActor (Tag) -> Void)? = nil
+}
+
+@available(iOS 17, macOS 14, *)
+struct ReferenceIDTapActionKey: EnvironmentKey {
+	static let defaultValue: (@MainActor (String) -> Void)? = nil
 }
 
 @available(iOS 17, macOS 14, *)
@@ -21,5 +26,11 @@ extension EnvironmentValues {
 	var tagTapAction: (@MainActor (Tag) -> Void)? {
 		get { self[TagTapActionKey.self] }
 		set { self[TagTapActionKey.self] = newValue }
+	}
+
+	/// Closure called when an entry with a referenceID is tapped.
+	public var referenceIDTapAction: (@MainActor (String) -> Void)? {
+		get { self[ReferenceIDTapActionKey.self] }
+		set { self[ReferenceIDTapActionKey.self] = newValue }
 	}
 }

@@ -21,6 +21,8 @@ public final class CloudKitLogger: Sendable {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -36,6 +38,8 @@ public final class CloudKitLogger: Sendable {
 			duration: duration,
 			error: error,
 			tags: tags,
+			referenceURL: referenceURL,
+			referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function,
 			sourceLine: line
@@ -54,6 +58,8 @@ public final class CloudKitLogger: Sendable {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -69,6 +75,8 @@ public final class CloudKitLogger: Sendable {
 			duration: duration,
 			error: error,
 			tags: tags,
+			referenceURL: referenceURL,
+			referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function,
 			sourceLine: line

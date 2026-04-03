@@ -29,6 +29,8 @@ public struct NetworkLog: ChronicleEntry {
 	public let linkedErrorID: UUID?
 
 	public let tags: [Tag]?
+	public let referenceURL: URL?
+	public let referenceID: String?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -54,6 +56,8 @@ public struct NetworkLog: ChronicleEntry {
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
 		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -74,6 +78,8 @@ public struct NetworkLog: ChronicleEntry {
 		self.metrics = metrics
 		self.linkedErrorID = linkedErrorID
 		self.tags = tags?.tags
+		self.referenceURL = referenceURL
+		self.referenceID = referenceID
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
@@ -83,7 +89,7 @@ public struct NetworkLog: ChronicleEntry {
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, url, method, requestHeaders, requestBody, requestBodySize
 		case statusCode, responseHeaders, responseBody, responseBodySize, error, wasCancelled, metrics
-		case linkedErrorID, tags, sourceFile, sourceFunction, sourceLine
+		case linkedErrorID, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
 	}
 	
 	public func encode(to encoder: Encoder) throws {
@@ -105,6 +111,8 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encode(metrics, forKey: .metrics)
 		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
 		try container.encodeIfPresent(tags, forKey: .tags)
+		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
+		try container.encodeIfPresent(referenceID, forKey: .referenceID)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -128,6 +136,8 @@ public struct NetworkLog: ChronicleEntry {
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
 		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
+		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
+		referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

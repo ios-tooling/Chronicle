@@ -17,17 +17,21 @@ public struct FlowEvent: ChronicleEntry {
 	public let transitionType: TransitionType
 
 	public let tags: [Tag]?
+	public let referenceURL: URL?
+	public let referenceID: String?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
 	
-	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, tags: TagCollection? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
+	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
 		self.id = id
 		self.timestamp = timestamp
 		self.from = from
 		self.to = to
 		self.transitionType = transitionType
 		self.tags = tags?.tags
+		self.referenceURL = referenceURL
+		self.referenceID = referenceID
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
@@ -39,7 +43,7 @@ public struct FlowEvent: ChronicleEntry {
 	
 	// Custom Codable to handle the constant category
 	private enum CodingKeys: String, CodingKey {
-		case id, timestamp, category, from, to, transitionType, tags
+		case id, timestamp, category, from, to, transitionType, tags, referenceURL, referenceID
 		case sourceFile, sourceFunction, sourceLine
 	}
 	
@@ -52,6 +56,8 @@ public struct FlowEvent: ChronicleEntry {
 		try container.encode(to, forKey: .to)
 		try container.encode(transitionType, forKey: .transitionType)
 		try container.encodeIfPresent(tags, forKey: .tags)
+		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
+		try container.encodeIfPresent(referenceID, forKey: .referenceID)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -65,6 +71,8 @@ public struct FlowEvent: ChronicleEntry {
 		to = try container.decode(FlowStep.self, forKey: .to)
 		transitionType = try container.decode(TransitionType.self, forKey: .transitionType)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
+		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
+		referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

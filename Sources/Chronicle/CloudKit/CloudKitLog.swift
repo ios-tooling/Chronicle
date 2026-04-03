@@ -41,6 +41,8 @@ public struct CloudKitLog: ChronicleEntry {
 	public let error: String?
 
 	public let tags: [Tag]?
+	public let referenceURL: URL?
+	public let referenceID: String?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -69,6 +71,8 @@ public struct CloudKitLog: ChronicleEntry {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -85,6 +89,8 @@ public struct CloudKitLog: ChronicleEntry {
 		self.duration = duration
 		self.error = error
 		self.tags = tags?.tags
+		self.referenceURL = referenceURL
+		self.referenceID = referenceID
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine

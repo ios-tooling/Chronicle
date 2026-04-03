@@ -53,6 +53,8 @@ public struct ErrorLog: ChronicleEntry {
 	public let linkedNetworkLogID: UUID?
 
 	public let tags: [Tag]?
+	public let referenceURL: URL?
+	public let referenceID: String?
 	public let sourceFile: String?
 	public let sourceFunction: String?
 	public let sourceLine: Int?
@@ -73,6 +75,8 @@ public struct ErrorLog: ChronicleEntry {
 		callStackSymbols: [String]? = nil,
 		linkedNetworkLogID: UUID? = nil,
 		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
 		sourceFile: String? = nil,
 		sourceFunction: String? = nil,
 		sourceLine: Int? = nil
@@ -92,6 +96,8 @@ public struct ErrorLog: ChronicleEntry {
 		self.callStackSymbols = callStackSymbols
 		self.linkedNetworkLogID = linkedNetworkLogID
 		self.tags = tags?.tags
+		self.referenceURL = referenceURL
+		self.referenceID = referenceID
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
@@ -107,7 +113,7 @@ public struct ErrorLog: ChronicleEntry {
 		case id, timestamp, category, domain, code, message, failureReason
 		case recoverySuggestion, errorType, userInfo, fullDescription
 		case severity, context, callStackSymbols
-		case linkedNetworkLogID, tags, sourceFile, sourceFunction, sourceLine
+		case linkedNetworkLogID, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
 	}
 	
 	public func encode(to encoder: Encoder) throws {
@@ -128,6 +134,8 @@ public struct ErrorLog: ChronicleEntry {
 		try container.encodeIfPresent(callStackSymbols, forKey: .callStackSymbols)
 		try container.encodeIfPresent(linkedNetworkLogID, forKey: .linkedNetworkLogID)
 		try container.encodeIfPresent(tags, forKey: .tags)
+		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
+		try container.encodeIfPresent(referenceID, forKey: .referenceID)
 		try container.encodeIfPresent(sourceFile, forKey: .sourceFile)
 		try container.encodeIfPresent(sourceFunction, forKey: .sourceFunction)
 		try container.encodeIfPresent(sourceLine, forKey: .sourceLine)
@@ -150,6 +158,8 @@ public struct ErrorLog: ChronicleEntry {
 		callStackSymbols = try container.decodeIfPresent([String].self, forKey: .callStackSymbols)
 		linkedNetworkLogID = try container.decodeIfPresent(UUID.self, forKey: .linkedNetworkLogID)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
+		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
+		referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)
 		sourceFile = try container.decodeIfPresent(String.self, forKey: .sourceFile)
 		sourceFunction = try container.decodeIfPresent(String.self, forKey: .sourceFunction)
 		sourceLine = try container.decodeIfPresent(Int.self, forKey: .sourceLine)

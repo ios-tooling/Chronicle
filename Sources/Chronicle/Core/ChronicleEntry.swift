@@ -26,6 +26,8 @@ public protocol ChronicleEntry: Codable, Sendable {
 	var tags: [Tag]? { get }
 	func matches(filter: String) -> Bool
 	var displaySummary: String { get }
+	var referenceURL: URL? { get }
+	var referenceID: String? { get }
 	var sourceFile: String? { get }
 	var sourceFunction: String? { get }
 	var sourceLine: Int? { get }
@@ -35,4 +37,6 @@ extension ChronicleEntry {
 	public var displaySummary: String { category.displayName }
 	public func matches(filter: String) -> Bool { false }
 	public var tags: [Tag]? { nil }
+	public var referenceURL: URL? { nil }
+	public var referenceID: String? { nil }
 }

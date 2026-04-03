@@ -5,6 +5,7 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 struct EntryRow: View {
     let entry: any ChronicleEntry
+    @Environment(\.referenceIDTapAction) private var referenceIDTapAction
 
     var body: some View {
         HStack(spacing: 10) {
@@ -14,6 +15,22 @@ struct EntryRow: View {
 
 			  VStack(alignment: .leading, spacing: 4) {
                 entryContent
+                if let url = entry.referenceURL {
+                    EntryURLButton(url: url)
+                }
+                if let refID = entry.referenceID, referenceIDTapAction != nil {
+                    Button { referenceIDTapAction?(refID) } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "arrow.up.forward.square")
+                                .font(.caption2)
+                            Text(refID)
+                                .font(.caption2)
+                                .lineLimit(1)
+                        }
+                        .foregroundStyle(.blue)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

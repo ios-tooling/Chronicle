@@ -12,16 +12,20 @@ final class PersistedEvent {
     var name: String
     var metadataJSON: Data?
     var tagsJSON: Data?
+    var referenceURLString: String?
+    var referenceID: String?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
 
-    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?, tagsJSON: Data?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
+    init(entryID: UUID, timestamp: Date, name: String, metadataJSON: Data?, tagsJSON: Data?, referenceURLString: String?, referenceID: String?, sourceFile: String?, sourceFunction: String?, sourceLine: Int?) {
         self.entryID = entryID
         self.timestamp = timestamp
         self.name = name
         self.metadataJSON = metadataJSON
         self.tagsJSON = tagsJSON
+        self.referenceURLString = referenceURLString
+        self.referenceID = referenceID
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -33,7 +37,8 @@ final class PersistedEvent {
             metadata = try? JSONDecoder().decode(EventMetadata.self, from: data)
         }
         let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) }
-        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata, tags: tags, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
+        let url = referenceURLString.flatMap { URL(string: $0) }
+        return Event(id: entryID, timestamp: timestamp, name: name, metadata: metadata, tags: tags, referenceURL: url, referenceID: referenceID, sourceFile: sourceFile, sourceFunction: sourceFunction, sourceLine: sourceLine)
     }
 
     static func from(_ event: Event) -> PersistedEvent {
@@ -45,6 +50,8 @@ final class PersistedEvent {
             name: event.name,
             metadataJSON: metadataJSON,
             tagsJSON: tagsJSON,
+            referenceURLString: event.referenceURL?.absoluteString,
+            referenceID: event.referenceID,
             sourceFile: event.sourceFile,
             sourceFunction: event.sourceFunction,
             sourceLine: event.sourceLine
@@ -76,6 +83,8 @@ final class PersistedNetworkLog {
     var bytesReceived: Int64
     var linkedErrorID: UUID?
     var tagsJSON: Data?
+    var referenceURLString: String?
+    var referenceID: String?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -100,6 +109,8 @@ final class PersistedNetworkLog {
         bytesReceived: Int64,
         linkedErrorID: UUID?,
         tagsJSON: Data?,
+        referenceURLString: String?,
+        referenceID: String?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -123,6 +134,8 @@ final class PersistedNetworkLog {
         self.bytesReceived = bytesReceived
         self.linkedErrorID = linkedErrorID
         self.tagsJSON = tagsJSON
+        self.referenceURLString = referenceURLString
+        self.referenceID = referenceID
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -137,6 +150,7 @@ final class PersistedNetworkLog {
             try? decoder.decode([String: String].self, from: $0)
         }
         let tags = tagsJSON.flatMap { try? decoder.decode([Tag].self, from: $0) } ?? []
+        let refURL = referenceURLString.flatMap { URL(string: $0) }
         return NetworkLog(
             id: entryID,
             timestamp: timestamp,
@@ -159,6 +173,8 @@ final class PersistedNetworkLog {
             ),
             linkedErrorID: linkedErrorID,
             tags: tags,
+            referenceURL: refURL,
+            referenceID: referenceID,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -190,6 +206,8 @@ final class PersistedNetworkLog {
             bytesReceived: log.metrics.bytesReceived,
             linkedErrorID: log.linkedErrorID,
             tagsJSON: tagsJSON,
+            referenceURLString: log.referenceURL?.absoluteString,
+            referenceID: log.referenceID,
             sourceFile: log.sourceFile,
             sourceFunction: log.sourceFunction,
             sourceLine: log.sourceLine
@@ -214,6 +232,8 @@ final class PersistedFlowEvent {
     var toInfoJSON: Data?
     var transitionType: String
     var tagsJSON: Data?
+    var referenceURLString: String?
+    var referenceID: String?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -231,6 +251,8 @@ final class PersistedFlowEvent {
         toInfoJSON: Data?,
         transitionType: String,
         tagsJSON: Data?,
+        referenceURLString: String?,
+        referenceID: String?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -247,6 +269,8 @@ final class PersistedFlowEvent {
         self.toInfoJSON = toInfoJSON
         self.transitionType = transitionType
         self.tagsJSON = tagsJSON
+        self.referenceURLString = referenceURLString
+        self.referenceID = referenceID
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -274,6 +298,7 @@ final class PersistedFlowEvent {
             additionalInfo: toInfo
         )
         let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) }
+        let refURL = referenceURLString.flatMap { URL(string: $0) }
         return FlowEvent(
             id: entryID,
             timestamp: timestamp,
@@ -281,6 +306,8 @@ final class PersistedFlowEvent {
             to: toStep,
             transitionType: TransitionType(rawValue: transitionType) ?? .push,
             tags: tags,
+            referenceURL: refURL,
+            referenceID: referenceID,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -305,6 +332,8 @@ final class PersistedFlowEvent {
             toInfoJSON: toInfoJSON,
             transitionType: flowEvent.transitionType.rawValue,
             tagsJSON: tagsJSON,
+            referenceURLString: flowEvent.referenceURL?.absoluteString,
+            referenceID: flowEvent.referenceID,
             sourceFile: flowEvent.sourceFile,
             sourceFunction: flowEvent.sourceFunction,
             sourceLine: flowEvent.sourceLine
@@ -332,6 +361,8 @@ final class PersistedErrorLog {
     var callStackJSON: Data?
     var linkedNetworkLogID: UUID?
     var tagsJSON: Data?
+    var referenceURLString: String?
+    var referenceID: String?
     var sourceFile: String?
     var sourceFunction: String?
     var sourceLine: Int?
@@ -352,6 +383,8 @@ final class PersistedErrorLog {
         callStackJSON: Data?,
         linkedNetworkLogID: UUID?,
         tagsJSON: Data?,
+        referenceURLString: String?,
+        referenceID: String?,
         sourceFile: String?,
         sourceFunction: String?,
         sourceLine: Int?
@@ -371,6 +404,8 @@ final class PersistedErrorLog {
         self.callStackJSON = callStackJSON
         self.linkedNetworkLogID = linkedNetworkLogID
         self.tagsJSON = tagsJSON
+        self.referenceURLString = referenceURLString
+        self.referenceID = referenceID
         self.sourceFile = sourceFile
         self.sourceFunction = sourceFunction
         self.sourceLine = sourceLine
@@ -382,6 +417,7 @@ final class PersistedErrorLog {
         let context = contextJSON.flatMap { try? decoder.decode(EventMetadata.self, from: $0) }
         let callStack = callStackJSON.flatMap { try? decoder.decode([String].self, from: $0) }
         let tags = tagsJSON.flatMap { try? decoder.decode([Tag].self, from: $0) } ?? []
+        let refURL = referenceURLString.flatMap { URL(string: $0) }
 
         return ErrorLog(
             id: entryID,
@@ -399,6 +435,8 @@ final class PersistedErrorLog {
             callStackSymbols: callStack,
             linkedNetworkLogID: linkedNetworkLogID,
             tags: tags,
+            referenceURL: refURL,
+            referenceID: referenceID,
             sourceFile: sourceFile,
             sourceFunction: sourceFunction,
             sourceLine: sourceLine
@@ -428,6 +466,8 @@ final class PersistedErrorLog {
             callStackJSON: callStackJSON,
             linkedNetworkLogID: errorLog.linkedNetworkLogID,
             tagsJSON: tagsJSON,
+            referenceURLString: errorLog.referenceURL?.absoluteString,
+            referenceID: errorLog.referenceID,
             sourceFile: errorLog.sourceFile,
             sourceFunction: errorLog.sourceFunction,
             sourceLine: errorLog.sourceLine
@@ -452,6 +492,8 @@ final class PersistedCloudKitLog {
 	var duration: Double?
 	var errorMessage: String?
 	var tagsJSON: Data?
+	var referenceURLString: String?
+	var referenceID: String?
 	var sourceFile: String?
 	var sourceFunction: String?
 	var sourceLine: Int?
@@ -469,6 +511,8 @@ final class PersistedCloudKitLog {
 		duration: Double?,
 		errorMessage: String?,
 		tagsJSON: Data?,
+		referenceURLString: String?,
+		referenceID: String?,
 		sourceFile: String?,
 		sourceFunction: String?,
 		sourceLine: Int?
@@ -485,6 +529,8 @@ final class PersistedCloudKitLog {
 		self.duration = duration
 		self.errorMessage = errorMessage
 		self.tagsJSON = tagsJSON
+		self.referenceURLString = referenceURLString
+		self.referenceID = referenceID
 		self.sourceFile = sourceFile
 		self.sourceFunction = sourceFunction
 		self.sourceLine = sourceLine
@@ -492,6 +538,7 @@ final class PersistedCloudKitLog {
 
 	func toCloudKitLog() -> CloudKitLog {
 		let tags = tagsJSON.flatMap { try? JSONDecoder().decode([Tag].self, from: $0) }
+		let refURL = referenceURLString.flatMap { URL(string: $0) }
 		return CloudKitLog(
 			id: entryID,
 			timestamp: timestamp,
@@ -505,6 +552,8 @@ final class PersistedCloudKitLog {
 			duration: duration,
 			error: errorMessage,
 			tags: tags,
+			referenceURL: refURL,
+			referenceID: referenceID,
 			sourceFile: sourceFile,
 			sourceFunction: sourceFunction,
 			sourceLine: sourceLine
@@ -526,6 +575,8 @@ final class PersistedCloudKitLog {
 			duration: log.duration,
 			errorMessage: log.error,
 			tagsJSON: tagsJSON,
+			referenceURLString: log.referenceURL?.absoluteString,
+			referenceID: log.referenceID,
 			sourceFile: log.sourceFile,
 			sourceFunction: log.sourceFunction,
 			sourceLine: log.sourceLine
