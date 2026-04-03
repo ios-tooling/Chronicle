@@ -39,6 +39,15 @@ public final class ErrorTracker: Sendable {
             line: line
         )
         storage.store(errorLog)
+
+        if ChronicleDebugger.isAttached {
+            var message = "⚠️ [\(severity.rawValue.uppercased())] \(error.localizedDescription)"
+            if let context, !context.isEmpty {
+                let ctx = context.dictionary.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+                message += " | \(ctx)"
+            }
+            print(message)
+        }
     }
 
     /// Logs an ErrorLog entry directly.

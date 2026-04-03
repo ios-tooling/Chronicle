@@ -20,7 +20,76 @@ struct NetworkLogDetailScreen: View {
 		#if !os(macOS)
 				.navigationBarTitleDisplayMode(.inline)
 		#endif
+		.toolbar {
+			if ChronicleDebugger.isAttached {
+				ToolbarItem(placement: .automatic) {
+					Button("Log") { logTransaction() }
+				}
+			}
+		}
 	}
+
+	private func logTransaction() {
+		var lines: [String] = []
+		lines.append("═══════════════════════════════════════")
+		lines.append("  \(log.method) \(log.url.absoluteString)")
+		lines.append("  \(log.timestamp.chronicle_formatted)")
+		lines.append("═══════════════════════════════════════")
+
+		if let status = log.statusCode {
+			lines.append("Status: \(status) \(HTTPURLResponse.localizedString(forStatusCode: status))")
+		}
+		if let duration = log.metrics.duration {
+			lines.append(String(format: "Duration: %.0fms", duration * 1000))
+		}
+
+		if let headers = log.requestHeaders, !headers.isEmpty {
+			lines.append("")
+			lines.append("── Request Headers ──")
+			for key in headers.keys.sorted() {
+				lines.append("  \(key): \(headers[key] ?? "")")
+			}
+		}
+
+		if let body = log.requestBody, !body.isEmpty {
+			lines.append("")
+			lines.append("── Request Body ──")
+			lines.append(Self.prettyString(from: body))
+		}
+
+		if let headers = log.responseHeaders, !headers.isEmpty {
+			lines.append("")
+			lines.append("── Response Headers ──")
+			for key in headers.keys.sorted() {
+				lines.append("  \(key): \(headers[key] ?? "")")
+			}
+		}
+
+		if let body = log.responseBody, !body.isEmpty {
+			lines.append("")
+			lines.append("── Response Body ──")
+			lines.append(Self.prettyString(from: body))
+		}
+
+		if let error = log.error {
+			lines.append("")
+			lines.append("── Error ──")
+			lines.append("  \(error)")
+		}
+
+		lines.append("═══════════════════════════════════════")
+		print(lines.joined(separator: "\n"))
+	}
+
+	private static func prettyString(from data: Data) -> String {
+		if let obj = try? JSONSerialization.jsonObject(with: data),
+		   let pretty = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted, .sortedKeys]),
+		   let str = String(data: pretty, encoding: .utf8) {
+			return str
+		}
+		return String(data: data, encoding: .utf8) ?? "\(data.count) bytes (binary)"
+	}
+
 	
 	private var overviewSection: some View {
 		Section("Overview") {
@@ -40,7 +109,7 @@ struct NetworkLogDetailScreen: View {
 					Text("Status")
 						.foregroundStyle(.secondary)
 					Spacer()
-					Text("\(status)")
+					Text("\(status) \(HTTPURLResponse.localizedString(forStatusCode: status))")
 						.foregroundStyle(statusColor(status))
 						.fontWeight(.semibold)
 				}
