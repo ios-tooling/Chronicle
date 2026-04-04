@@ -102,6 +102,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
+		record: CKRecord? = nil,
 		file: String = #file,
 		function: String = #function,
 		line: Int = #line
@@ -116,6 +117,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFunction: function, sourceLine: line
 		)
 		storage.store(log)
+		if let record { _recordCache?.store(record, for: log.id) }
 	}
 
 	/// Log a CloudKit zone creation.
