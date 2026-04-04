@@ -14,9 +14,11 @@ public struct EntryCategory: RawRepresentable, Hashable, Codable, Sendable {
     public static let cloudKitUpload = EntryCategory("cloudKitUpload")
     public static let cloudKitDownload = EntryCategory("cloudKitDownload")
     public static let cloudKitDelete = EntryCategory("cloudKitDelete")
+    public static let cloudKitZoneCreated = EntryCategory("cloudKitZoneCreated")
+    public static let cloudKitZoneDeleted = EntryCategory("cloudKitZoneDeleted")
 
     /// The built-in categories.
-    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error, .cloudKitUpload, .cloudKitDownload, .cloudKitDelete]
+    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error, .cloudKitUpload, .cloudKitDownload, .cloudKitDelete, .cloudKitZoneCreated, .cloudKitZoneDeleted, .cloudKitZoneCreated]
 }
 
 /// Base protocol for all Chronicle log entries.

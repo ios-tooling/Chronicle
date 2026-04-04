@@ -8,14 +8,23 @@ struct CloudKitLogRow: View {
 	@Environment(\.showTags) private var showTags
 	@Environment(\.tagTapAction) private var tagTapAction
 
+	private var isZoneEvent: Bool {
+		log.operation == .zoneCreated || log.operation == .zoneDeleted
+	}
+
 	var body: some View {
 		VStack(alignment: .leading, spacing: 2) {
 			HStack(spacing: 6) {
 				if showTags, let tags = log.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
-				Text(log.recordType)
-					.font(.subheadline.weight(.medium))
-					.lineLimit(1)
+				if isZoneEvent {
+					Text(log.operation == .zoneCreated ? "Zone Created" : "Zone Deleted")
+						.font(.subheadline.weight(.medium))
+				} else {
+					Text(log.recordType)
+						.font(.subheadline.weight(.medium))
+						.lineLimit(1)
+				}
 
 				Spacer()
 
@@ -27,12 +36,26 @@ struct CloudKitLogRow: View {
 			}
 
 			HStack(spacing: 8) {
-				Text(log.recordName)
-					.font(.caption.monospaced())
-					.lineLimit(1)
-					.foregroundStyle(.secondary)
+				if isZoneEvent {
+					Text(zoneDisplay)
+						.font(.caption.monospaced())
+						.lineLimit(1)
+						.foregroundStyle(.secondary)
+				} else {
+					Text(log.recordName)
+						.font(.caption.monospaced())
+						.lineLimit(1)
+						.foregroundStyle(.secondary)
+				}
 
 				Spacer()
+
+				if !isZoneEvent, !log.zoneName.isEmpty {
+					Text(log.zoneName)
+						.font(.caption2)
+						.foregroundStyle(.tertiary)
+						.lineLimit(1)
+				}
 
 				if let size = log.recordSize {
 					Text(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
@@ -52,5 +75,12 @@ struct CloudKitLogRow: View {
 				log.timestamp.timestampView
 			}
 		}
+	}
+
+	private var zoneDisplay: String {
+		if log.zoneOwner != "_defaultOwner" && !log.zoneOwner.isEmpty {
+			return "\(log.zoneName) (\(log.zoneOwner))"
+		}
+		return log.zoneName
 	}
 }

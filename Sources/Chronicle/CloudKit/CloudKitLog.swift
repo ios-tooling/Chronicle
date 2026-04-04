@@ -18,8 +18,9 @@ public struct CloudKitLog: ChronicleEntry {
 		switch operation {
 		case .upload: .cloudKitUpload
 		case .download: .cloudKitDownload
-		case .deleted, .zoneDeleted: .cloudKitDelete
-		case .zoneCreated: .cloudKitDownload
+        case .deleted: .cloudKitDelete
+        case .zoneDeleted: .cloudKitZoneDeleted
+		case .zoneCreated: .cloudKitZoneCreated
 		}
 	}
 

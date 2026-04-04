@@ -1,4 +1,5 @@
 import Foundation
+import CloudKit
 import TagAlong
 
 @available(iOS 17, macOS 14, *)
@@ -159,6 +160,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		record: CKRecord? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -170,7 +172,7 @@ extension Chronicle {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, tags: tags,
+			duration: duration, error: error, record: record, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
@@ -186,6 +188,7 @@ extension Chronicle {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		record: CKRecord? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -197,7 +200,7 @@ extension Chronicle {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, tags: tags,
+			duration: duration, error: error, record: record, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
@@ -221,6 +224,76 @@ extension Chronicle {
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
+			file: file, function: function, line: line
+		)
+	}
+
+	/// Logs a CloudKit zone creation.
+	nonisolated public static func cloudKitZoneCreated(
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logZoneCreated(
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			file: file, function: function, line: line
+		)
+	}
+
+	/// Logs a CloudKit zone creation from a zone ID.
+	nonisolated public static func cloudKitZoneCreated(
+		zoneID: CKRecordZone.ID,
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logZoneCreated(
+			zoneID: zoneID,
+			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			file: file, function: function, line: line
+		)
+	}
+
+	/// Logs a CloudKit zone deletion.
+	nonisolated public static func cloudKitZoneDeleted(
+		zoneName: String,
+		zoneOwner: String = "_defaultOwner",
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logZoneDeleted(
+			zoneName: zoneName, zoneOwner: zoneOwner,
+			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			file: file, function: function, line: line
+		)
+	}
+
+	/// Logs a CloudKit zone deletion from a zone ID.
+	nonisolated public static func cloudKitZoneDeleted(
+		zoneID: CKRecordZone.ID,
+		tags: TagCollection? = nil,
+		referenceURL: URL? = nil,
+		referenceID: String? = nil,
+		file: String = #file,
+		function: String = #function,
+		line: Int = #line
+	) {
+		instance.cloudKit.logZoneDeleted(
+			zoneID: zoneID,
+			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
 	}

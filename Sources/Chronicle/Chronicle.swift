@@ -83,6 +83,11 @@ public final class Chronicle: @unchecked Sendable {
         lock.withLock { _cloudKit! }
     }
 
+    /// Sets the maximum number of CKRecords to cache on disk. Pass 0 to disable (default).
+    public func setCloudKitCacheSize(_ maxRecords: Int) {
+        lock.withLock { _cloudKit?.setCacheSize(maxRecords) }
+    }
+
     private init() {}
 
     /// Configures Chronicle with the given configuration.
