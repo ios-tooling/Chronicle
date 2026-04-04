@@ -28,7 +28,7 @@ extension EntryCategory {
         .error: EntryCategoryStyle(displayName: "Errors", systemImage: "exclamationmark.triangle.fill", tintColor: .red),
         .cloudKitUpload: EntryCategoryStyle(displayName: "CK Uploads", systemImage: "icloud.and.arrow.up.fill", tintColor: .orange),
         .cloudKitDownload: EntryCategoryStyle(displayName: "CK Downloads", systemImage: "icloud.and.arrow.down.fill", tintColor: .blue),
-        .cloudKitDelete: EntryCategoryStyle(displayName: "CK Deletes", systemImage: "icloud.slash.fill", tintColor: .red),
+        .cloudKitDelete: EntryCategoryStyle(displayName: "CK Deletes", systemImage: "xmark.icloud.fill", tintColor: .red),
     ]
 
     /// Registers a display style for a custom category.
