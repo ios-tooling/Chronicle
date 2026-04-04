@@ -28,6 +28,9 @@ public struct NetworkLog: ChronicleEntry {
 	/// The UUID of a linked ErrorLog, if this request produced an error.
 	public let linkedErrorID: UUID?
 
+	/// Optional context about this network request.
+	public let context: EventMetadata?
+
 	public let tags: [Tag]?
 	public let referenceURL: URL?
 	public let referenceID: String?
@@ -55,6 +58,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -77,6 +81,7 @@ public struct NetworkLog: ChronicleEntry {
 		self.wasCancelled = wasCancelled
 		self.metrics = metrics
 		self.linkedErrorID = linkedErrorID
+		self.context = context
 		self.tags = tags?.tags
 		self.referenceURL = referenceURL
 		self.referenceID = referenceID
@@ -89,7 +94,7 @@ public struct NetworkLog: ChronicleEntry {
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, url, method, requestHeaders, requestBody, requestBodySize
 		case statusCode, responseHeaders, responseBody, responseBodySize, error, wasCancelled, metrics
-		case linkedErrorID, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
+		case linkedErrorID, context, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
 	}
 	
 	public func encode(to encoder: Encoder) throws {
@@ -110,6 +115,7 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encode(wasCancelled, forKey: .wasCancelled)
 		try container.encode(metrics, forKey: .metrics)
 		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
+		try container.encodeIfPresent(context, forKey: .context)
 		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
 		try container.encodeIfPresent(referenceID, forKey: .referenceID)
@@ -135,6 +141,7 @@ public struct NetworkLog: ChronicleEntry {
 		wasCancelled = try container.decodeIfPresent(Bool.self, forKey: .wasCancelled) ?? false
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
 		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
+		context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
 		referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)

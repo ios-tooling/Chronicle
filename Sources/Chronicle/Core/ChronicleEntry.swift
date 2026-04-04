@@ -18,7 +18,7 @@ public struct EntryCategory: RawRepresentable, Hashable, Codable, Sendable {
     public static let cloudKitZoneDeleted = EntryCategory("cloudKitZoneDeleted")
 
     /// The built-in categories.
-    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error, .cloudKitUpload, .cloudKitDownload, .cloudKitDelete, .cloudKitZoneCreated, .cloudKitZoneDeleted, .cloudKitZoneCreated]
+    public static let builtIn: [EntryCategory] = [.event, .network, .flow, .error, .cloudKitUpload, .cloudKitDownload, .cloudKitDelete, .cloudKitZoneCreated, .cloudKitZoneDeleted]
 }
 
 /// Base protocol for all Chronicle log entries.
@@ -26,6 +26,7 @@ public protocol ChronicleEntry: Codable, Sendable {
 	var id: UUID { get }
 	var timestamp: Date { get }
 	var category: EntryCategory { get }
+	var context: EventMetadata? { get }
 	var tags: [Tag]? { get }
 	func matches(filter: String) -> Bool
 	var displaySummary: String { get }
@@ -39,6 +40,7 @@ public protocol ChronicleEntry: Codable, Sendable {
 extension ChronicleEntry {
 	public var displaySummary: String { category.displayName }
 	public func matches(filter: String) -> Bool { false }
+	public var context: EventMetadata? { nil }
 	public var tags: [Tag]? { nil }
 	public var referenceURL: URL? { nil }
 	public var referenceID: String? { nil }

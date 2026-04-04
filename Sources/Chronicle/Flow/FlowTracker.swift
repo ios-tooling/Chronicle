@@ -18,18 +18,19 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Tracks a screen transition.
-    public func trackScreen(_ name: String, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    public func trackScreen(_ name: String, transition: TransitionType = .push, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let previousStep = currentStep
         let newStep = FlowStep(
             screenName: name,
             transitionType: transition,
-            additionalInfo: metadata
+            additionalInfo: context
         )
         let fileName = (file as NSString).lastPathComponent
         let flowEvent = FlowEvent(
             from: previousStep,
             to: newStep,
             transitionType: transition,
+            context: context,
             tags: tags,
             referenceURL: referenceURL,
             referenceID: referenceID,

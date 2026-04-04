@@ -20,7 +20,7 @@ struct EventRow: View {
 				event.timestamp.timestampView
 			}
 			
-			if let metadata = event.metadata, !metadata.isEmpty {
+			if let metadata = event.context, !metadata.isEmpty {
 				Text(metadataSummary(metadata))
 					.font(.caption)
 					.foregroundStyle(.secondary)

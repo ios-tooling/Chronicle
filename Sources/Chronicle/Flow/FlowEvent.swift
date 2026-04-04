@@ -16,6 +16,9 @@ public struct FlowEvent: ChronicleEntry {
 	/// The type of transition.
 	public let transitionType: TransitionType
 
+	/// Optional context about this flow event.
+	public let context: EventMetadata?
+
 	public let tags: [Tag]?
 	public let referenceURL: URL?
 	public let referenceID: String?
@@ -23,12 +26,13 @@ public struct FlowEvent: ChronicleEntry {
 	public let sourceFunction: String?
 	public let sourceLine: Int?
 	
-	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
+	public init(id: UUID = UUID(), timestamp: Date = Date(), from: FlowStep? = nil, to: FlowStep, transitionType: TransitionType = .push, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
 		self.id = id
 		self.timestamp = timestamp
 		self.from = from
 		self.to = to
 		self.transitionType = transitionType
+		self.context = context
 		self.tags = tags?.tags
 		self.referenceURL = referenceURL
 		self.referenceID = referenceID
@@ -43,7 +47,7 @@ public struct FlowEvent: ChronicleEntry {
 	
 	// Custom Codable to handle the constant category
 	private enum CodingKeys: String, CodingKey {
-		case id, timestamp, category, from, to, transitionType, tags, referenceURL, referenceID
+		case id, timestamp, category, from, to, transitionType, context, tags, referenceURL, referenceID
 		case sourceFile, sourceFunction, sourceLine
 	}
 	
@@ -55,6 +59,7 @@ public struct FlowEvent: ChronicleEntry {
 		try container.encodeIfPresent(from, forKey: .from)
 		try container.encode(to, forKey: .to)
 		try container.encode(transitionType, forKey: .transitionType)
+		try container.encodeIfPresent(context, forKey: .context)
 		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
 		try container.encodeIfPresent(referenceID, forKey: .referenceID)
@@ -70,6 +75,7 @@ public struct FlowEvent: ChronicleEntry {
 		self.from = try container.decodeIfPresent(FlowStep.self, forKey: .from)
 		to = try container.decode(FlowStep.self, forKey: .to)
 		transitionType = try container.decode(TransitionType.self, forKey: .transitionType)
+		context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
 		referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)

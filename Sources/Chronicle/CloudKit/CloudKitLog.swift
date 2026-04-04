@@ -18,8 +18,8 @@ public struct CloudKitLog: ChronicleEntry {
 		switch operation {
 		case .upload: .cloudKitUpload
 		case .download: .cloudKitDownload
-        case .deleted: .cloudKitDelete
-        case .zoneDeleted: .cloudKitZoneDeleted
+		case .deleted: .cloudKitDelete
+		case .zoneDeleted: .cloudKitZoneDeleted
 		case .zoneCreated: .cloudKitZoneCreated
 		}
 	}
@@ -50,6 +50,9 @@ public struct CloudKitLog: ChronicleEntry {
 
 	/// Error description if the operation failed.
 	public let error: String?
+
+	/// Optional context about this CloudKit operation.
+	public let context: EventMetadata?
 
 	public let tags: [Tag]?
 	public let referenceURL: URL?
@@ -86,6 +89,7 @@ public struct CloudKitLog: ChronicleEntry {
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
 		error: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -104,6 +108,7 @@ public struct CloudKitLog: ChronicleEntry {
 		self.fieldCount = fieldCount
 		self.duration = duration
 		self.error = error
+		self.context = context
 		self.tags = tags?.tags
 		self.referenceURL = referenceURL
 		self.referenceID = referenceID

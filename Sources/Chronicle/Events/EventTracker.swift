@@ -10,9 +10,9 @@ public final class EventTracker: Sendable {
         self.storage = storage
     }
 
-    /// Records a named event with optional metadata.
-    public func track(_ name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-        let event = Event(name: name, metadata: metadata, tags: tags, referenceURL: referenceURL, referenceID: referenceID, sourceFile: (file as NSString).lastPathComponent, sourceFunction: function, sourceLine: line)
+    /// Records a named event with optional context.
+    public func track(_ name: String, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+        let event = Event(name: name, context: context, tags: tags, referenceURL: referenceURL, referenceID: referenceID, sourceFile: (file as NSString).lastPathComponent, sourceFunction: function, sourceLine: line)
         storage.store(event)
     }
 

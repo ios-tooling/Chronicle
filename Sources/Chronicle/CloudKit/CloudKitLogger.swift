@@ -40,6 +40,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		record: CKRecord? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -52,7 +53,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, tags: tags,
+			duration: duration, error: error, context: context, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
@@ -72,6 +73,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		record: CKRecord? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -84,7 +86,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, tags: tags,
+			duration: duration, error: error, context: context, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
@@ -99,6 +101,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		recordType: String,
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -111,7 +114,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			operation: .deleted,
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags,
+			context: context, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
@@ -124,6 +127,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 	public func logZoneCreated(
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -135,7 +139,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			operation: .zoneCreated,
 			recordName: "", recordType: "",
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags,
+			context: context, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
@@ -146,6 +150,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 	/// Log a CloudKit zone creation from a zone ID.
 	public func logZoneCreated(
 		zoneID: CKRecordZone.ID,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -153,13 +158,14 @@ public final class CloudKitLogger: @unchecked Sendable {
 		function: String = #function,
 		line: Int = #line
 	) {
-		logZoneCreated(zoneName: zoneID.zoneName, zoneOwner: zoneID.ownerName, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+		logZoneCreated(zoneName: zoneID.zoneName, zoneOwner: zoneID.ownerName, context: context, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 
 	/// Log a CloudKit zone deletion.
 	public func logZoneDeleted(
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -171,7 +177,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			operation: .zoneDeleted,
 			recordName: "", recordType: "",
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags,
+			context: context, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
@@ -182,6 +188,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 	/// Log a CloudKit zone deletion from a zone ID.
 	public func logZoneDeleted(
 		zoneID: CKRecordZone.ID,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -189,7 +196,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		function: String = #function,
 		line: Int = #line
 	) {
-		logZoneDeleted(zoneName: zoneID.zoneName, zoneOwner: zoneID.ownerName, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+		logZoneDeleted(zoneName: zoneID.zoneName, zoneOwner: zoneID.ownerName, context: context, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 
 	/// Log a pre-built CloudKitLog entry directly, optionally caching the associated record.

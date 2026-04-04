@@ -7,7 +7,7 @@ public struct Event: ChronicleEntry {
     public let timestamp: Date
     public let category: EntryCategory = .event
     public let name: String
-    public let metadata: EventMetadata?
+    public let context: EventMetadata?
     public let tags: [Tag]?
     public let referenceURL: URL?
     public let referenceID: String?
@@ -15,11 +15,11 @@ public struct Event: ChronicleEntry {
     public let sourceFunction: String?
     public let sourceLine: Int?
 
-    public init(id: UUID = UUID(), timestamp: Date = Date(), name: String, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
+    public init(id: UUID = UUID(), timestamp: Date = Date(), name: String, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, sourceFile: String? = nil, sourceFunction: String? = nil, sourceLine: Int? = nil) {
         self.id = id
         self.timestamp = timestamp
         self.name = name
-        self.metadata = metadata
+        self.context = context
 		 self.tags = tags?.tags
         self.referenceURL = referenceURL
         self.referenceID = referenceID
@@ -34,7 +34,7 @@ public struct Event: ChronicleEntry {
 
     // Custom Codable to handle the constant category
     private enum CodingKeys: String, CodingKey {
-        case id, timestamp, category, name, metadata, tags, referenceURL, referenceID
+        case id, timestamp, category, name, context, tags, referenceURL, referenceID
         case sourceFile, sourceFunction, sourceLine
     }
 
@@ -44,7 +44,7 @@ public struct Event: ChronicleEntry {
         try container.encode(timestamp, forKey: .timestamp)
         try container.encode(category, forKey: .category)
         try container.encode(name, forKey: .name)
-        try container.encodeIfPresent(metadata, forKey: .metadata)
+        try container.encodeIfPresent(context, forKey: .context)
         try container.encodeIfPresent(tags, forKey: .tags)
         try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
         try container.encodeIfPresent(referenceID, forKey: .referenceID)
@@ -58,7 +58,7 @@ public struct Event: ChronicleEntry {
         id = try container.decode(UUID.self, forKey: .id)
         timestamp = try container.decode(Date.self, forKey: .timestamp)
         name = try container.decode(String.self, forKey: .name)
-        metadata = try container.decodeIfPresent(EventMetadata.self, forKey: .metadata)
+        context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
         tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
         referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
         referenceID = try container.decodeIfPresent(String.self, forKey: .referenceID)

@@ -10,7 +10,7 @@ import SwiftData
 /// try Chronicle.shared.configure(.default)
 ///
 /// // Track events
-/// Chronicle.track("button_tapped", metadata: ["id": "checkout"])
+/// Chronicle.track("button_tapped", context: ["id": "checkout"])
 ///
 /// // Log network requests
 /// Chronicle.network(request: urlRequest, response: httpResponse, data: data)

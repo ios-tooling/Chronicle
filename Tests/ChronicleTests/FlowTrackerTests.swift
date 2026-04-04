@@ -52,7 +52,7 @@ struct FlowTrackerTests {
         let storage = try makeStorage()
         let tracker = FlowTracker(storage: storage)
 
-        tracker.trackScreen("ProductDetail", transition: .push, metadata: ["product_id": "abc123"])
+        tracker.trackScreen("ProductDetail", transition: .push, context: ["product_id": "abc123"])
 
         let events = tracker.breadcrumbs()
         #expect(events.count == 1)

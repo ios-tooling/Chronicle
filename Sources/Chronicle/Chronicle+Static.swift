@@ -5,10 +5,10 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 extension Chronicle {
 	
-	/// Tracks a named event with optional metadata.
-	nonisolated public static func track(_ name: String, description: String? = nil, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		let merged = mergeDescription(description, into: metadata)
-		instance.events.track(name, metadata: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+	/// Tracks a named event with optional context.
+	nonisolated public static func track(_ name: String, description: String? = nil, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+		let merged = mergeDescription(description, into: context)
+		instance.events.track(name, context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 	
 	/// Logs a network request and response from a URLRequest/HTTPURLResponse pair.
@@ -20,6 +20,8 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics? = nil,
 		linkedErrorID: UUID? = nil,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -29,6 +31,7 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		if metrics != nil || linkedErrorID != nil {
 			let log = NetworkLog(
 				url: request.url ?? URL(string: "https://unknown")!,
@@ -42,6 +45,7 @@ extension Chronicle {
 				wasCancelled: wasCancelled,
 				metrics: metrics ?? NetworkMetrics(startTime: startTime, endTime: endTime ?? Date(), bytesSent: Int64(request.httpBody?.count ?? 0), bytesReceived: Int64(data?.count ?? 0)),
 				linkedErrorID: linkedErrorID,
+				context: merged,
 				tags: tags,
 				referenceURL: referenceURL,
 				referenceID: referenceID,
@@ -57,6 +61,7 @@ extension Chronicle {
 				data: data,
 				error: error,
 				wasCancelled: wasCancelled,
+				context: merged,
 				tags: tags,
 				referenceURL: referenceURL,
 				referenceID: referenceID,
@@ -84,6 +89,8 @@ extension Chronicle {
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
 		linkedErrorID: UUID? = nil,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -91,6 +98,7 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		let log = NetworkLog(
 			url: url,
 			method: method,
@@ -105,6 +113,7 @@ extension Chronicle {
 			wasCancelled: wasCancelled,
 			metrics: metrics,
 			linkedErrorID: linkedErrorID,
+			context: merged,
 			tags: tags,
 			referenceURL: referenceURL,
 			referenceID: referenceID,
@@ -116,9 +125,9 @@ extension Chronicle {
 	}
 	
 	/// Tracks a screen transition in the app flow.
-	nonisolated public static func flow(_ name: String, description: String? = nil, transition: TransitionType = .push, metadata: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
-		let merged = mergeDescription(description, into: metadata)
-		instance.flow.trackScreen(name, transition: transition, metadata: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
+	nonisolated public static func flow(_ name: String, description: String? = nil, transition: TransitionType = .push, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+		let merged = mergeDescription(description, into: context)
+		instance.flow.trackScreen(name, transition: transition, context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}
 	
 	/// Logs an error with optional severity and context.
@@ -161,6 +170,8 @@ extension Chronicle {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		record: CKRecord? = nil,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -168,11 +179,12 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logUpload(
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, record: record, tags: tags,
+			duration: duration, error: error, record: record, context: merged, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
@@ -189,6 +201,8 @@ extension Chronicle {
 		duration: TimeInterval? = nil,
 		error: String? = nil,
 		record: CKRecord? = nil,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -196,11 +210,12 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logDownload(
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
 			recordSize: recordSize, fieldCount: fieldCount,
-			duration: duration, error: error, record: record, tags: tags,
+			duration: duration, error: error, record: record, context: merged, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
@@ -212,6 +227,8 @@ extension Chronicle {
 		recordType: String,
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -219,10 +236,11 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logDeletion(
 			recordName: recordName, recordType: recordType,
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags,
+			context: merged, tags: tags,
 			referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
@@ -232,6 +250,8 @@ extension Chronicle {
 	nonisolated public static func cloudKitZoneCreated(
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -239,9 +259,10 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logZoneCreated(
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
 	}
@@ -249,6 +270,8 @@ extension Chronicle {
 	/// Logs a CloudKit zone creation from a zone ID.
 	nonisolated public static func cloudKitZoneCreated(
 		zoneID: CKRecordZone.ID,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -256,9 +279,10 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logZoneCreated(
 			zoneID: zoneID,
-			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
 	}
@@ -267,6 +291,8 @@ extension Chronicle {
 	nonisolated public static func cloudKitZoneDeleted(
 		zoneName: String,
 		zoneOwner: String = "_defaultOwner",
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -274,9 +300,10 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logZoneDeleted(
 			zoneName: zoneName, zoneOwner: zoneOwner,
-			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
 	}
@@ -284,6 +311,8 @@ extension Chronicle {
 	/// Logs a CloudKit zone deletion from a zone ID.
 	nonisolated public static func cloudKitZoneDeleted(
 		zoneID: CKRecordZone.ID,
+		description: String? = nil,
+		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
 		referenceID: String? = nil,
@@ -291,9 +320,10 @@ extension Chronicle {
 		function: String = #function,
 		line: Int = #line
 	) {
+		let merged = mergeDescription(description, into: context)
 		instance.cloudKit.logZoneDeleted(
 			zoneID: zoneID,
-			tags: tags, referenceURL: referenceURL, referenceID: referenceID,
+			context: merged, tags: tags, referenceURL: referenceURL, referenceID: referenceID,
 			file: file, function: function, line: line
 		)
 	}
@@ -308,9 +338,9 @@ extension Chronicle {
 }
 
 @available(iOS 17, macOS 14, *)
-private func mergeDescription(_ description: String?, into metadata: EventMetadata?) -> EventMetadata? {
-	guard let description else { return metadata }
-	var result = metadata ?? EventMetadata()
+private func mergeDescription(_ description: String?, into context: EventMetadata?) -> EventMetadata? {
+	guard let description else { return context }
+	var result = context ?? EventMetadata()
 	result["description"] = .string(description)
 	return result
 }

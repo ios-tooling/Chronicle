@@ -18,7 +18,7 @@ struct EventTrackerTests {
         let events = tracker.recentEvents()
         #expect(events.count == 1)
         #expect(events[0].name == "button_tapped")
-        #expect(events[0].metadata == nil)
+        #expect(events[0].context == nil)
         #expect(events[0].category == .event)
     }
 
@@ -27,19 +27,19 @@ struct EventTrackerTests {
         let storage = try makeStorage()
         let tracker = EventTracker(storage: storage)
 
-        let metadata: EventMetadata = [
+        let context: EventMetadata = [
             "screen": "checkout",
             "item_count": 3,
             "total": 29.99
         ]
-        tracker.track("purchase_completed", metadata: metadata)
+        tracker.track("purchase_completed", context: context)
 
         let events = tracker.recentEvents()
         #expect(events.count == 1)
         #expect(events[0].name == "purchase_completed")
-        #expect(events[0].metadata?["screen"] == .string("checkout"))
-        #expect(events[0].metadata?["item_count"] == .int(3))
-        #expect(events[0].metadata?["total"] == .double(29.99))
+        #expect(events[0].context?["screen"] == .string("checkout"))
+        #expect(events[0].context?["item_count"] == .int(3))
+        #expect(events[0].context?["total"] == .double(29.99))
     }
 
     @Test("Track multiple events")
@@ -48,8 +48,8 @@ struct EventTrackerTests {
         let tracker = EventTracker(storage: storage)
 
         tracker.track("app_launched")
-        tracker.track("screen_viewed", metadata: ["name": "home"])
-        tracker.track("button_tapped", metadata: ["id": "settings"])
+        tracker.track("screen_viewed", context: ["name": "home"])
+        tracker.track("button_tapped", context: ["id": "settings"])
 
         let events = tracker.allEvents()
         #expect(events.count == 3)
@@ -74,12 +74,12 @@ struct EventTrackerTests {
         let event = Event(
             timestamp: now,
             name: "test_event",
-            metadata: ["key": "value"]
+            context: ["key": "value"]
         )
 
         #expect(event.category == .event)
         #expect(event.name == "test_event")
         #expect(event.timestamp == now)
-        #expect(event.metadata?["key"] == .string("value"))
+        #expect(event.context?["key"] == .string("value"))
     }
 }

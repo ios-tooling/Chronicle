@@ -61,7 +61,7 @@ public struct MarkdownExporter: ExportDestination {
         switch entry {
         case let event as Event:
             var md = "**\(event.name)**"
-            if let meta = event.metadata { md += "  \nMetadata: \(meta)" }
+            if let ctx = event.context { md += "  \nContext: \(ctx)" }
             return md + "\n"
 
         case let log as NetworkLog:

@@ -11,7 +11,7 @@ struct ChronicleIntegrationTests {
 
         // Track events
         chronicle.events.track("app_launched")
-        chronicle.events.track("screen_viewed", metadata: ["name": "home"])
+        chronicle.events.track("screen_viewed", context: ["name": "home"])
 
         // Log network
         let url = URL(string: "https://api.example.com/config")!

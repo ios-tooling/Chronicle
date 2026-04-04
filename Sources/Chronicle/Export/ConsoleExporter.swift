@@ -23,8 +23,8 @@ public struct ConsoleExporter: ExportDestination {
         switch entry {
         case let event as Event:
             var message = "[\(timestamp)] EVENT: \(event.name)"
-            if let metadata = event.metadata, !metadata.isEmpty {
-                message += " \(metadata)"
+            if let context = event.context, !context.isEmpty {
+                message += " \(context)"
             }
             return message
 

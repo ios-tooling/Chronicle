@@ -12,7 +12,7 @@ struct SwiftDataStorageTests {
     func storeAndRetrieveEvent() throws {
         let storage = try makeStorage()
 
-        let event = Event(name: "test_event", metadata: ["key": "value"])
+        let event = Event(name: "test_event", context: ["key": "value"])
         storage.store(event)
 
         let entries = storage.allEntries()
@@ -21,7 +21,7 @@ struct SwiftDataStorageTests {
         let retrieved = entries[0] as? Event
         #expect(retrieved != nil)
         #expect(retrieved?.name == "test_event")
-        #expect(retrieved?.metadata?["key"] == .string("value"))
+        #expect(retrieved?.context?["key"] == .string("value"))
     }
 
     @Test("Store and retrieve a network log")
