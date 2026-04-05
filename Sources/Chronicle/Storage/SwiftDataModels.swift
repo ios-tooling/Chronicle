@@ -500,7 +500,7 @@ final class PersistedCloudKitLog {
 	var recordName: String
 	var recordType: String
 	var zoneName: String
-	var zoneOwner: String
+	var zoneOwner: String?
 	var recordSize: Int?
 	var fieldCount: Int?
 	var duration: Double?
@@ -520,7 +520,7 @@ final class PersistedCloudKitLog {
 		recordName: String,
 		recordType: String,
 		zoneName: String,
-		zoneOwner: String,
+		zoneOwner: String?,
 		recordSize: Int?,
 		fieldCount: Int?,
 		duration: Double?,

@@ -37,7 +37,7 @@ struct CloudKitLogRow: View {
 
 			HStack(spacing: 8) {
 				if isZoneEvent {
-					Text(zoneDisplay)
+					zoneDisplay
 						.font(.caption.monospaced())
 						.lineLimit(1)
 						.foregroundStyle(.secondary)
@@ -77,10 +77,17 @@ struct CloudKitLogRow: View {
 		}
 	}
 
-	private var zoneDisplay: String {
-		if log.zoneOwner != "_defaultOwner" && !log.zoneOwner.isEmpty {
-			return "\(log.zoneName) (\(log.zoneOwner))"
+	@ViewBuilder private var zoneDisplay: some View {
+		HStack {
+			if let owner = log.zoneOwner {
+				if owner == "__defaultOwner__" {
+					Text("default")
+						.opacity(0.6)
+				} else {
+					Text(owner)
+				}
+			}
+			Text(log.zoneName)
 		}
-		return log.zoneName
 	}
 }

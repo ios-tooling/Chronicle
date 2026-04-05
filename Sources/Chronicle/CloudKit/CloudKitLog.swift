@@ -37,7 +37,7 @@ public struct CloudKitLog: ChronicleEntry {
 	public let zoneName: String
 
 	/// The zone owner from the CKRecordZone.ID.
-	public let zoneOwner: String
+	public let zoneOwner: String?
 
 	/// Overall size of the record in bytes.
 	public let recordSize: Int?
@@ -84,7 +84,7 @@ public struct CloudKitLog: ChronicleEntry {
 		recordName: String,
 		recordType: String,
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		recordSize: Int? = nil,
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,

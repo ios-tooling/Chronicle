@@ -34,7 +34,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		recordName: String,
 		recordType: String,
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		recordSize: Int? = nil,
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
@@ -67,7 +67,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		recordName: String,
 		recordType: String,
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		recordSize: Int? = nil,
 		fieldCount: Int? = nil,
 		duration: TimeInterval? = nil,
@@ -100,7 +100,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 		recordName: String,
 		recordType: String,
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
@@ -126,7 +126,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 	/// Log a CloudKit zone creation.
 	public func logZoneCreated(
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
@@ -164,7 +164,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 	/// Log a CloudKit zone deletion.
 	public func logZoneDeleted(
 		zoneName: String,
-		zoneOwner: String = "_defaultOwner",
+		zoneOwner: String?,
 		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
