@@ -68,11 +68,11 @@ struct ContentView: View {
 					.truncationMode(.head)
 			}
 			Spacer()
-			if isRefreshing {
-				ProgressView()
-					.scaleEffect(0.7)
-					.transition(.opacity)
-			}
+            ProgressView()
+                .scaleEffect(0.7)
+                .transition(.opacity)
+                .opacity(isRefreshing ? 1 : 0)
+
 			if let watcher {
 				Button {
 					watcher.manualRefresh()
@@ -212,20 +212,29 @@ struct LiveChronicleView: View {
 	@ObservedObject var watcher: DatabaseWatcher
 	@Binding var showClearConfirmation: Bool
 	@Binding var isRefreshing: Bool
+	@State private var isAtTop = true
 
 	var body: some View {
-		Group {
-			if let model {
-				ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: false)
-					.modelContainer(model.modelContainer)
+		ScrollViewReader { proxy in
+			Group {
+				if let model {
+					ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: false)
+						.modelContainer(model.modelContainer)
+				}
+			}
+			.onChange(of: watcher.refreshToken) {
+				refresh(proxy: proxy)
 			}
 		}
-		.onChange(of: watcher.refreshToken) {
-			refresh()
+		.onScrollGeometryChange(for: Bool.self) { geo in
+			geo.contentOffset.y <= geo.contentInsets.top + 10
+		} action: { _, atTop in
+			isAtTop = atTop
 		}
 	}
 
-	private func refresh() {
+	private func refresh(proxy: ScrollViewProxy) {
+		let shouldScrollToTop = isAtTop
 		withAnimation { isRefreshing = true }
 		Task { @MainActor in
 			do {
@@ -235,7 +244,12 @@ struct LiveChronicleView: View {
 				model = ChronicleViewerModel(modelContainer: container)
 			} catch {}
 			try? await Task.sleep(for: .milliseconds(500))
-			withAnimation { isRefreshing = false }
+			withAnimation {
+				isRefreshing = false
+				if shouldScrollToTop {
+					proxy.scrollTo(ChronicleEntryList.topAnchorID, anchor: .top)
+				}
+			}
 		}
 	}
 }
