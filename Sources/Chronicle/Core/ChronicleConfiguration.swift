@@ -6,6 +6,8 @@ import SwiftData
 public struct ChronicleConfiguration: Sendable {
     /// Whether Chronicle is actively recording entries.
     public var isEnabled: Bool
+    
+    public var databaseLocation: URL?
 
     /// Maximum number of entries to store across all types.
     /// Oldest entries are discarded when this limit is reached.

@@ -95,9 +95,9 @@ public final class Chronicle: @unchecked Sendable {
     public func configure(_ configuration: ChronicleConfiguration = .default) throws {
         let storage: SwiftDataStorage
         if let container = configuration.modelContainer {
-            storage = try SwiftDataStorage(modelContainer: container)
+            storage = try SwiftDataStorage(modelContainer: container, configuration: configuration)
         } else {
-            storage = try SwiftDataStorage()
+            storage = try SwiftDataStorage(configuration: configuration)
         }
 
         storage.maxEntries = configuration.maxEntries

@@ -24,11 +24,12 @@ public final class SwiftDataStorage: @unchecked Sendable {
         ])
     }
 
-    public init(modelContainer: ModelContainer? = nil) throws {
+    public init(modelContainer: ModelContainer? = nil, configuration: ChronicleConfiguration) throws {
         if let container = modelContainer {
             self.modelContainer = container
         } else {
-            let dir = URL.cachesDirectory.appendingPathComponent("com.chronicle.history")
+            let parent = configuration.databaseLocation ?? URL.cachesDirectory
+            let dir = parent.appendingPathComponent("com.chronicle.history")
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let url = dir.appendingPathComponent("history.db")
             let config = ModelConfiguration(url: url, cloudKitDatabase: .none)
@@ -42,10 +43,18 @@ public final class SwiftDataStorage: @unchecked Sendable {
     public static func inMemory() throws -> SwiftDataStorage {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: schema, configurations: [config])
-        return try SwiftDataStorage(modelContainer: container)
+        return try SwiftDataStorage(modelContainer: container, configuration: .default)
     }
 
     public var container: ModelContainer { modelContainer }
+
+    /// Creates a ModelContainer for an existing Chronicle database on disk.
+    /// Useful for external viewer apps that read another app's Chronicle data.
+    public static func containerForExternalDatabase(at directoryURL: URL) throws -> ModelContainer {
+        let dbURL = directoryURL.appendingPathComponent("history.db")
+        let config = ModelConfiguration(url: dbURL, cloudKitDatabase: .none)
+        return try ModelContainer(for: schema, configurations: [config])
+    }
 
     // MARK: - Store
 
