@@ -1,6 +1,6 @@
 import SwiftUI
-import SwiftData
 import Chronicle
+import SwiftData
 
 struct ContentView: View {
 	@State private var selectedURL: URL?
@@ -11,8 +11,8 @@ struct ContentView: View {
 
 	var body: some View {
 		Group {
-			if let model, let watcher {
-				viewerContent(model, watcher: watcher)
+			if model != nil, let watcher {
+				viewerContent(watcher: watcher)
 			} else {
 				welcomeView
 			}
@@ -34,6 +34,7 @@ struct ContentView: View {
 
 			Button("Open Database…") { selectDatabase() }
 				.buttonStyle(.borderedProminent)
+				.keyboardShortcut(.defaultAction)
 
 			if let errorMessage {
 				Text(errorMessage)
@@ -44,10 +45,10 @@ struct ContentView: View {
 		.padding(40)
 	}
 
-	private func viewerContent(_ model: ChronicleViewerModel, watcher: DatabaseWatcher) -> some View {
+	private func viewerContent(watcher: DatabaseWatcher) -> some View {
 		VStack(spacing: 0) {
 			toolbar
-			LiveChronicleView(model: model, watcher: watcher, showClearConfirmation: $showClearConfirmation)
+			LiveChronicleView(model: $model, directoryURL: selectedURL!, watcher: watcher, showClearConfirmation: $showClearConfirmation)
 		}
 	}
 
@@ -91,12 +92,19 @@ struct ContentView: View {
 		}
 
 		do {
-			let container = try SwiftDataStorage.containerForExternalDatabase(at: directoryURL)
+			var config = ChronicleConfiguration(isReadOnly: true)
+			config.databaseLocation = directoryURL.deletingLastPathComponent()
+			try Chronicle.instance.configure(config)
+
+			guard let container = Chronicle.instance.modelContainer else {
+				errorMessage = "Failed to configure Chronicle"
+				return
+			}
 
 			withAnimation {
 				self.selectedURL = directoryURL
 				self.watcher = DatabaseWatcher(dbURL: dbURL, modelContainer: container)
-				self.model = ChronicleViewerModel(modelContainer: container)
+				self.model = ChronicleViewerModel()
 				self.errorMessage = nil
 			}
 		} catch {
@@ -105,16 +113,32 @@ struct ContentView: View {
 	}
 }
 
-/// Wraps ChronicleTabContent and re-creates it when the database file changes,
-/// forcing SwiftData @Query properties to re-fetch.
+/// Wraps ChronicleTabContent and rebuilds the ModelContainer when the database
+/// file changes on disk, so @Query picks up writes from external processes.
 struct LiveChronicleView: View {
-	let model: ChronicleViewerModel
+	@Binding var model: ChronicleViewerModel?
+	let directoryURL: URL
 	@ObservedObject var watcher: DatabaseWatcher
 	@Binding var showClearConfirmation: Bool
 
 	var body: some View {
-		ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: false)
-			.modelContainer(model.modelContainer)
-			.id(watcher.refreshToken)
+		Group {
+			if let model {
+				ChronicleTabContent(model: model, showClearConfirmation: $showClearConfirmation, currentRunOnly: false)
+					.modelContainer(model.modelContainer)
+			}
+		}
+		.onChange(of: watcher.refreshToken) {
+			refresh()
+		}
+	}
+
+	private func refresh() {
+		do {
+			var config = ChronicleConfiguration(isReadOnly: true)
+			config.databaseLocation = directoryURL.deletingLastPathComponent()
+			try Chronicle.instance.configure(config)
+			model = ChronicleViewerModel()
+		} catch {}
 	}
 }
