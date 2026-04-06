@@ -2,59 +2,61 @@ import Foundation
 import SwiftData
 import Combine
 
-/// Watches a SQLite database file for changes from another process
-/// and notifies SwiftData to re-fetch.
+/// Watches a Chronicle database for changes by polling modification dates.
+///
+/// FSEvents and kqueue are both unreliable for sandboxed apps watching paths
+/// outside their own container (e.g. simulator app containers). Polling the
+/// modification date of the db and WAL files is simple and always works.
 @MainActor
 final class DatabaseWatcher: ObservableObject {
-	private var source: DispatchSourceFileSystemObject?
-	private var fileDescriptor: Int32 = -1
-	private let dbURL: URL
-	let modelContainer: ModelContainer
-	@Published var refreshToken = UUID()
+    let modelContainer: ModelContainer
+    @Published var refreshToken = UUID()
 
-	init(dbURL: URL, modelContainer: ModelContainer) {
-		self.dbURL = dbURL
-		self.modelContainer = modelContainer
-		startWatching()
-	}
+    private let dbURL: URL
+    private var walURL: URL { URL(fileURLWithPath: dbURL.path + "-wal") }
+    private var timer: Timer?
+    private var lastKnownDate: Date?
 
-	deinit {
-		source?.cancel()
-		source = nil
-	}
+    init(dbURL: URL, modelContainer: ModelContainer) {
+        self.dbURL = dbURL
+        self.modelContainer = modelContainer
+        lastKnownDate = latestModificationDate()
+        startPolling()
+    }
 
-	private func startWatching() {
-		// Watch the WAL file since SQLite writes there first
-		let walURL = dbURL.appendingPathExtension("wal")
-		let path = FileManager.default.fileExists(atPath: walURL.path) ? walURL.path : dbURL.path
+    deinit {
+        timer?.invalidate()
+    }
 
-		fileDescriptor = open(path, O_EVTONLY)
-		guard fileDescriptor >= 0 else { return }
+    func manualRefresh() {
+        refreshToken = UUID()
+    }
 
-		let source = DispatchSource.makeFileSystemObjectSource(
-			fileDescriptor: fileDescriptor,
-			eventMask: [.write, .extend, .rename],
-			queue: .main
-		)
+    // MARK: - Private
 
-		source.setEventHandler { [weak self] in
-			self?.refreshToken = UUID()
-		}
+    private func startPolling() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.poll()
+        }
+    }
 
-		source.setCancelHandler { [fd = fileDescriptor] in
-			close(fd)
-		}
+    private func poll() {
+        let current = latestModificationDate()
+        guard current != lastKnownDate else { return }
+        print("[DatabaseWatcher] 📁 change detected (mod date: \(current?.description ?? "nil"))")
+        lastKnownDate = current
+        refreshToken = UUID()
+    }
 
-		self.source = source
-		source.resume()
-	}
-
-	func manualRefresh() {
-		refreshToken = UUID()
-	}
-
-	private func stopWatching() {
-		source?.cancel()
-		source = nil
-	}
+    private func latestModificationDate() -> Date? {
+        let keys: Set<URLResourceKey> = [.contentModificationDateKey]
+        let dbDate = (try? dbURL.resourceValues(forKeys: keys))?.contentModificationDate
+        let walDate = (try? walURL.resourceValues(forKeys: keys))?.contentModificationDate
+        switch (dbDate, walDate) {
+        case (let d?, let w?): return max(d, w)
+        case (let d?, nil):    return d
+        case (nil, let w?):    return w
+        default:               return nil
+        }
+    }
 }
