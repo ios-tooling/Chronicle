@@ -16,6 +16,7 @@ public struct ChronicleEntryList: View {
 				.listRowInsets(EdgeInsets())
 				.listRowSeparator(.hidden)
 				.id(Self.topAnchorID)
+            
 			ForEach(entries, id: \.id) { entry in
 				if let log = entry as? NetworkLog {
 					NavigationLink(destination: NetworkLogDetailScreen(log: log)) { EntryRow(entry: entry) }
@@ -31,6 +32,7 @@ public struct ChronicleEntryList: View {
 			}
 		}
 		.listStyle(.plain)
+        .environment(\.defaultMinListRowHeight, 1)
 	}
 
 	private func hasCachedRecord(for entryID: UUID) -> Bool {
