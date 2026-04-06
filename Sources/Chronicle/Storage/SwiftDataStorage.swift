@@ -52,7 +52,7 @@ public final class SwiftDataStorage: @unchecked Sendable {
     /// Useful for external viewer apps that read another app's Chronicle data.
     public static func containerForExternalDatabase(at directoryURL: URL) throws -> ModelContainer {
         let dbURL = directoryURL.appendingPathComponent("history.db")
-        let config = ModelConfiguration(url: dbURL, cloudKitDatabase: .none)
+        let config = ModelConfiguration(url: dbURL, allowsSave: false, cloudKitDatabase: .none)
         return try ModelContainer(for: schema, configurations: [config])
     }
 
