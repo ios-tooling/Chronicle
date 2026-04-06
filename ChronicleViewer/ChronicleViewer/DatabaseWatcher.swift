@@ -49,6 +49,10 @@ final class DatabaseWatcher: ObservableObject {
 		source.resume()
 	}
 
+	func manualRefresh() {
+		refreshToken = UUID()
+	}
+
 	private func stopWatching() {
 		source?.cancel()
 		source = nil

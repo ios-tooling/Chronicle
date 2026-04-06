@@ -8,6 +8,9 @@ struct ContentView: View {
 	@State private var model: ChronicleViewerModel?
 	@State private var showClearConfirmation = false
 	@State private var errorMessage: String?
+	@State private var isRefreshing = false
+	@State private var securityScopedURL: URL?
+	@AppStorage("lastDatabaseBookmark") private var lastDatabaseBookmark: Data = Data()
 
 	var body: some View {
 		Group {
@@ -18,6 +21,7 @@ struct ContentView: View {
 			}
 		}
 		.frame(minWidth: 600, minHeight: 400)
+		.task { restoreFromBookmark() }
 	}
 
 	private var welcomeView: some View {
@@ -48,7 +52,7 @@ struct ContentView: View {
 	private func viewerContent(watcher: DatabaseWatcher) -> some View {
 		VStack(spacing: 0) {
 			toolbar
-			LiveChronicleView(model: $model, directoryURL: selectedURL!, watcher: watcher, showClearConfirmation: $showClearConfirmation)
+			LiveChronicleView(model: $model, directoryURL: selectedURL!, watcher: watcher, showClearConfirmation: $showClearConfirmation, isRefreshing: $isRefreshing)
 		}
 	}
 
@@ -64,24 +68,116 @@ struct ContentView: View {
 					.truncationMode(.head)
 			}
 			Spacer()
+			if isRefreshing {
+				ProgressView()
+					.scaleEffect(0.7)
+					.transition(.opacity)
+			}
+			if let watcher {
+				Button {
+					watcher.manualRefresh()
+				} label: {
+					Image(systemName: "arrow.clockwise")
+				}
+				.buttonStyle(.bordered)
+				.help("Reload from disk")
+				.disabled(isRefreshing)
+			}
 			Button("Open…") { selectDatabase() }
 				.buttonStyle(.bordered)
 		}
 		.padding(.horizontal)
 		.padding(.vertical, 8)
 		.background(.bar)
+		.animation(.easeInOut(duration: 0.2), value: isRefreshing)
 	}
 
 	private func selectDatabase() {
 		let panel = NSOpenPanel()
-		panel.canChooseFiles = false
+		panel.canChooseFiles = true
 		panel.canChooseDirectories = true
 		panel.allowsMultipleSelection = false
-		panel.message = "Select a Chronicle database directory (contains history.db)"
+		panel.message = "Select a Chronicle database file or directory"
 		panel.prompt = "Open"
 
 		guard panel.runModal() == .OK, let url = panel.url else { return }
-		openDatabase(at: url)
+		guard let resolved = resolveDirectoryURL(from: url) else {
+			errorMessage = "No history.db found near \(url.lastPathComponent)"
+			return
+		}
+
+		// Create security-scoped bookmark before the panel releases access
+		if let bookmark = try? resolved.bookmarkData(
+			options: .withSecurityScope,
+			includingResourceValuesForKeys: nil,
+			relativeTo: nil
+		) {
+			lastDatabaseBookmark = bookmark
+		}
+
+		stopCurrentAccess()
+		_ = resolved.startAccessingSecurityScopedResource()
+		securityScopedURL = resolved
+		openDatabase(at: resolved)
+	}
+
+	private func restoreFromBookmark() {
+		guard !lastDatabaseBookmark.isEmpty else { return }
+		do {
+			var isStale = false
+			let url = try URL(
+				resolvingBookmarkData: lastDatabaseBookmark,
+				options: .withSecurityScope,
+				relativeTo: nil,
+				bookmarkDataIsStale: &isStale
+			)
+			if isStale {
+				lastDatabaseBookmark = Data()
+				return
+			}
+			_ = url.startAccessingSecurityScopedResource()
+			securityScopedURL = url
+			openDatabase(at: url)
+		} catch {
+			lastDatabaseBookmark = Data()
+		}
+	}
+
+	private func stopCurrentAccess() {
+		securityScopedURL?.stopAccessingSecurityScopedResource()
+		securityScopedURL = nil
+	}
+
+	/// Accepts a history.db file, a directory containing one, a subdirectory of
+	/// one, or walks up two levels to find a parent that contains one.
+	private func resolveDirectoryURL(from url: URL) -> URL? {
+		let fm = FileManager.default
+
+		func containsDB(_ dir: URL) -> Bool {
+			fm.fileExists(atPath: dir.appendingPathComponent("history.db").path)
+		}
+
+		// Selected the file directly
+		if url.lastPathComponent == "history.db" { return url.deletingLastPathComponent() }
+
+		let baseDir = url.hasDirectoryPath ? url : url.deletingLastPathComponent()
+
+		// Check the selected directory itself
+		if containsDB(baseDir) { return baseDir }
+
+		// Check one level down (e.g. selected an app container that holds com.chronicle.history/)
+		if let subdirs = try? fm.contentsOfDirectory(at: baseDir, includingPropertiesForKeys: [.isDirectoryKey]) {
+			for sub in subdirs where containsDB(sub) { return sub }
+		}
+
+		// Walk up two levels
+		var candidate = baseDir.deletingLastPathComponent()
+		for _ in 0..<2 {
+			if containsDB(candidate) { return candidate }
+			candidate = candidate.deletingLastPathComponent()
+		}
+
+		return nil
 	}
 
 	private func openDatabase(at directoryURL: URL) {
@@ -92,23 +188,18 @@ struct ContentView: View {
 		}
 
 		do {
-			var config = ChronicleConfiguration(isReadOnly: true)
-			config.databaseLocation = directoryURL.deletingLastPathComponent()
+			let container = try SwiftDataStorage.containerForExternalDatabase(at: directoryURL)
+			let config = ChronicleConfiguration(isReadOnly: true, modelContainer: container)
 			try Chronicle.instance.configure(config)
-
-			guard let container = Chronicle.instance.modelContainer else {
-				errorMessage = "Failed to configure Chronicle"
-				return
-			}
 
 			withAnimation {
 				self.selectedURL = directoryURL
 				self.watcher = DatabaseWatcher(dbURL: dbURL, modelContainer: container)
-				self.model = ChronicleViewerModel()
+				self.model = ChronicleViewerModel(modelContainer: container)
 				self.errorMessage = nil
 			}
 		} catch {
-			errorMessage = "Failed to open database: \(error.localizedDescription)"
+			errorMessage = "Failed to open database at \(directoryURL.path(percentEncoded: false)): \(error.localizedDescription)"
 		}
 	}
 }
@@ -120,6 +211,7 @@ struct LiveChronicleView: View {
 	let directoryURL: URL
 	@ObservedObject var watcher: DatabaseWatcher
 	@Binding var showClearConfirmation: Bool
+	@Binding var isRefreshing: Bool
 
 	var body: some View {
 		Group {
@@ -134,11 +226,16 @@ struct LiveChronicleView: View {
 	}
 
 	private func refresh() {
-		do {
-			var config = ChronicleConfiguration(isReadOnly: true)
-			config.databaseLocation = directoryURL.deletingLastPathComponent()
-			try Chronicle.instance.configure(config)
-			model = ChronicleViewerModel()
-		} catch {}
+		withAnimation { isRefreshing = true }
+		Task { @MainActor in
+			do {
+				let container = try SwiftDataStorage.containerForExternalDatabase(at: directoryURL)
+				let config = ChronicleConfiguration(isReadOnly: true, modelContainer: container)
+				try Chronicle.instance.configure(config)
+				model = ChronicleViewerModel(modelContainer: container)
+			} catch {}
+			try? await Task.sleep(for: .milliseconds(500))
+			withAnimation { isRefreshing = false }
+		}
 	}
 }
