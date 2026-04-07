@@ -66,7 +66,7 @@ public struct CloudKitLog: ChronicleEntry {
 		case .upload: "up \(recordType) — \(recordName)"
 		case .download: "down \(recordType) — \(recordName)"
 		case .deleted: "del \(recordType) — \(recordName)"
-		case .zoneCreated: "zone created — \(zoneName)"
+		case .zoneCreated: "zone modified — \(zoneName)"
 		case .zoneDeleted: "zone deleted — \(zoneName)"
 		}
 	}

@@ -86,7 +86,7 @@ public struct MarkdownExporter: ExportDestination {
             case .upload: "Upload"
             case .download: "Download"
             case .deleted: "Delete"
-            case .zoneCreated: "Zone Created"
+            case .zoneCreated: "Zone Modified"
             case .zoneDeleted: "Zone Deleted"
             }
             var md: String = switch ck.operation {

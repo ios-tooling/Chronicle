@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- macOS squircle clip path -->
+    <clipPath id="squircle">
+      <path d="M512 8C299.2 8 224 8 148.8 45.6 89.6 76.8 76.8 89.6 45.6 148.8 8 224 8 299.2 8 512s0 288 37.6 363.2c31.2 59.2 44 72 103.2 103.2C224 1016 299.2 1016 512 1016s288 0 363.2-37.6c59.2-31.2 72-44 103.2-103.2C1016 800 1016 724.8 1016 512s0-288-37.6-363.2C947.2 89.6 934.4 76.8 875.2 45.6 800 8 724.8 8 512 8z"/>
+    </clipPath>
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4A1A8A"/>
+      <stop offset="50%" stop-color="#2D1B69"/>
+      <stop offset="100%" stop-color="#1A0E3E"/>
+    </linearGradient>
+    <!-- Subtle inner glow -->
+    <radialGradient id="glow" cx="400" cy="350" r="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C4DFF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#7C4DFF" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Card shadow -->
+    <filter id="cardShadow" x="-10%" y="-5%" width="120%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <!-- Magnifier shadow -->
+    <filter id="magShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <!-- Card gradient -->
+    <linearGradient id="card" x1="180" y1="180" x2="700" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F5F0FF"/>
+      <stop offset="100%" stop-color="#E0D6F0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <g clip-path="url(#squircle)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <rect width="1024" height="1024" fill="url(#glow)"/>
+  </g>
+
+  <!-- Log card -->
+  <g clip-path="url(#squircle)">
+    <rect x="180" y="185" width="520" height="660" rx="36" fill="url(#card)" filter="url(#cardShadow)"/>
+
+    <!-- Header bar -->
+    <rect x="180" y="185" width="520" height="72" rx="36" fill="#6C3FC8"/>
+    <rect x="180" y="221" width="520" height="36" fill="#6C3FC8"/>
+    <!-- Header dots (window controls) -->
+    <circle cx="222" cy="221" r="10" fill="#FF6B6B" opacity="0.9"/>
+    <circle cx="254" cy="221" r="10" fill="#FFD93D" opacity="0.9"/>
+    <circle cx="286" cy="221" r="10" fill="#6BCB77" opacity="0.9"/>
+    <!-- Header title -->
+    <text x="440" y="230" font-family="-apple-system, SF Pro Display, Helvetica Neue" font-size="28" font-weight="600" fill="#fff" text-anchor="middle" opacity="0.95">Chronicle</text>
+
+    <!-- Log entries -->
+    <!-- Entry 1: Event (blue) -->
+    <circle cx="228" cy="310" r="12" fill="#42A5F5"/>
+    <rect x="258" y="302" width="200" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="324" width="140" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 2: Network (green) -->
+    <circle cx="228" cy="385" r="12" fill="#66BB6A"/>
+    <rect x="258" y="377" width="240" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="399" width="170" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 3: Error (red) -->
+    <circle cx="228" cy="460" r="12" fill="#EF5350"/>
+    <rect x="258" y="452" width="180" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="474" width="220" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 4: Flow (amber) -->
+    <circle cx="228" cy="535" r="12" fill="#FFA726"/>
+    <rect x="258" y="527" width="260" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="549" width="150" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 5: CloudKit (purple) -->
+    <circle cx="228" cy="610" r="12" fill="#AB47BC"/>
+    <rect x="258" y="602" width="190" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="624" width="210" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 6: Event (blue) -->
+    <circle cx="228" cy="685" r="12" fill="#42A5F5"/>
+    <rect x="258" y="677" width="220" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="699" width="160" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Entry 7: partial -->
+    <circle cx="228" cy="760" r="12" fill="#66BB6A"/>
+    <rect x="258" y="752" width="200" height="16" rx="8" fill="#9E9E9E" opacity="0.3"/>
+    <rect x="258" y="774" width="130" height="10" rx="5" fill="#BDBDBD" opacity="0.2"/>
+
+    <!-- Timeline line connecting dots -->
+    <line x1="228" y1="322" x2="228" y2="373" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+    <line x1="228" y1="397" x2="228" y2="448" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+    <line x1="228" y1="472" x2="228" y2="523" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+    <line x1="228" y1="547" x2="228" y2="598" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+    <line x1="228" y1="622" x2="228" y2="673" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+    <line x1="228" y1="697" x2="228" y2="748" stroke="#7E57C2" stroke-width="2" opacity="0.3"/>
+  </g>
+
+  <!-- Magnifying glass -->
+  <g clip-path="url(#squircle)" filter="url(#magShadow)">
+    <!-- Glass body -->
+    <circle cx="700" cy="640" r="140" fill="none" stroke="#E0D6F0" stroke-width="28" opacity="0.95"/>
+    <circle cx="700" cy="640" r="140" fill="#B39DDB" opacity="0.15"/>
+    <!-- Handle -->
+    <line x1="798" y1="740" x2="890" y2="850" stroke="#E0D6F0" stroke-width="32" stroke-linecap="round" opacity="0.95"/>
+    <!-- Glare -->
+    <path d="M640 580 Q660 560 680 570" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.5"/>
+  </g>
+</svg>

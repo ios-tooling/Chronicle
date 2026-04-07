@@ -18,7 +18,7 @@ struct CloudKitLogRow: View {
 				if showTags, let tags = log.tags { TagsView(tags: tags, onTap: tagTapAction) }
 
 				if isZoneEvent {
-					Text(log.operation == .zoneCreated ? "Zone Created" : "Zone Deleted")
+					Text(log.operation == .zoneCreated ? "Zone Modified" : "Zone Deleted")
 						.font(.subheadline.weight(.medium))
 				} else {
 					Text(log.recordType)
