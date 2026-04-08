@@ -21,7 +21,7 @@ struct CKRecordDetailScreen: View {
 		#if !os(macOS)
 		.navigationBarTitleDisplayMode(.inline)
 		#endif
-		.onAppear { record = Chronicle.instance.cloudKit.recordCache?.record(for: entryID) }
+		.onAppear { record = Chronicle.instance.cloudKit?.recordCache?.record(for: entryID) }
 	}
 
 	private func recordContent(_ record: CKRecord) -> some View {
@@ -90,7 +90,7 @@ struct CKRecordDetailScreen: View {
 	}
 
 	private func removeFromCache() {
-		Chronicle.instance.cloudKit.recordCache?.remove(for: entryID)
+		Chronicle.instance.cloudKit?.recordCache?.remove(for: entryID)
 		record = nil
 	}
 }

@@ -36,6 +36,6 @@ public struct ChronicleEntryList: View {
 	}
 
 	private func hasCachedRecord(for entryID: UUID) -> Bool {
-		Chronicle.instance.cloudKit.recordCache?.hasRecord(for: entryID) ?? false
+		Chronicle.instance.cloudKit?.recordCache?.hasRecord(for: entryID) ?? false
 	}
 }

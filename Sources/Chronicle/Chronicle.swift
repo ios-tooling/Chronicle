@@ -59,28 +59,28 @@ public final class Chronicle: @unchecked Sendable {
     }
 
     /// The event tracker for recording application events.
-    public var events: EventTracker {
-        lock.withLock { _events! }
+    public var events: EventTracker? {
+        lock.withLock { _events }
     }
 
     /// The network logger for recording network requests.
-    public var network: NetworkLogger {
-        lock.withLock { _network! }
+    public var network: NetworkLogger? {
+        lock.withLock { _network }
     }
 
     /// The flow tracker for recording screen transitions.
-    public var flow: FlowTracker {
-        lock.withLock { _flow! }
+    public var flow: FlowTracker? {
+        lock.withLock { _flow }
     }
 
     /// The error tracker for logging arbitrary errors.
-    public var errors: ErrorTracker {
-        lock.withLock { _errors! }
+    public var errors: ErrorTracker? {
+        lock.withLock { _errors }
     }
 
     /// The CloudKit logger for recording record uploads and downloads.
-    public var cloudKit: CloudKitLogger {
-        lock.withLock { _cloudKit! }
+    public var cloudKit: CloudKitLogger? {
+        lock.withLock { _cloudKit }
     }
 
     /// Sets the maximum number of CKRecords to cache on disk. Pass 0 to disable (default).

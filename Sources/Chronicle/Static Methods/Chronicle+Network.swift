@@ -45,9 +45,9 @@ extension Chronicle {
 				sourceFunction: function,
 				sourceLine: line
 			)
-			instance.network.log(log)
+			instance.network?.log(log)
 		} else {
-			instance.network.log(
+			instance.network?.log(
 				request: request,
 				response: response,
 				data: data,
@@ -113,6 +113,6 @@ extension Chronicle {
 			sourceFunction: function,
 			sourceLine: line
 		)
-		instance.network.log(log)
+		instance.network?.log(log)
 	}
 }

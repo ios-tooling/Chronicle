@@ -18,7 +18,7 @@ extension Chronicle {
 		line: Int = #line
 	) {
 		let merged = mergeDescription(description, into: context)
-		instance.errors.log(
+		instance.errors?.log(
 			error,
 			severity: severity,
 			context: merged,
