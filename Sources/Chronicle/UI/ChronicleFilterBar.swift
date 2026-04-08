@@ -31,6 +31,7 @@ struct ChronicleFilterBar: View {
             }
             .padding(.horizontal)
         }
+		  .frame(minHeight: 48)
     }
 }
 

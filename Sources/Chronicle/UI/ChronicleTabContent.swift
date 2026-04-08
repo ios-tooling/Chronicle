@@ -100,6 +100,7 @@ private struct ChronicleQueryContent: View {
 				tagsToggle
 					.padding(.leading)
 				ChronicleFilterBar(model: model, entries: allEntries)
+				clearButton
 				exportButton
 					.padding(.trailing)
 			}
@@ -115,6 +116,16 @@ private struct ChronicleQueryContent: View {
 		}
 		.buttonStyle(.plain)
 		.accessibilityLabel(model.showTags ? "Hide tags" : "Show tags")
+	}
+
+	private var clearButton: some View {
+		Button { showClearConfirmation = true } label: {
+			Image(systemName: "trash")
+				.font(.body)
+		}
+		.buttonStyle(.plain)
+		.foregroundStyle(.secondary)
+		.accessibilityLabel("Clear entries")
 	}
 
 	private var exportButton: some View {
