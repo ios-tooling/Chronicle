@@ -24,6 +24,8 @@ public struct ChronicleEntryList: View {
 					NavigationLink(destination: ErrorLogDetailScreen(error: error)) { EntryRow(entry: entry) }
 				} else if let ck = entry as? CloudKitLog, hasCachedRecord(for: ck.id) {
 					NavigationLink(destination: CKRecordDetailScreen(entryID: ck.id, log: ck)) { EntryRow(entry: entry) }
+				} else if let event = entry as? Event {
+					NavigationLink(destination: EventDetailScreen(event: event)) { EntryRow(entry: entry) }
 				} else if let detailView = entry.category.style.detailView {
 					NavigationLink(destination: detailView(entry)) { EntryRow(entry: entry) }
 				} else {
