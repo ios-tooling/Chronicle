@@ -2,17 +2,33 @@ import SwiftUI
 
 /// A button that presents the ChronicleScreen in a sheet.
 @available(iOS 17, macOS 14, *)
-public struct ChronicleButton: View {
-    @State private var isPresented = false
+public struct ChronicleButton<Content: View>: View {
+	@State private var isPresented = false
+	let content: () -> Content
+	
+	public init(content: @escaping () -> Content) {
+		self.content = content
+	}
+	
+	public var body: some View {
+		Button { isPresented = true } label: {
+			content()
+		}
+		.sheet(isPresented: $isPresented) {
+			ChronicleScreen()
+		}
+	}
+}
 
-    public init() {}
+@available(iOS 17, macOS 14, *)
+extension ChronicleButton where Content == ChronicleButtonLabel {
+	public init() {
+		self.init { ChronicleButtonLabel() }
+	}
+}
 
-    public var body: some View {
-        Button { isPresented = true } label: {
-            Label("Chronicle", systemImage: "clock.arrow.circlepath")
-        }
-        .sheet(isPresented: $isPresented) {
-            ChronicleScreen()
-        }
-    }
+public struct ChronicleButtonLabel: View {
+	public var body: some View {
+		Label("Chronicle", systemImage: "clock.arrow.circlepath")
+	}
 }
