@@ -13,6 +13,7 @@ public struct ChronicleButton<Content: View>: View {
 	public var body: some View {
 		Button { isPresented = true } label: {
 			content()
+				.contentShape(.rect)
 		}
 		.sheet(isPresented: $isPresented) {
 			ChronicleScreen()
