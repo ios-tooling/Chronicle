@@ -33,9 +33,10 @@ extension Chronicle {
 	}
 
 	/// Logs an error with a string context.
-	nonisolated public static func error(_ error: Error, description: String? = nil, severity: ErrorSeverity = .error, context: String, captureCallStack: Bool = false, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+	nonisolated public static func error(_ error: Error, description: String? = nil, severity: ErrorSeverity = .error, context: String?, captureCallStack: Bool = false, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, file: String = #file, function: String = #function, line: Int = #line) {
 		if error.isCancellation { return }
-		var metadata: EventMetadata = ["context": .string(context)]
+		var metadata: EventMetadata = error.eventMetadata
+		if let context { metadata["context"] = .string(context) }
 		if let description { metadata["description"] = .string(description) }
 		self.error(error, severity: severity, context: metadata, captureCallStack: captureCallStack, tags: tags, referenceURL: referenceURL, referenceID: referenceID, file: file, function: function, line: line)
 	}

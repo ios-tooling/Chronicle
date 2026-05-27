@@ -1,13 +1,40 @@
 {
-  "originHash" : "cc0029285b02e32f7166bc0d12633e9529b44162efe35c89d36136bb61e82a59",
+  "originHash" : "dc8e0bb110d14768e57dc75fc30a13b02971940b93b54c9bb2c2a529fe796051",
   "pins" : [
+    {
+      "identity" : "cloudseeding",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ios-tooling/cloudseeding",
+      "state" : {
+        "revision" : "d25fa5226c974678bd3823c14aeaf6db28827225",
+        "version" : "0.2.1"
+      }
+    },
+    {
+      "identity" : "suite",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ios-tooling/Suite",
+      "state" : {
+        "revision" : "69734bb6002337959fe3d29cb9a413106aace8b5",
+        "version" : "1.4.5"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax",
+      "state" : {
+        "revision" : "9de99a78f099e59caf2b2beec65a4c45d54b2081",
+        "version" : "603.0.1"
+      }
+    },
     {
       "identity" : "tagalong",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ios-tooling/TagAlong",
       "state" : {
-        "revision" : "f7ddf6ae68e18703c209923210e8a713beb280f3",
-        "version" : "0.0.4"
+        "revision" : "c15cd80a5870989c6d12ecdcad1e32d81bf550a8",
+        "version" : "0.0.5"
       }
     }
   ],
