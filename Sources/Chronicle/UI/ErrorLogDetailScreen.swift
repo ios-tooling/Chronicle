@@ -17,6 +17,52 @@ struct ErrorLogDetailScreen: View {
         #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        .toolbar {
+            if ChronicleDebugger.isAttached {
+                ToolbarItem(placement: .automatic) {
+                    Button("Log") { logError() }
+                }
+            }
+        }
+    }
+
+    private func logError() {
+        var lines: [String] = []
+        lines.append("═══════════════════════════════════════")
+        lines.append("  [\(error.severity.rawValue.uppercased())] \(error.errorType)")
+        lines.append("  \(error.timestamp.chronicle_formatted)")
+        lines.append("═══════════════════════════════════════")
+        lines.append("Domain: \(error.domain)" + (error.code.map { "  Code: \($0)" } ?? ""))
+        lines.append("Message: \(error.message)")
+        if let reason = error.failureReason       { lines.append("Reason: \(reason)") }
+        if let suggestion = error.recoverySuggestion { lines.append("Suggestion: \(suggestion)") }
+        if error.fullDescription != error.message {
+            lines.append("")
+            lines.append("── Full Description ──")
+            lines.append(error.fullDescription)
+        }
+        if let context = error.context, !context.isEmpty {
+            lines.append("")
+            lines.append("── Context ──")
+            for key in context.keys.sorted() { lines.append("  \(key): \(context[key]!)") }
+        }
+        if let userInfo = error.userInfo, !userInfo.isEmpty {
+            lines.append("")
+            lines.append("── User Info ──")
+            for key in userInfo.keys.sorted() { lines.append("  \(key): \(userInfo[key] ?? "")") }
+        }
+        if let file = error.sourceFile, let line = error.sourceLine {
+            lines.append("")
+            lines.append("── Source ──")
+            lines.append("  \(file):\(line)" + (error.sourceFunction.map { "  \($0)" } ?? ""))
+        }
+        if let symbols = error.callStackSymbols {
+            lines.append("")
+            lines.append("── Call Stack ──")
+            symbols.forEach { lines.append("  \($0)") }
+        }
+        lines.append("═══════════════════════════════════════")
+        print(lines.joined(separator: "\n"))
     }
 
     private var overviewSection: some View {
