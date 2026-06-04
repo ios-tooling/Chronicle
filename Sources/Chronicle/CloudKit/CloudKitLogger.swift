@@ -6,10 +6,12 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 public final class CloudKitLogger: @unchecked Sendable {
 	private let storage: SwiftDataStorage
+	private let writer: StorageWriter
 	private var _recordCache: CKRecordCache?
 
-	init(storage: SwiftDataStorage) {
+	init(storage: SwiftDataStorage, writer: StorageWriter) {
 		self.storage = storage
+		self.writer = writer
 	}
 
 	/// The CKRecord cache, if enabled via `setCloudKitCacheSize(_:)`.
@@ -58,7 +60,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
 		)
-		storage.store(log)
+		writer.store(log)
 		if let record { _recordCache?.store(record, for: log.id) }
 	}
 
@@ -91,7 +93,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
 		)
-		storage.store(log)
+		writer.store(log)
 		if let record { _recordCache?.store(record, for: log.id) }
 	}
 
@@ -119,7 +121,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
 		)
-		storage.store(log)
+		writer.store(log)
 		if let record { _recordCache?.store(record, for: log.id) }
 	}
 
@@ -144,7 +146,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
 		)
-		storage.store(log)
+		writer.store(log)
 	}
 
 	/// Log a CloudKit zone creation from a zone ID.
@@ -182,7 +184,7 @@ public final class CloudKitLogger: @unchecked Sendable {
 			sourceFile: (file as NSString).lastPathComponent,
 			sourceFunction: function, sourceLine: line
 		)
-		storage.store(log)
+		writer.store(log)
 	}
 
 	/// Log a CloudKit zone deletion from a zone ID.
@@ -201,21 +203,21 @@ public final class CloudKitLogger: @unchecked Sendable {
 
 	/// Log a pre-built CloudKitLog entry directly, optionally caching the associated record.
 	public func log(_ cloudKitLog: CloudKitLog, record: CKRecord? = nil) {
-		storage.store(cloudKitLog)
+		writer.store(cloudKitLog)
 		if let record { _recordCache?.store(record, for: cloudKitLog.id) }
 	}
 
 	private static let allCloudKitCategories: Set<EntryCategory> = [.cloudKitUpload, .cloudKitDownload, .cloudKitDelete]
 
 	/// Returns recent CloudKit logs.
-	public func recentLogs(limit: Int = 100) -> [CloudKitLog] {
+	public func recentLogs(limit: Int = 100) async -> [CloudKitLog] {
 		let query = StorageQuery(categories: Self.allCloudKitCategories, limit: limit)
-		return storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
+		return await storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
 	}
 
 	/// Returns all stored CloudKit logs.
-	public func allLogs() -> [CloudKitLog] {
+	public func allLogs() async -> [CloudKitLog] {
 		let query = StorageQuery(categories: Self.allCloudKitCategories)
-		return storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
+		return await storage.entries(matching: query).compactMap { $0 as? CloudKitLog }
 	}
 }

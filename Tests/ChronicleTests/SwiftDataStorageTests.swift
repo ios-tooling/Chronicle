@@ -9,13 +9,13 @@ struct SwiftDataStorageTests {
     }
 
     @Test("Store and retrieve an event")
-    func storeAndRetrieveEvent() throws {
+    func storeAndRetrieveEvent() async throws {
         let storage = try makeStorage()
 
         let event = Event(name: "test_event", context: ["key": "value"])
-        storage.store(event)
+        await storage.store(event)
 
-        let entries = storage.allEntries()
+        let entries = await storage.allEntries()
         #expect(entries.count == 1)
 
         let retrieved = entries[0] as? Event
@@ -25,7 +25,7 @@ struct SwiftDataStorageTests {
     }
 
     @Test("Store and retrieve a network log")
-    func storeAndRetrieveNetworkLog() throws {
+    func storeAndRetrieveNetworkLog() async throws {
         let storage = try makeStorage()
 
         let log = NetworkLog(
@@ -39,9 +39,9 @@ struct SwiftDataStorageTests {
                 bytesReceived: 1024
             )
         )
-        storage.store(log)
+        await storage.store(log)
 
-        let entries = storage.entries(matching: StorageQuery(categories: [.network]))
+        let entries = await storage.entries(matching: StorageQuery(categories: [.network]))
         #expect(entries.count == 1)
 
         let retrieved = entries[0] as? NetworkLog
@@ -50,15 +50,15 @@ struct SwiftDataStorageTests {
     }
 
     @Test("Store and retrieve a flow event")
-    func storeAndRetrieveFlowEvent() throws {
+    func storeAndRetrieveFlowEvent() async throws {
         let storage = try makeStorage()
 
         let from = FlowStep(screenName: "Home", transitionType: .push)
         let to = FlowStep(screenName: "Settings", transitionType: .push)
         let flowEvent = FlowEvent(from: from, to: to, transitionType: .push)
-        storage.store(flowEvent)
+        await storage.store(flowEvent)
 
-        let entries = storage.entries(matching: StorageQuery(categories: [.flow]))
+        let entries = await storage.entries(matching: StorageQuery(categories: [.flow]))
         #expect(entries.count == 1)
 
         let retrieved = entries[0] as? FlowEvent
@@ -67,93 +67,93 @@ struct SwiftDataStorageTests {
     }
 
     @Test("Query with date range")
-    func queryDateRange() throws {
+    func queryDateRange() async throws {
         let storage = try makeStorage()
 
         let old = Event(timestamp: Date().addingTimeInterval(-3600), name: "old_event")
         let recent = Event(name: "recent_event")
-        storage.store(old)
-        storage.store(recent)
+        await storage.store(old)
+        await storage.store(recent)
 
         let query = StorageQuery(since: Date().addingTimeInterval(-60))
-        let results = storage.entries(matching: query)
+        let results = await storage.entries(matching: query)
         #expect(results.count == 1)
         #expect((results[0] as? Event)?.name == "recent_event")
     }
 
     @Test("Query with category filter")
-    func queryCategoryFilter() throws {
+    func queryCategoryFilter() async throws {
         let storage = try makeStorage()
 
-        storage.store(Event(name: "an_event"))
-        storage.store(NetworkLog(
+        await storage.store(Event(name: "an_event"))
+        await storage.store(NetworkLog(
             url: URL(string: "https://example.com")!,
             method: "GET"
         ))
 
         let eventQuery = StorageQuery(categories: [.event])
-        let eventResults = storage.entries(matching: eventQuery)
+        let eventResults = await storage.entries(matching: eventQuery)
         #expect(eventResults.count == 1)
         #expect(eventResults[0].category == .event)
 
         let networkQuery = StorageQuery(categories: [.network])
-        let networkResults = storage.entries(matching: networkQuery)
+        let networkResults = await storage.entries(matching: networkQuery)
         #expect(networkResults.count == 1)
         #expect(networkResults[0].category == .network)
     }
 
     @Test("Query with limit")
-    func queryWithLimit() throws {
+    func queryWithLimit() async throws {
         let storage = try makeStorage()
 
         for i in 0..<10 {
-            storage.store(Event(name: "event_\(i)"))
+            await storage.store(Event(name: "event_\(i)"))
         }
 
         let query = StorageQuery(limit: 3)
-        let results = storage.entries(matching: query)
+        let results = await storage.entries(matching: query)
         #expect(results.count == 3)
     }
 
     @Test("Clear all entries")
-    func clearAll() throws {
+    func clearAll() async throws {
         let storage = try makeStorage()
 
-        storage.store(Event(name: "event"))
-        storage.store(NetworkLog(url: URL(string: "https://example.com")!, method: "GET"))
+        await storage.store(Event(name: "event"))
+        await storage.store(NetworkLog(url: URL(string: "https://example.com")!, method: "GET"))
 
-        #expect(storage.allEntries().count == 2)
+        #expect(await storage.allEntries().count == 2)
 
-        storage.clear()
-        #expect(storage.allEntries().count == 0)
+        await storage.clear()
+        #expect(await storage.allEntries().count == 0)
     }
 
     @Test("Clear entries before date")
-    func clearBeforeDate() throws {
+    func clearBeforeDate() async throws {
         let storage = try makeStorage()
 
         let old = Event(timestamp: Date().addingTimeInterval(-3600), name: "old")
         let recent = Event(name: "recent")
-        storage.store(old)
-        storage.store(recent)
+        await storage.store(old)
+        await storage.store(recent)
 
-        storage.clear(before: Date().addingTimeInterval(-60))
+        await storage.clear(before: Date().addingTimeInterval(-60))
 
-        let entries = storage.allEntries()
+        let entries = await storage.allEntries()
         #expect(entries.count == 1)
         #expect((entries[0] as? Event)?.name == "recent")
     }
 
     @Test("Query with name filter")
-    func queryNameFilter() throws {
+    func queryNameFilter() async throws {
         let storage = try makeStorage()
 
-        storage.store(Event(name: "user_login"))
-        storage.store(Event(name: "user_logout"))
-        storage.store(Event(name: "page_view"))
+        await storage.store(Event(name: "user_login"))
+        await storage.store(Event(name: "user_logout"))
+        await storage.store(Event(name: "page_view"))
 
         let query = StorageQuery(categories: [.event], nameContains: "user")
-        let results = storage.entries(matching: query)
+        let results = await storage.entries(matching: query)
         #expect(results.count == 2)
     }
 }

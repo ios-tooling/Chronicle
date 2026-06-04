@@ -5,23 +5,23 @@ import Foundation
 @Suite("Chronicle Integration Tests")
 struct ChronicleIntegrationTests {
     @Test("Full lifecycle: configure, track, query, report")
-    func fullLifecycle() throws {
+    func fullLifecycle() async throws {
         let chronicle = Chronicle.instance
         try chronicle.configureInMemory()
 
         // Track events
-        chronicle.events.track("app_launched")
-        chronicle.events.track("screen_viewed", context: ["name": "home"])
+        chronicle.events?.track("app_launched")
+        chronicle.events?.track("screen_viewed", context: ["name": "home"])
 
         // Log network
         let url = URL(string: "https://api.example.com/config")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        chronicle.network.log(request: request)
+        chronicle.network?.log(request: request)
 
         // Track flow
-        chronicle.flow.trackScreen("HomeScreen")
-        chronicle.flow.trackScreen("SettingsScreen", transition: .push)
+        chronicle.flow?.trackScreen("HomeScreen")
+        chronicle.flow?.trackScreen("SettingsScreen", transition: .push)
 
         // Log errors
         let testError = NSError(
@@ -29,38 +29,41 @@ struct ChronicleIntegrationTests {
             code: 404,
             userInfo: [NSLocalizedDescriptionKey: "Resource not found"]
         )
-        chronicle.errors.log(testError, severity: .warning, context: ["endpoint": "/config"])
+        chronicle.errors?.log(testError, severity: .warning, context: ["endpoint": "/config"])
+
+        // Wait for all fire-and-forget writes to be persisted
+        await chronicle.flush()
 
         // Query all entries
-        let allEntries = chronicle.allEntries()
+        let allEntries = await chronicle.allEntries()
         #expect(allEntries.count == 6) // 2 events + 1 network + 2 flow + 1 error
 
         // Query by category
-        let eventEntries = chronicle.entries(matching: StorageQuery(categories: [.event]))
+        let eventEntries = await chronicle.entries(matching: StorageQuery(categories: [.event]))
         #expect(eventEntries.count == 2)
 
-        let networkEntries = chronicle.entries(matching: StorageQuery(categories: [.network]))
+        let networkEntries = await chronicle.entries(matching: StorageQuery(categories: [.network]))
         #expect(networkEntries.count == 1)
 
-        let flowEntries = chronicle.entries(matching: StorageQuery(categories: [.flow]))
+        let flowEntries = await chronicle.entries(matching: StorageQuery(categories: [.flow]))
         #expect(flowEntries.count == 2)
 
-        let errorEntries = chronicle.entries(matching: StorageQuery(categories: [.error]))
+        let errorEntries = await chronicle.entries(matching: StorageQuery(categories: [.error]))
         #expect(errorEntries.count == 1)
 
         // Generate report
-        let report = try chronicle.generateReport(title: "Integration Test Report")
+        let report = await chronicle.generateReport(title: "Integration Test Report")
         #expect(report.contains("# Integration Test Report"))
         #expect(report.contains("app_launched"))
         #expect(report.contains("api.example.com"))
         #expect(report.contains("HomeScreen"))
         #expect(report.contains("SettingsScreen"))
-        #expect(report.contains("## Errors"))
+        #expect(report.contains("## Timeline"))
         #expect(report.contains("Resource not found"))
 
         // Clear
-        chronicle.clear()
-        #expect(chronicle.allEntries().count == 0)
+        await chronicle.clear()
+        #expect(await chronicle.allEntries().count == 0)
     }
 
     @Test("AnyCodableValue roundtrip encoding")

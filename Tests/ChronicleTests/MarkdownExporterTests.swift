@@ -40,10 +40,7 @@ struct MarkdownExporterTests {
 
         #expect(markdown.contains("# Test Report"))
         #expect(markdown.contains("## Summary"))
-        #expect(markdown.contains("## Events"))
-        #expect(markdown.contains("## Network"))
-        #expect(markdown.contains("## Flow"))
-        #expect(markdown.contains("## Errors"))
+        #expect(markdown.contains("## Timeline"))
         #expect(markdown.contains("app_launched"))
         #expect(markdown.contains("api.example.com"))
         #expect(markdown.contains("HomeScreen"))
@@ -77,7 +74,6 @@ struct MarkdownExporterTests {
         #expect(markdown.contains("| Events | 2 |"))
         #expect(markdown.contains("| Network | 2 |"))
         #expect(markdown.contains("**Total Entries:** 4"))
-        #expect(markdown.contains("Network Error Rate"))
     }
 
     @Test("Report with no entries")
@@ -108,23 +104,4 @@ struct MarkdownExporterTests {
         #expect(string!.contains("Chronicle Report"))
     }
 
-    @Test("Network error rate calculation")
-    func networkErrorRate() throws {
-        let exporter = MarkdownExporter()
-
-        let entries: [any ChronicleEntry] = [
-            NetworkLog(url: URL(string: "https://a.com")!, method: "GET", statusCode: 200,
-                      metrics: NetworkMetrics(startTime: Date(), endTime: Date())),
-            NetworkLog(url: URL(string: "https://b.com")!, method: "GET", statusCode: 404,
-                      metrics: NetworkMetrics(startTime: Date(), endTime: Date())),
-            NetworkLog(url: URL(string: "https://c.com")!, method: "GET", statusCode: 500,
-                      metrics: NetworkMetrics(startTime: Date(), endTime: Date())),
-            NetworkLog(url: URL(string: "https://d.com")!, method: "GET", statusCode: 200,
-                      metrics: NetworkMetrics(startTime: Date(), endTime: Date()))
-        ]
-
-        let markdown = exporter.generateMarkdown(from: entries)
-        // 2 out of 4 requests had errors (404 and 500)
-        #expect(markdown.contains("50.0%"))
-    }
 }

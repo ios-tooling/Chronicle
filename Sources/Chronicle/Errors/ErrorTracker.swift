@@ -5,9 +5,11 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 public final class ErrorTracker: Sendable {
     private let storage: SwiftDataStorage
+    private let writer: StorageWriter
 
-    init(storage: SwiftDataStorage) {
+    init(storage: SwiftDataStorage, writer: StorageWriter) {
         self.storage = storage
+        self.writer = writer
     }
 
     /// Logs any Swift `Error`, extracting all available information.
@@ -38,7 +40,7 @@ public final class ErrorTracker: Sendable {
             function: function,
             line: line
         )
-        storage.store(errorLog)
+        writer.store(errorLog)
 
         if ChronicleDebugger.isAttached {
             var message = "⚠️ [\(severity.rawValue.uppercased())] \(error.localizedDescription)"
@@ -52,24 +54,24 @@ public final class ErrorTracker: Sendable {
 
     /// Logs an ErrorLog entry directly.
     public func log(_ errorLog: ErrorLog) {
-        storage.store(errorLog)
+        writer.store(errorLog)
     }
 
     /// Returns recent error logs, up to the specified limit.
-    public func recentErrors(limit: Int = 100) -> [ErrorLog] {
+    public func recentErrors(limit: Int = 100) async -> [ErrorLog] {
         let query = StorageQuery(categories: [.error], limit: limit)
-        return storage.entries(matching: query).compactMap { $0 as? ErrorLog }
+        return await storage.entries(matching: query).compactMap { $0 as? ErrorLog }
     }
 
     /// Returns all stored error logs.
-    public func allErrors() -> [ErrorLog] {
+    public func allErrors() async -> [ErrorLog] {
         let query = StorageQuery(categories: [.error])
-        return storage.entries(matching: query).compactMap { $0 as? ErrorLog }
+        return await storage.entries(matching: query).compactMap { $0 as? ErrorLog }
     }
 
     /// Returns error logs filtered by severity.
-    public func errors(withSeverity severity: ErrorSeverity) -> [ErrorLog] {
-        allErrors().filter { $0.severity == severity }
+    public func errors(withSeverity severity: ErrorSeverity) async -> [ErrorLog] {
+        await allErrors().filter { $0.severity == severity }
     }
 
     // MARK: - Error Extraction

@@ -5,6 +5,7 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 public final class FlowTracker: @unchecked Sendable {
     private let storage: SwiftDataStorage
+    private let writer: StorageWriter
     private var _currentStep: FlowStep?
     private let lock = NSLock()
 
@@ -13,8 +14,9 @@ public final class FlowTracker: @unchecked Sendable {
         set { lock.withLock { _currentStep = newValue } }
     }
 
-    init(storage: SwiftDataStorage) {
+    init(storage: SwiftDataStorage, writer: StorageWriter) {
         self.storage = storage
+        self.writer = writer
     }
 
     /// Tracks a screen transition.
@@ -40,7 +42,7 @@ public final class FlowTracker: @unchecked Sendable {
         )
 
         currentStep = newStep
-        storage.store(flowEvent)
+        writer.store(flowEvent)
     }
 
     /// Tracks an app lifecycle event.
@@ -59,7 +61,7 @@ public final class FlowTracker: @unchecked Sendable {
             sourceLine: line
         )
 
-        storage.store(flowEvent)
+        writer.store(flowEvent)
     }
 
     /// The currently active screen.
@@ -68,14 +70,14 @@ public final class FlowTracker: @unchecked Sendable {
     }
 
     /// Returns recent flow events (breadcrumbs), up to the specified limit.
-    public func breadcrumbs(limit: Int = 50) -> [FlowEvent] {
+    public func breadcrumbs(limit: Int = 50) async -> [FlowEvent] {
         let query = StorageQuery(categories: [.flow], limit: limit)
-        return storage.entries(matching: query).compactMap { $0 as? FlowEvent }
+        return await storage.entries(matching: query).compactMap { $0 as? FlowEvent }
     }
 
     /// Returns all stored flow events.
-    public func allFlowEvents() -> [FlowEvent] {
+    public func allFlowEvents() async -> [FlowEvent] {
         let query = StorageQuery(categories: [.flow])
-        return storage.entries(matching: query).compactMap { $0 as? FlowEvent }
+        return await storage.entries(matching: query).compactMap { $0 as? FlowEvent }
     }
 }

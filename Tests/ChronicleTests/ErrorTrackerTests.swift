@@ -42,18 +42,20 @@ enum TestError: Error, LocalizedError {
 
 @Suite("ErrorTracker Tests")
 struct ErrorTrackerTests {
-    private func makeStorage() throws -> SwiftDataStorage {
-        try SwiftDataStorage.inMemory()
+    private func makeTracker() throws -> (ErrorTracker, StorageWriter) {
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        return (ErrorTracker(storage: storage, writer: writer), writer)
     }
 
     @Test("Log a simple error")
-    func logSimpleError() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logSimpleError() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.log(TestError.simple)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].category == .error)
         #expect(errors[0].message == "A simple test error")
@@ -62,38 +64,37 @@ struct ErrorTrackerTests {
     }
 
     @Test("Log error with custom severity")
-    func logErrorWithSeverity() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logErrorWithSeverity() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.log(TestError.simple, severity: .critical)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].severity == .critical)
     }
 
     @Test("Log error with context")
-    func logErrorWithContext() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logErrorWithContext() async throws {
+        let (tracker, writer) = try makeTracker()
 
         let context: EventMetadata = ["screen": "checkout", "userId": "user123"]
         tracker.log(TestError.simple, context: context)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].context?["screen"] == .string("checkout"))
         #expect(errors[0].context?["userId"] == .string("user123"))
-        // Source location context should also be present
-        #expect(errors[0].context?["sourceFunction"] != nil)
-        #expect(errors[0].context?["sourceLine"] != nil)
+        // Source location is captured in the ErrorLog's dedicated fields
+        #expect(errors[0].sourceFunction != nil)
+        #expect(errors[0].sourceLine != nil)
     }
 
     @Test("Log NSError with domain and code")
-    func logNSError() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logNSError() async throws {
+        let (tracker, writer) = try makeTracker()
 
         let nsError = NSError(
             domain: "com.myapp.database",
@@ -107,8 +108,9 @@ struct ErrorTrackerTests {
         )
 
         tracker.log(nsError)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].domain == "com.myapp.database")
         #expect(errors[0].code == 42)
@@ -119,22 +121,21 @@ struct ErrorTrackerTests {
     }
 
     @Test("Log error extracts failure reason and recovery suggestion")
-    func logErrorExtractsLocalizedInfo() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logErrorExtractsLocalizedInfo() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.log(TestError.simple)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].failureReason == "Something went wrong")
         #expect(errors[0].recoverySuggestion == "Try again")
     }
 
     @Test("Full description includes error chain")
-    func fullDescriptionIncludesChain() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func fullDescriptionIncludesChain() async throws {
+        let (tracker, writer) = try makeTracker()
 
         let underlying = NSError(
             domain: "com.myapp.network",
@@ -151,8 +152,9 @@ struct ErrorTrackerTests {
         )
 
         tracker.log(outerError)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].fullDescription.contains("API call failed"))
         #expect(errors[0].fullDescription.contains("Underlying"))
@@ -160,42 +162,41 @@ struct ErrorTrackerTests {
     }
 
     @Test("Log multiple errors with different severities")
-    func logMultipleErrors() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logMultipleErrors() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.log(TestError.simple, severity: .warning)
         tracker.log(TestError.withMessage("Critical failure"), severity: .critical)
         tracker.log(TestError.simple, severity: .info)
+        await writer.flush()
 
-        let allErrors = tracker.allErrors()
+        let allErrors = await tracker.allErrors()
         #expect(allErrors.count == 3)
 
-        let criticalErrors = tracker.errors(withSeverity: .critical)
+        let criticalErrors = await tracker.errors(withSeverity: .critical)
         #expect(criticalErrors.count == 1)
         #expect(criticalErrors[0].message == "Critical failure")
 
-        let warningErrors = tracker.errors(withSeverity: .warning)
+        let warningErrors = await tracker.errors(withSeverity: .warning)
         #expect(warningErrors.count == 1)
     }
 
     @Test("Recent errors respects limit")
-    func recentErrorsLimit() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func recentErrorsLimit() async throws {
+        let (tracker, writer) = try makeTracker()
 
         for i in 0..<10 {
             tracker.log(TestError.withMessage("Error \(i)"))
         }
+        await writer.flush()
 
-        let recent = tracker.recentErrors(limit: 3)
+        let recent = await tracker.recentErrors(limit: 3)
         #expect(recent.count == 3)
     }
 
     @Test("Log ErrorLog directly")
-    func logErrorLogDirectly() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logErrorLogDirectly() async throws {
+        let (tracker, writer) = try makeTracker()
 
         let errorLog = ErrorLog(
             domain: "com.test",
@@ -207,8 +208,9 @@ struct ErrorTrackerTests {
         )
 
         tracker.log(errorLog)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].domain == "com.test")
         #expect(errors[0].code == 99)
@@ -249,13 +251,13 @@ struct ErrorTrackerTests {
     }
 
     @Test("Log error with call stack capture")
-    func logErrorWithCallStack() throws {
-        let storage = try makeStorage()
-        let tracker = ErrorTracker(storage: storage)
+    func logErrorWithCallStack() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.log(TestError.simple, captureCallStack: true)
+        await writer.flush()
 
-        let errors = tracker.recentErrors()
+        let errors = await tracker.recentErrors()
         #expect(errors.count == 1)
         #expect(errors[0].callStackSymbols != nil)
         #expect(errors[0].callStackSymbols!.count > 0)

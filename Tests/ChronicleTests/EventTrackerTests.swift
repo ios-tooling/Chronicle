@@ -4,18 +4,20 @@ import Foundation
 
 @Suite("EventTracker Tests")
 struct EventTrackerTests {
-    private func makeStorage() throws -> SwiftDataStorage {
-        try SwiftDataStorage.inMemory()
+    private func makeTracker() throws -> (EventTracker, StorageWriter) {
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        return (EventTracker(storage: storage, writer: writer), writer)
     }
 
     @Test("Track a simple event")
-    func trackSimpleEvent() throws {
-        let storage = try makeStorage()
-        let tracker = EventTracker(storage: storage)
+    func trackSimpleEvent() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.track("button_tapped")
+        await writer.flush()
 
-        let events = tracker.recentEvents()
+        let events = await tracker.recentEvents()
         #expect(events.count == 1)
         #expect(events[0].name == "button_tapped")
         #expect(events[0].context == nil)
@@ -23,9 +25,8 @@ struct EventTrackerTests {
     }
 
     @Test("Track event with metadata")
-    func trackEventWithMetadata() throws {
-        let storage = try makeStorage()
-        let tracker = EventTracker(storage: storage)
+    func trackEventWithMetadata() async throws {
+        let (tracker, writer) = try makeTracker()
 
         let context: EventMetadata = [
             "screen": "checkout",
@@ -33,8 +34,9 @@ struct EventTrackerTests {
             "total": 29.99
         ]
         tracker.track("purchase_completed", context: context)
+        await writer.flush()
 
-        let events = tracker.recentEvents()
+        let events = await tracker.recentEvents()
         #expect(events.count == 1)
         #expect(events[0].name == "purchase_completed")
         #expect(events[0].context?["screen"] == .string("checkout"))
@@ -43,28 +45,28 @@ struct EventTrackerTests {
     }
 
     @Test("Track multiple events")
-    func trackMultipleEvents() throws {
-        let storage = try makeStorage()
-        let tracker = EventTracker(storage: storage)
+    func trackMultipleEvents() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.track("app_launched")
         tracker.track("screen_viewed", context: ["name": "home"])
         tracker.track("button_tapped", context: ["id": "settings"])
+        await writer.flush()
 
-        let events = tracker.allEvents()
+        let events = await tracker.allEvents()
         #expect(events.count == 3)
     }
 
     @Test("Recent events respects limit")
-    func recentEventsLimit() throws {
-        let storage = try makeStorage()
-        let tracker = EventTracker(storage: storage)
+    func recentEventsLimit() async throws {
+        let (tracker, writer) = try makeTracker()
 
         for i in 0..<10 {
             tracker.track("event_\(i)")
         }
+        await writer.flush()
 
-        let recent = tracker.recentEvents(limit: 3)
+        let recent = await tracker.recentEvents(limit: 3)
         #expect(recent.count == 3)
     }
 

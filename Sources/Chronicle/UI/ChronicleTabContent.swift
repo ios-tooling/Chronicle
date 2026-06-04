@@ -162,10 +162,12 @@ private struct ChronicleQueryContent: View {
 		 }
         .confirmationDialog("Clear Entries", isPresented: $showClearConfirmation) {
             Button(currentRunOnly ? "Clear Current Run" : "Clear All", role: .destructive) {
-                if currentRunOnly, let launchDate = Chronicle.instance.launchDate {
-                    Chronicle.instance.clear(since: launchDate)
-                } else {
-                    Chronicle.instance.clear()
+                Task {
+                    if currentRunOnly, let launchDate = Chronicle.instance.launchDate {
+                        await Chronicle.instance.clear(since: launchDate)
+                    } else {
+                        await Chronicle.instance.clear()
+                    }
                 }
             }
         } message: {

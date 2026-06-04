@@ -5,10 +5,12 @@ import TagAlong
 @available(iOS 17, macOS 14, *)
 public final class NetworkLogger: Sendable {
     private let storage: SwiftDataStorage
+    private let writer: StorageWriter
     private let errorTracker: ErrorTracker?
 
-    init(storage: SwiftDataStorage, errorTracker: ErrorTracker? = nil) {
+    init(storage: SwiftDataStorage, writer: StorageWriter, errorTracker: ErrorTracker? = nil) {
         self.storage = storage
+        self.writer = writer
         self.errorTracker = errorTracker
     }
 
@@ -51,24 +53,24 @@ public final class NetworkLogger: Sendable {
             sourceFunction: function,
             sourceLine: line
         )
-        storage.store(networkLog)
+        writer.store(networkLog)
     }
 
     /// Log a pre-built NetworkLog entry directly.
     public func log(_ networkLog: NetworkLog) {
-        storage.store(networkLog)
+        writer.store(networkLog)
     }
 
     /// Returns recent network logs, up to the specified limit.
-    public func recentLogs(limit: Int = 100) -> [NetworkLog] {
+    public func recentLogs(limit: Int = 100) async -> [NetworkLog] {
         let query = StorageQuery(categories: [.network], limit: limit)
-        return storage.entries(matching: query).compactMap { $0 as? NetworkLog }
+        return await storage.entries(matching: query).compactMap { $0 as? NetworkLog }
     }
 
     /// Returns all stored network logs.
-    public func allLogs() -> [NetworkLog] {
+    public func allLogs() async -> [NetworkLog] {
         let query = StorageQuery(categories: [.network])
-        return storage.entries(matching: query).compactMap { $0 as? NetworkLog }
+        return await storage.entries(matching: query).compactMap { $0 as? NetworkLog }
     }
 
 }

@@ -4,18 +4,20 @@ import Foundation
 
 @Suite("FlowTracker Tests")
 struct FlowTrackerTests {
-    private func makeStorage() throws -> SwiftDataStorage {
-        try SwiftDataStorage.inMemory()
+    private func makeTracker() throws -> (FlowTracker, StorageWriter) {
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        return (FlowTracker(storage: storage, writer: writer), writer)
     }
 
     @Test("Track first screen")
-    func trackFirstScreen() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func trackFirstScreen() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.trackScreen("HomeScreen")
+        await writer.flush()
 
-        let events = tracker.breadcrumbs()
+        let events = await tracker.breadcrumbs()
         #expect(events.count == 1)
         #expect(events[0].from == nil)
         #expect(events[0].to.screenName == "HomeScreen")
@@ -24,15 +26,15 @@ struct FlowTrackerTests {
     }
 
     @Test("Track screen transitions")
-    func trackTransitions() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func trackTransitions() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.trackScreen("HomeScreen")
         tracker.trackScreen("SettingsScreen", transition: .push)
         tracker.trackScreen("ProfileScreen", transition: .present)
+        await writer.flush()
 
-        let events = tracker.breadcrumbs()
+        let events = await tracker.breadcrumbs()
         #expect(events.count == 3)
 
         #expect(events[0].from == nil)
@@ -48,35 +50,34 @@ struct FlowTrackerTests {
     }
 
     @Test("Track screen with metadata")
-    func trackScreenWithMetadata() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func trackScreenWithMetadata() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.trackScreen("ProductDetail", transition: .push, context: ["product_id": "abc123"])
+        await writer.flush()
 
-        let events = tracker.breadcrumbs()
+        let events = await tracker.breadcrumbs()
         #expect(events.count == 1)
         #expect(events[0].to.additionalInfo?["product_id"] == .string("abc123"))
     }
 
     @Test("Track lifecycle event")
-    func trackLifecycle() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func trackLifecycle() async throws {
+        let (tracker, writer) = try makeTracker()
 
         tracker.trackScreen("HomeScreen")
         tracker.trackLifecycle(.didEnterBackground)
+        await writer.flush()
 
-        let events = tracker.breadcrumbs()
+        let events = await tracker.breadcrumbs()
         #expect(events.count == 2)
         #expect(events[1].to.screenName == "didEnterBackground")
         #expect(events[1].transitionType == .lifecycle)
     }
 
     @Test("Current screen tracking")
-    func currentScreen() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func currentScreen() async throws {
+        let (tracker, _) = try makeTracker()
 
         #expect(tracker.getCurrentScreen() == nil)
 
@@ -88,15 +89,15 @@ struct FlowTrackerTests {
     }
 
     @Test("Breadcrumbs respects limit")
-    func breadcrumbsLimit() throws {
-        let storage = try makeStorage()
-        let tracker = FlowTracker(storage: storage)
+    func breadcrumbsLimit() async throws {
+        let (tracker, writer) = try makeTracker()
 
         for i in 0..<10 {
             tracker.trackScreen("Screen_\(i)")
         }
+        await writer.flush()
 
-        let crumbs = tracker.breadcrumbs(limit: 3)
+        let crumbs = await tracker.breadcrumbs(limit: 3)
         #expect(crumbs.count == 3)
     }
 }

@@ -4,14 +4,15 @@ import Foundation
 
 @Suite("NetworkLogger Tests")
 struct NetworkLoggerTests {
-    private func makeStorage() throws -> SwiftDataStorage {
-        try SwiftDataStorage.inMemory()
+    private func makeLogger() throws -> (NetworkLogger, StorageWriter) {
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        return (NetworkLogger(storage: storage, writer: writer), writer)
     }
 
     @Test("Log a network request")
-    func logNetworkRequest() throws {
-        let storage = try makeStorage()
-        let logger = NetworkLogger(storage: storage)
+    func logNetworkRequest() async throws {
+        let (logger, writer) = try makeLogger()
 
         let url = URL(string: "https://api.example.com/users")!
         var request = URLRequest(url: url)
@@ -24,8 +25,9 @@ struct NetworkLoggerTests {
             startTime: startTime,
             endTime: startTime.addingTimeInterval(0.5)
         )
+        await writer.flush()
 
-        let logs = logger.recentLogs()
+        let logs = await logger.recentLogs()
         #expect(logs.count == 1)
         #expect(logs[0].url == url)
         #expect(logs[0].method == "GET")
@@ -33,9 +35,8 @@ struct NetworkLoggerTests {
     }
 
     @Test("Log request with response")
-    func logWithResponse() throws {
-        let storage = try makeStorage()
-        let logger = NetworkLogger(storage: storage)
+    func logWithResponse() async throws {
+        let (logger, writer) = try makeLogger()
 
         let url = URL(string: "https://api.example.com/data")!
         var request = URLRequest(url: url)
@@ -56,8 +57,9 @@ struct NetworkLoggerTests {
             response: response,
             data: responseData
         )
+        await writer.flush()
 
-        let logs = logger.recentLogs()
+        let logs = await logger.recentLogs()
         #expect(logs.count == 1)
         #expect(logs[0].method == "POST")
         #expect(logs[0].statusCode == 200)
@@ -66,17 +68,17 @@ struct NetworkLoggerTests {
     }
 
     @Test("Log request with error")
-    func logWithError() throws {
-        let storage = try makeStorage()
-        let logger = NetworkLogger(storage: storage)
+    func logWithError() async throws {
+        let (logger, writer) = try makeLogger()
 
         let url = URL(string: "https://api.example.com/fail")!
         let request = URLRequest(url: url)
         let error = NSError(domain: "test", code: -1, userInfo: [NSLocalizedDescriptionKey: "Connection failed"])
 
         logger.log(request: request, error: error)
+        await writer.flush()
 
-        let logs = logger.recentLogs()
+        let logs = await logger.recentLogs()
         #expect(logs.count == 1)
         #expect(logs[0].error == "Connection failed")
     }
@@ -100,17 +102,17 @@ struct NetworkLoggerTests {
     }
 
     @Test("Recent logs respects limit")
-    func recentLogsLimit() throws {
-        let storage = try makeStorage()
-        let logger = NetworkLogger(storage: storage)
+    func recentLogsLimit() async throws {
+        let (logger, writer) = try makeLogger()
 
         for i in 0..<5 {
             let url = URL(string: "https://api.example.com/\(i)")!
             let request = URLRequest(url: url)
             logger.log(request: request)
         }
+        await writer.flush()
 
-        let logs = logger.recentLogs(limit: 2)
+        let logs = await logger.recentLogs(limit: 2)
         #expect(logs.count == 2)
     }
 }
