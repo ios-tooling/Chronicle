@@ -67,6 +67,7 @@ public struct MarkdownExporter: ExportDestination {
         case let log as NetworkLog:
             var md = "**\(log.method)** `\(log.url.absoluteString)`"
             if let status = log.statusCode { md += " → \(status)" }
+            if let size = log.responseBodySize { md += " (\(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)))" }
             if let duration = log.metrics.duration { md += String(format: " (%.0fms)", duration * 1000) }
             md += "\n"
             if let error = log.error { md += "Error: \(error)\n" }
