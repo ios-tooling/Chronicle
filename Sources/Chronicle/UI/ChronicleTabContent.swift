@@ -48,19 +48,19 @@ private struct ChronicleQueryContent: View {
         self._showClearConfirmation = showClearConfirmation
         self.currentRunOnly = currentRunOnly
         if let since {
-            _events = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
-            _networkLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
-            _flowEvents = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
-            _errorLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
-            _cloudKitLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
-            _genericEntries = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor(\.timestamp)])
+            _events = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedEvent>(\.timestamp)])
+            _networkLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedNetworkLog>(\.timestamp)])
+            _flowEvents = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedFlowEvent>(\.timestamp)])
+            _errorLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedErrorLog>(\.timestamp)])
+            _cloudKitLogs = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedCloudKitLog>(\.timestamp)])
+            _genericEntries = Query(filter: #Predicate { $0.timestamp >= since }, sort: [SortDescriptor<PersistedGenericEntry>(\.timestamp)])
         } else {
-            _events = Query(sort: [SortDescriptor(\.timestamp)])
-            _networkLogs = Query(sort: [SortDescriptor(\.timestamp)])
-            _flowEvents = Query(sort: [SortDescriptor(\.timestamp)])
-            _errorLogs = Query(sort: [SortDescriptor(\.timestamp)])
-            _cloudKitLogs = Query(sort: [SortDescriptor(\.timestamp)])
-            _genericEntries = Query(sort: [SortDescriptor(\.timestamp)])
+            _events = Query(sort: [SortDescriptor<PersistedEvent>(\.timestamp)])
+            _networkLogs = Query(sort: [SortDescriptor<PersistedNetworkLog>(\.timestamp)])
+            _flowEvents = Query(sort: [SortDescriptor<PersistedFlowEvent>(\.timestamp)])
+            _errorLogs = Query(sort: [SortDescriptor<PersistedErrorLog>(\.timestamp)])
+            _cloudKitLogs = Query(sort: [SortDescriptor<PersistedCloudKitLog>(\.timestamp)])
+            _genericEntries = Query(sort: [SortDescriptor<PersistedGenericEntry>(\.timestamp)])
         }
     }
 
