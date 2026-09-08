@@ -80,7 +80,38 @@ struct NetworkLoggerTests {
 
         let logs = await logger.recentLogs()
         #expect(logs.count == 1)
-        #expect(logs[0].error == "Connection failed")
+        #expect(logs[0].error?.contains("test [-1]") == true)
+        #expect(logs[0].error?.contains("Connection failed") == true)
+    }
+
+    @Test("Custom metrics preserve a richly linked network error")
+    func customMetricsPreserveLinkedError() async throws {
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        let errorTracker = ErrorTracker(storage: storage, writer: writer)
+        let logger = NetworkLogger(storage: storage, writer: writer, errorTracker: errorTracker)
+
+        let url = URL(string: "https://api.example.com/offline")!
+        let request = URLRequest(url: url)
+        let error = NSError(
+            domain: NSURLErrorDomain,
+            code: NSURLErrorNotConnectedToInternet,
+            userInfo: [NSLocalizedDescriptionKey: "NSURLError"]
+        )
+        let start = Date()
+        let metrics = NetworkMetrics(startTime: start, endTime: start.addingTimeInterval(0.25))
+
+        logger.log(request: request, error: error, metrics: metrics)
+        await writer.flush()
+
+        let entries = await storage.allEntries()
+        let networkLog = try #require(entries.compactMap { $0 as? NetworkLog }.first)
+        let errorLog = try #require(entries.compactMap { $0 as? ErrorLog }.first)
+
+        #expect(networkLog.metrics == metrics)
+        #expect(networkLog.linkedErrorID == errorLog.id)
+        #expect(errorLog.linkedNetworkLogID == networkLog.id)
+        #expect(networkLog.error?.contains("NSURLErrorDomain [-1009, notConnectedToInternet]") == true)
     }
 
     @Test("NetworkMetrics duration calculation")

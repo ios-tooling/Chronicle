@@ -16,13 +16,13 @@ public final class NetworkLogger: Sendable {
 
     /// Manually log a network request/response.
     /// If an error is provided and an ErrorTracker is available, automatically creates a linked ErrorLog.
-    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, metrics: NetworkMetrics? = nil, linkedErrorID: UUID? = nil, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let networkLogID = UUID()
-        var linkedErrorID: UUID?
+        var resolvedLinkedErrorID = linkedErrorID
 
-        if let error, let errorTracker {
+        if let error, resolvedLinkedErrorID == nil, let errorTracker {
             let errorLogID = UUID()
-            linkedErrorID = errorLogID
+            resolvedLinkedErrorID = errorLogID
             let errorLog = errorTracker.makeErrorLog(from: error, id: errorLogID, linkedNetworkLogID: networkLogID, file: file, function: function, line: line)
             errorTracker.log(errorLog)
         }
@@ -36,15 +36,15 @@ public final class NetworkLogger: Sendable {
             statusCode: response?.statusCode,
             responseHeaders: response?.allHeaderFields as? [String: String],
             responseBody: data,
-            error: error?.localizedDescription,
+            error: error?.chronicleDescription,
             wasCancelled: wasCancelled,
-            metrics: NetworkMetrics(
+            metrics: metrics ?? NetworkMetrics(
                 startTime: startTime,
                 endTime: endTime ?? Date(),
                 bytesSent: Int64(request.httpBody?.count ?? 0),
                 bytesReceived: Int64(data?.count ?? 0)
             ),
-            linkedErrorID: linkedErrorID,
+            linkedErrorID: resolvedLinkedErrorID,
             context: context,
             tags: tags,
             referenceURL: referenceURL,

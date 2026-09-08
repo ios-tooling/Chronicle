@@ -24,46 +24,24 @@ extension Chronicle {
 		line: Int = #line
 	) {
 		let merged = mergeDescription(description, into: context)
-		if metrics != nil || linkedErrorID != nil {
-			let log = NetworkLog(
-				url: request.url ?? URL(string: "https://unknown")!,
-				method: request.httpMethod ?? "GET",
-				requestHeaders: request.allHTTPHeaderFields,
-				requestBody: request.httpBody,
-				statusCode: response?.statusCode,
-				responseHeaders: response?.allHeaderFields as? [String: String],
-				responseBody: data,
-				error: error?.localizedDescription,
-				wasCancelled: wasCancelled,
-				metrics: metrics ?? NetworkMetrics(startTime: startTime, endTime: endTime ?? Date(), bytesSent: Int64(request.httpBody?.count ?? 0), bytesReceived: Int64(data?.count ?? 0)),
-				linkedErrorID: linkedErrorID,
-				context: merged,
-				tags: tags,
-				referenceURL: referenceURL,
-				referenceID: referenceID,
-				sourceFile: (file as NSString).lastPathComponent,
-				sourceFunction: function,
-				sourceLine: line
-			)
-			instance.network?.log(log)
-		} else {
-			instance.network?.log(
-				request: request,
-				response: response,
-				data: data,
-				error: error,
-				wasCancelled: wasCancelled,
-				context: merged,
-				tags: tags,
-				referenceURL: referenceURL,
-				referenceID: referenceID,
-				startTime: startTime,
-				endTime: endTime,
-				file: file,
-				function: function,
-				line: line
-			)
-		}
+		instance.network?.log(
+			request: request,
+			response: response,
+			data: data,
+			error: error,
+			wasCancelled: wasCancelled,
+			metrics: metrics,
+			linkedErrorID: linkedErrorID,
+			context: merged,
+			tags: tags,
+			referenceURL: referenceURL,
+			referenceID: referenceID,
+			startTime: startTime,
+			endTime: endTime,
+			file: file,
+			function: function,
+			line: line
+		)
 	}
 
 	/// Logs a network request and response from individual parameters.

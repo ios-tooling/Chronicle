@@ -71,15 +71,16 @@ private extension URLError {
     var extractedMetadata: [String: AnyCodableValue] {
         var dict: [String: AnyCodableValue] = [
             "errorCode":     .int(code.rawValue),
-            "errorCodeName": .string(code.humanReadableName)
+            "errorCodeName": .string(code.chronicleName)
         ]
         if let url = failingURL { dict["failingURL"] = .string(url.absoluteString) }
         return dict
     }
 }
 
-private extension URLError.Code {
-    var humanReadableName: String {
+extension URLError.Code {
+    /// A stable symbolic name suitable for Chronicle's human-readable output.
+    var chronicleName: String {
         switch self {
         case .cancelled:               return "cancelled"
         case .badURL:                  return "badURL"
@@ -98,6 +99,22 @@ private extension URLError.Code {
         case .dataLengthExceedsMaximum: return "dataLengthExceedsMaximum"
         default:                       return "urlError(\(rawValue))"
         }
+    }
+}
+
+extension Error {
+    /// A concise description that retains the NSError identity which
+    /// `localizedDescription` frequently omits.
+    var chronicleDescription: String {
+        let nsError = self as NSError
+        var identity = "\(nsError.domain) [\(nsError.code)"
+        if nsError.domain == NSURLErrorDomain {
+            identity += ", \(URLError.Code(rawValue: nsError.code).chronicleName)"
+        }
+        identity += "]"
+
+        let message = nsError.localizedDescription
+        return message.isEmpty ? identity : "\(identity): \(message)"
     }
 }
 
