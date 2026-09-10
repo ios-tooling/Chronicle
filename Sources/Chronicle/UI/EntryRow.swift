@@ -10,7 +10,7 @@ struct EntryRow: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: entry.category.systemImage)
-                .foregroundStyle(entry.category.tintColor)
+                .foregroundStyle(iconColor)
                 .frame(width: 24)
 
 			  VStack(alignment: .leading, spacing: 4) {
@@ -34,6 +34,12 @@ struct EntryRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    /// The category tint, except that a failed request is flagged red like an error entry.
+    private var iconColor: Color {
+        if let log = entry as? NetworkLog, log.hasError { return .red }
+        return entry.category.tintColor
     }
 
     @ViewBuilder private var entryContent: some View {

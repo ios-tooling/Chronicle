@@ -22,17 +22,13 @@ struct NetworkLogRow: View {
                 Text(log.url.path())
                     .font(.subheadline)
                     .lineLimit(1)
-					
+
 					Spacer()
-					
+
 					if log.wasCancelled {
-						Label("Cancelled", systemImage: "nosign")
-							.font(.caption)
-							.foregroundStyle(.orange)
-					} else if log.error != nil {
-						 Label("Error", systemImage: "xmark.circle.fill")
-							  .font(.caption)
-							  .foregroundStyle(.red)
+						OutcomeMarker(text: "Cancelled", systemImage: "nosign", color: .orange)
+					} else if log.hasError {
+						OutcomeMarker(text: "Error", systemImage: "xmark.circle.fill", color: .red)
 					}
             }
 
@@ -58,9 +54,14 @@ struct NetworkLogRow: View {
                     }
                     .foregroundStyle(.secondary)
                 }
-					
+
 					Spacer()
 					log.timestamp.timestampView
+            }
+
+            if let linked = log.linkedError {
+                ErrorBadge(text: linked.caseName ?? linked.errorType, color: .red)
+                ErrorLogSummary(error: linked)
             }
         }
     }
@@ -73,4 +74,22 @@ struct NetworkLogRow: View {
         }
     }
 
+}
+
+/// A compact icon-and-word marker for how a request ended. A `Label` would inherit the list's
+/// icon-aligning style and drift far from its text.
+@available(iOS 17, macOS 14, *)
+private struct OutcomeMarker: View {
+    let text: String
+    let systemImage: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemImage)
+            Text(text)
+        }
+        .font(.caption)
+        .foregroundStyle(color)
+    }
 }
