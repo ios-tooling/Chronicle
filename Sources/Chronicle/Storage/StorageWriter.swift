@@ -9,6 +9,7 @@ import Foundation
 final class StorageWriter: Sendable {
     private enum Command {
         case store(any ChronicleEntry)
+        case attach(ErrorLog, NetworkLogReference)
         case flush(CheckedContinuation<Void, Never>)
     }
 
@@ -21,6 +22,8 @@ final class StorageWriter: Sendable {
             for await command in stream {
                 switch command {
                 case .store(let entry): await storage.store(entry)
+                case .attach(let error, let reference):
+                    if !(await storage.attach(error, to: reference)) { await storage.store(error) }
                 case .flush(let resume): resume.resume()
                 }
             }
@@ -30,6 +33,12 @@ final class StorageWriter: Sendable {
     /// Enqueues an entry to be persisted. Returns immediately.
     func store(_ entry: any ChronicleEntry) {
         continuation.yield(.store(entry))
+    }
+
+    /// Enqueues `error` to be attached to the request `reference` names. FIFO order means the
+    /// request's own entry is already stored by then; if it never was, the error is stored on its own.
+    func attach(_ error: ErrorLog, to reference: NetworkLogReference) {
+        continuation.yield(.attach(error, reference))
     }
 
     /// Suspends until all previously enqueued writes have been persisted.

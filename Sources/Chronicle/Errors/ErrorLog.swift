@@ -56,7 +56,7 @@ public struct ErrorLog: ChronicleEntry {
 	public let callStackSymbols: [String]?
 	
 	/// The UUID of a linked NetworkLog, if this error came from a network request.
-	public let linkedNetworkLogID: UUID?
+	public var linkedNetworkLogID: UUID?
 
 	public let tags: [Tag]?
 	public let referenceURL: URL?

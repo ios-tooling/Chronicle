@@ -11,7 +11,7 @@ struct NetworkLogDetailScreen: View {
 			requestSection
 			responseSection
 			metricsSection
-			if log.error != nil || log.linkedErrorID != nil {
+			if log.hasError {
 				errorSection
 			}
 			sourceSection
@@ -160,8 +160,11 @@ struct NetworkLogDetailScreen: View {
 				Text(error)
 					.foregroundStyle(.red)
 			}
-			if let errorID = log.linkedErrorID {
-				row("Linked Error ID", errorID.uuidString)
+			if let linked = log.linkedError {
+				row("Type", linked.qualifiedType)
+				if linked.message != log.error { row("Message", linked.message) }
+				if let context = linked.context?["context"] { row("Context", "\(context)") }
+				NavigationLink("Error Details") { ErrorLogDetailScreen(error: linked) }
 			}
 		}
 	}

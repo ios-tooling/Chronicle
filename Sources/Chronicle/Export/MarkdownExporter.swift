@@ -70,7 +70,12 @@ public struct MarkdownExporter: ExportDestination {
             if let size = log.responseBodySize { md += " (\(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)))" }
             if let duration = log.metrics.duration { md += String(format: " (%.0fms)", duration * 1000) }
             md += "\n"
-            if let error = log.error { md += "Error: \(error)\n" }
+            if let linked = log.linkedError {
+                md += "Error: \(linked.errorType): \(linked.message)\n"
+                if let context = linked.context?["context"] { md += "Context: \(context)\n" }
+            } else if let error = log.error {
+                md += "Error: \(error)\n"
+            }
             return md
 
         case let flow as FlowEvent:

@@ -40,7 +40,11 @@ public final class ErrorTracker: Sendable {
             function: function,
             line: line
         )
-        writer.store(errorLog)
+        if let reference = (error as? NetworkLogLinkedError)?.networkLogReference {
+            writer.attach(errorLog, to: reference)
+        } else {
+            writer.store(errorLog)
+        }
 
         if ChronicleDebugger.isAttached {
             var message = "⚠️ [\(severity.rawValue.uppercased())] \(error.localizedDescription)"

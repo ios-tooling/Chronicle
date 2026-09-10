@@ -33,7 +33,7 @@ All logging methods capture source location (`#file`, `#function`, `#line`) auto
 // Events
 Chronicle.track("button_tapped", metadata: ["id": "checkout"])
 
-// Network — auto-creates linked ErrorLog when error is non-nil
+// Network — a failed request stays one entry; the error rides along as its linkedError
 Chronicle.network(request: urlRequest, response: httpResponse, data: data, error: error)
 
 // Screen flow
@@ -102,15 +102,17 @@ All conform to `ChronicleEntry` (requires `id: UUID`, `timestamp: Date`, `catego
 | Type | Category | Key fields |
 |------|----------|------------|
 | `Event` | `.event` | `name`, `metadata: EventMetadata?` |
-| `NetworkLog` | `.network` | `url`, `method`, `statusCode`, `metrics: NetworkMetrics`, `linkedErrorID: UUID?` |
+| `NetworkLog` | `.network` | `url`, `method`, `statusCode`, `metrics: NetworkMetrics`, `linkedError: ErrorLog?` |
 | `FlowEvent` | `.flow` | `from: FlowStep?`, `to: FlowStep`, `transitionType: TransitionType` |
-| `ErrorLog` | `.error` | `domain`, `code`, `message`, `errorType`, `severity: ErrorSeverity`, `linkedNetworkLogID: UUID?` |
+| `ErrorLog` | `.error` | `domain`, `code`, `message`, `errorType`, `caseName: String?`, `severity: ErrorSeverity`, `linkedNetworkLogID: UUID?` |
 
 All entry types include `sourceFile: String?`, `sourceFunction: String?`, `sourceLine: Int?`.
 
 ### Network-error linking
 
-When `NetworkLogger.log(request:..., error:...)` receives a non-nil error, it creates both a `NetworkLog` and a linked `ErrorLog` with cross-referenced UUIDs (`linkedErrorID` / `linkedNetworkLogID`).
+A failed request is a single entry. When `NetworkLogger.log(request:..., error:...)` receives a non-nil error, the `NetworkLog` carries the extracted `ErrorLog` as `linkedError` (whose `linkedNetworkLogID` points back at the request); no separate error entry is written.
+
+Errors discovered after a request completes — a decode failure, an error envelope in a 2xx body, a 404 the transport didn't treat as fatal — can be attributed to their request too. Conform the error to `NetworkLogLinkedError` and return a `NetworkLogReference` (the request URL and its start time, i.e. `NetworkMetrics.startTime`; query strings are ignored when matching). `Chronicle.error(_:)` then attaches the error to that request's entry instead of logging it on its own. If no matching request was logged, the error is stored as a standalone `ErrorLog`.
 
 ### Storage
 

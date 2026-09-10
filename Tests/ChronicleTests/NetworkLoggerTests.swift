@@ -67,9 +67,12 @@ struct NetworkLoggerTests {
         #expect(logs[0].responseBodySize == 11)
     }
 
-    @Test("Log request with error")
+    @Test("A request that failed is one entry, carrying its error")
     func logWithError() async throws {
-        let (logger, writer) = try makeLogger()
+        let storage = try SwiftDataStorage.inMemory()
+        let writer = StorageWriter(storage: storage)
+        let errors = ErrorTracker(storage: storage, writer: writer)
+        let logger = NetworkLogger(storage: storage, writer: writer, errorTracker: errors)
 
         let url = URL(string: "https://api.example.com/fail")!
         let request = URLRequest(url: url)
@@ -81,6 +84,11 @@ struct NetworkLoggerTests {
         let logs = await logger.recentLogs()
         #expect(logs.count == 1)
         #expect(logs[0].error == "Connection failed")
+        #expect(logs[0].linkedError?.message == "Connection failed")
+        #expect(logs[0].linkedError?.linkedNetworkLogID == logs[0].id)
+
+        let standalone = await errors.recentErrors()
+        #expect(standalone.isEmpty)
     }
 
     @Test("NetworkMetrics duration calculation")

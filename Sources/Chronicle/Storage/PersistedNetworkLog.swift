@@ -24,7 +24,7 @@ final class PersistedNetworkLog {
     var endTime: Date?
     var bytesSent: Int64
     var bytesReceived: Int64
-    var linkedErrorID: UUID?
+    var linkedErrorJSON: Data?
     var contextJSON: Data?
     var tagsJSON: Data?
     var referenceURLString: String?
@@ -51,7 +51,7 @@ final class PersistedNetworkLog {
         endTime: Date?,
         bytesSent: Int64,
         bytesReceived: Int64,
-        linkedErrorID: UUID?,
+        linkedErrorJSON: Data?,
         contextJSON: Data?,
         tagsJSON: Data?,
         referenceURLString: String?,
@@ -77,7 +77,7 @@ final class PersistedNetworkLog {
         self.endTime = endTime
         self.bytesSent = bytesSent
         self.bytesReceived = bytesReceived
-        self.linkedErrorID = linkedErrorID
+        self.linkedErrorJSON = linkedErrorJSON
         self.contextJSON = contextJSON
         self.tagsJSON = tagsJSON
         self.referenceURLString = referenceURLString
@@ -118,7 +118,7 @@ final class PersistedNetworkLog {
                 bytesSent: bytesSent,
                 bytesReceived: bytesReceived
             ),
-            linkedErrorID: linkedErrorID,
+            linkedError: linkedErrorJSON.flatMap { try? decoder.decode(ErrorLog.self, from: $0) },
             context: context,
             tags: tags,
             referenceURL: refURL,
@@ -153,7 +153,7 @@ final class PersistedNetworkLog {
             endTime: log.metrics.endTime,
             bytesSent: log.metrics.bytesSent,
             bytesReceived: log.metrics.bytesReceived,
-            linkedErrorID: log.linkedErrorID,
+            linkedErrorJSON: log.linkedError.flatMap { try? encoder.encode($0) },
             contextJSON: contextJSON,
             tagsJSON: tagsJSON,
             referenceURLString: log.referenceURL?.absoluteString,

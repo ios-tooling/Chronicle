@@ -36,7 +36,9 @@ public struct ConsoleExporter: ExportDestination {
             if let duration = networkLog.metrics.duration {
                 message += " (\(String(format: "%.2f", duration))s)"
             }
-            if let error = networkLog.error {
+            if let linked = networkLog.linkedError {
+                message += " ERROR: \(linked.errorType): \(linked.message)"
+            } else if let error = networkLog.error {
                 message += " ERROR: \(error)"
             }
             return message

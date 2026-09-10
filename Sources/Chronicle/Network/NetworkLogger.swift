@@ -15,17 +15,10 @@ public final class NetworkLogger: Sendable {
     }
 
     /// Manually log a network request/response.
-    /// If an error is provided and an ErrorTracker is available, automatically creates a linked ErrorLog.
-    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    /// A failed request is still a single entry: the error's details ride along as the log's `linkedError`.
+    public func log(request: URLRequest, response: HTTPURLResponse? = nil, data: Data? = nil, error: Error? = nil, wasCancelled: Bool = false, metrics: NetworkMetrics? = nil, context: EventMetadata? = nil, tags: TagCollection? = nil, referenceURL: URL? = nil, referenceID: String? = nil, startTime: Date = Date(), endTime: Date? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         let networkLogID = UUID()
-        var linkedErrorID: UUID?
-
-        if let error, let errorTracker {
-            let errorLogID = UUID()
-            linkedErrorID = errorLogID
-            let errorLog = errorTracker.makeErrorLog(from: error, id: errorLogID, linkedNetworkLogID: networkLogID, file: file, function: function, line: line)
-            errorTracker.log(errorLog)
-        }
+        let linkedError = error.flatMap { errorTracker?.makeErrorLog(from: $0, linkedNetworkLogID: networkLogID, file: file, function: function, line: line) }
 
         let networkLog = NetworkLog(
             id: networkLogID,
@@ -38,13 +31,13 @@ public final class NetworkLogger: Sendable {
             responseBody: data,
             error: error?.localizedDescription,
             wasCancelled: wasCancelled,
-            metrics: NetworkMetrics(
+            metrics: metrics ?? NetworkMetrics(
                 startTime: startTime,
                 endTime: endTime ?? Date(),
                 bytesSent: Int64(request.httpBody?.count ?? 0),
                 bytesReceived: Int64(data?.count ?? 0)
             ),
-            linkedErrorID: linkedErrorID,
+            linkedError: linkedError,
             context: context,
             tags: tags,
             referenceURL: referenceURL,

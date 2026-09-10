@@ -25,8 +25,9 @@ public struct NetworkLog: ChronicleEntry {
 	// Metrics
 	public let metrics: NetworkMetrics
 	
-	/// The UUID of a linked ErrorLog, if this request produced an error.
-	public let linkedErrorID: UUID?
+	/// The error this request produced, if any: a transport failure recorded with the request, or one
+	/// a caller attributed to it afterwards through `NetworkLogLinkedError`.
+	public let linkedError: ErrorLog?
 
 	/// Optional context about this network request.
 	public let context: EventMetadata?
@@ -38,8 +39,11 @@ public struct NetworkLog: ChronicleEntry {
 	public let sourceFunction: String?
 	public let sourceLine: Int?
 	
+	/// Whether the request failed: a transport error recorded with it, or an error attributed to it afterwards.
+	public var hasError: Bool { error != nil || linkedError != nil }
+
 	public func matches(filter: String) -> Bool {
-		url.absoluteString.localizedCaseInsensitiveContains(filter)
+		url.absoluteString.localizedCaseInsensitiveContains(filter) || linkedError?.matches(filter: filter) == true
 	}
 	
 	public init(
@@ -57,7 +61,7 @@ public struct NetworkLog: ChronicleEntry {
 		error: String? = nil,
 		wasCancelled: Bool = false,
 		metrics: NetworkMetrics = NetworkMetrics(),
-		linkedErrorID: UUID? = nil,
+		linkedError: ErrorLog? = nil,
 		context: EventMetadata? = nil,
 		tags: TagCollection? = nil,
 		referenceURL: URL? = nil,
@@ -80,7 +84,7 @@ public struct NetworkLog: ChronicleEntry {
 		self.error = error
 		self.wasCancelled = wasCancelled
 		self.metrics = metrics
-		self.linkedErrorID = linkedErrorID
+		self.linkedError = linkedError
 		self.context = context
 		self.tags = tags?.tags
 		self.referenceURL = referenceURL
@@ -94,7 +98,7 @@ public struct NetworkLog: ChronicleEntry {
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, url, method, requestHeaders, requestBody, requestBodySize
 		case statusCode, responseHeaders, responseBody, responseBodySize, error, wasCancelled, metrics
-		case linkedErrorID, context, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
+		case linkedError, context, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
 	}
 	
 	public func encode(to encoder: Encoder) throws {
@@ -114,7 +118,7 @@ public struct NetworkLog: ChronicleEntry {
 		try container.encodeIfPresent(error, forKey: .error)
 		try container.encode(wasCancelled, forKey: .wasCancelled)
 		try container.encode(metrics, forKey: .metrics)
-		try container.encodeIfPresent(linkedErrorID, forKey: .linkedErrorID)
+		try container.encodeIfPresent(linkedError, forKey: .linkedError)
 		try container.encodeIfPresent(context, forKey: .context)
 		try container.encodeIfPresent(tags, forKey: .tags)
 		try container.encodeIfPresent(referenceURL, forKey: .referenceURL)
@@ -140,7 +144,7 @@ public struct NetworkLog: ChronicleEntry {
 		error = try container.decodeIfPresent(String.self, forKey: .error)
 		wasCancelled = try container.decodeIfPresent(Bool.self, forKey: .wasCancelled) ?? false
 		metrics = try container.decode(NetworkMetrics.self, forKey: .metrics)
-		linkedErrorID = try container.decodeIfPresent(UUID.self, forKey: .linkedErrorID)
+		linkedError = try container.decodeIfPresent(ErrorLog.self, forKey: .linkedError)
 		context = try container.decodeIfPresent(EventMetadata.self, forKey: .context)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 		referenceURL = try container.decodeIfPresent(URL.self, forKey: .referenceURL)
