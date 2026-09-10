@@ -21,15 +21,15 @@ struct NetworkLogDetailScreen: View {
 				.navigationBarTitleDisplayMode(.inline)
 		#endif
 		.toolbar {
+			ToolbarItem(placement: .automatic) { ShareLink(item: report) }
 			if ChronicleDebugger.isAttached {
-				ToolbarItem(placement: .automatic) {
-					Button("Log") { logTransaction() }
-				}
+				ToolbarItem(placement: .automatic) { Button("Log") { print(report) } }
 			}
 		}
 	}
 
-	private func logTransaction() {
+	/// Everything the screen shows, as plain text; the Share and Log buttons both hand this out.
+	private var report: String {
 		var lines: [String] = []
 		lines.append("═══════════════════════════════════════")
 		lines.append("  \(log.method) \(log.url.absoluteString)")
@@ -71,14 +71,18 @@ struct NetworkLogDetailScreen: View {
 			lines.append(Self.prettyString(from: body))
 		}
 
-		if let error = log.error {
+		if log.hasError {
 			lines.append("")
 			lines.append("── Error ──")
-			lines.append("  \(error)")
+			if let error = log.error { lines.append("  \(error)") }
+			if let linked = log.linkedError {
+				lines.append("  \(linked.qualifiedType): \(linked.message)")
+				if let context = linked.context?["context"] { lines.append("  Context: \(context)") }
+			}
 		}
 
 		lines.append("═══════════════════════════════════════")
-		print(lines.joined(separator: "\n"))
+		return lines.joined(separator: "\n")
 	}
 
 	private static func prettyString(from data: Data) -> String {

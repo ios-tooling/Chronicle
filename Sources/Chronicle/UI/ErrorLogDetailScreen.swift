@@ -18,15 +18,15 @@ struct ErrorLogDetailScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
+            ToolbarItem(placement: .automatic) { ShareLink(item: report) }
             if ChronicleDebugger.isAttached {
-                ToolbarItem(placement: .automatic) {
-                    Button("Log") { logError() }
-                }
+                ToolbarItem(placement: .automatic) { Button("Log") { print(report) } }
             }
         }
     }
 
-    private func logError() {
+    /// Everything the screen shows, as plain text; the Share and Log buttons both hand this out.
+    private var report: String {
         var lines: [String] = []
         lines.append("═══════════════════════════════════════")
         lines.append("  [\(error.severity.rawValue.uppercased())] \(error.errorType)")
@@ -62,7 +62,7 @@ struct ErrorLogDetailScreen: View {
             symbols.forEach { lines.append("  \($0)") }
         }
         lines.append("═══════════════════════════════════════")
-        print(lines.joined(separator: "\n"))
+        return lines.joined(separator: "\n")
     }
 
     private var overviewSection: some View {
