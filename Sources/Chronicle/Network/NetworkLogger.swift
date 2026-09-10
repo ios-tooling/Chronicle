@@ -29,7 +29,7 @@ public final class NetworkLogger: Sendable {
             statusCode: response?.statusCode,
             responseHeaders: response?.allHeaderFields as? [String: String],
             responseBody: data,
-            error: error?.localizedDescription,
+            error: error?.chronicleDescription,
             wasCancelled: wasCancelled,
             metrics: metrics ?? NetworkMetrics(
                 startTime: startTime,

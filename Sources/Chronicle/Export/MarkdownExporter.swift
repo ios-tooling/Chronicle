@@ -71,10 +71,10 @@ public struct MarkdownExporter: ExportDestination {
             if let duration = log.metrics.duration { md += String(format: " (%.0fms)", duration * 1000) }
             md += "\n"
             if let linked = log.linkedError {
-                md += "Error: \(linked.errorType): \(linked.message)\n"
-                if let context = linked.context?["context"] { md += "Context: \(context)\n" }
+                md += "  Error: \(errorIdentity(linked))\n"
+                if let context = linked.context?["context"] { md += "  Context: \(inline(String(describing: context)))\n" }
             } else if let error = log.error {
-                md += "Error: \(error)\n"
+                md += "  Error: \(inline(error))\n"
             }
             return md
 
@@ -83,9 +83,7 @@ public struct MarkdownExporter: ExportDestination {
             return "\(from) → **\(flow.to.screenName)** (\(flow.transitionType.rawValue))\n"
 
         case let error as ErrorLog:
-            var md = "**\(error.severity.rawValue.uppercased())** \(error.errorType): \(error.message)\n"
-            if let reason = error.failureReason { md += "Reason: \(reason)\n" }
-            return md
+            return formatError(error)
 
         case let ck as CloudKitLog:
             let dir: String = switch ck.operation {
@@ -108,5 +106,88 @@ public struct MarkdownExporter: ExportDestination {
         default:
             return "\(entry.displaySummary)\n"
         }
+    }
+
+    private func formatError(_ error: ErrorLog) -> String {
+        var md = "**\(error.severity.rawValue.uppercased())** **\(inline(error.errorType))**: \(inline(error.message))\n"
+        md += "  Domain: `\(inline(error.domain))`  \n"
+        if let code = error.code {
+            md += "  Code: `\(code)`"
+            if error.domain == NSURLErrorDomain {
+                md += " (`\(URLError.Code(rawValue: code).chronicleName)`)"
+            }
+            md += "  \n"
+        }
+        if let reason = error.failureReason {
+            md += "  Failure Reason: \(inline(reason))  \n"
+        }
+        if let suggestion = error.recoverySuggestion {
+            md += "  Recovery Suggestion: \(inline(suggestion))  \n"
+        }
+
+        let defaultFullDescription = "\(error.errorType): \(error.message)"
+        if error.fullDescription != error.message, error.fullDescription != defaultFullDescription {
+            md += "  Details:\n"
+            md += quoted(error.fullDescription)
+        }
+
+        if let userInfo = error.userInfo, !userInfo.isEmpty {
+            md += "  User Info:\n"
+            for key in userInfo.keys.sorted() {
+                md += "    - `\(inline(key))`: \(inline(userInfo[key] ?? ""))\n"
+            }
+        }
+        if let context = error.context, !context.isEmpty {
+            md += "  Context:\n"
+            for key in context.keys.sorted() {
+                md += "    - `\(inline(key))`: \(inline(String(describing: context[key]!)))\n"
+            }
+        }
+        if let linkedNetworkLogID = error.linkedNetworkLogID {
+            md += "  Linked Network Log: `\(linkedNetworkLogID.uuidString)`  \n"
+        }
+
+        var source: [String] = []
+        if let file = error.sourceFile {
+            source.append(file + (error.sourceLine.map { ":\($0)" } ?? ""))
+        }
+        if let function = error.sourceFunction {
+            source.append(function)
+        }
+        if !source.isEmpty {
+            md += "  Source: `\(inline(source.joined(separator: " — ")))`  \n"
+        }
+
+        if let callStack = error.callStackSymbols, !callStack.isEmpty {
+            md += "  Call Stack:\n"
+            for frame in callStack {
+                md += "    - `\(inline(frame))`\n"
+            }
+        }
+        return md
+    }
+
+    private func errorIdentity(_ error: ErrorLog) -> String {
+        var identity = "`\(inline(error.domain))`"
+        if let code = error.code {
+            identity += " code `\(code)`"
+            if error.domain == NSURLErrorDomain {
+                identity += " (`\(URLError.Code(rawValue: code).chronicleName)`)"
+            }
+        }
+        return "\(identity) — \(inline(error.message))"
+    }
+
+    private func quoted(_ value: String) -> String {
+        value.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { "  > \($0)\n" }
+            .joined()
+    }
+
+    private func inline(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "\r\n", with: " ")
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\r", with: " ")
     }
 }

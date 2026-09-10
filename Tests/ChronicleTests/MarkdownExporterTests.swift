@@ -104,4 +104,50 @@ struct MarkdownExporterTests {
         #expect(string!.contains("Chronicle Report"))
     }
 
+    @Test("Report includes rich error diagnostics and resolves linked network errors")
+    func richErrorDiagnostics() {
+        let exporter = MarkdownExporter()
+        let networkID = UUID()
+        let errorID = UUID()
+        let error = ErrorLog(
+            id: errorID,
+            domain: NSURLErrorDomain,
+            code: NSURLErrorNotConnectedToInternet,
+            message: "NSURLError",
+            failureReason: "The device is offline",
+            recoverySuggestion: "Check the network connection",
+            errorType: "NSError",
+            userInfo: ["NSErrorFailingURLStringKey": "https://api.example.com/data"],
+            fullDescription: "NSError: NSURLError\nUnderlying (1): NetworkExtension [7] Radio unavailable",
+            severity: .error,
+            context: ["operation": "fetchData"],
+            callStackSymbols: ["0 ChronicleTests richErrorDiagnostics"],
+            linkedNetworkLogID: networkID,
+            sourceFile: "APIClient.swift",
+            sourceFunction: "fetchData()",
+            sourceLine: 42
+        )
+        let network = NetworkLog(
+            id: networkID,
+            url: URL(string: "https://api.example.com/data")!,
+            method: "GET",
+            error: "NSURLError",
+            linkedError: error
+        )
+
+        let markdown = exporter.generateMarkdown(from: [network, error])
+
+        #expect(markdown.contains("Error: `NSURLErrorDomain` code `-1009` (`notConnectedToInternet`) — NSURLError"))
+        #expect(markdown.contains("Domain: `NSURLErrorDomain`"))
+        #expect(markdown.contains("Code: `-1009` (`notConnectedToInternet`)"))
+        #expect(markdown.contains("Failure Reason: The device is offline"))
+        #expect(markdown.contains("Recovery Suggestion: Check the network connection"))
+        #expect(markdown.contains("Underlying (1): NetworkExtension [7] Radio unavailable"))
+        #expect(markdown.contains("`NSErrorFailingURLStringKey`: https://api.example.com/data"))
+        #expect(markdown.contains("`operation`: fetchData"))
+        #expect(markdown.contains("Linked Network Log: `\(networkID.uuidString)`"))
+        #expect(markdown.contains("Source: `APIClient.swift:42 — fetchData()`"))
+        #expect(markdown.contains("`0 ChronicleTests richErrorDiagnostics`"))
+    }
+
 }
