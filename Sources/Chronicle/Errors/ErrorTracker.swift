@@ -125,6 +125,7 @@ public final class ErrorTracker: Sendable {
             failureReason: nsError.localizedFailureReason,
             recoverySuggestion: nsError.localizedRecoverySuggestion,
             errorType: errorType,
+            caseName: error.chronicle_caseName,
             userInfo: userInfoStrings,
             fullDescription: fullDescription,
             severity: severity,

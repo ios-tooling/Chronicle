@@ -67,7 +67,7 @@ struct ErrorLogDetailScreen: View {
 
     private var overviewSection: some View {
         Section("Overview") {
-            row("Type", error.errorType)
+            row("Type", error.qualifiedType)
             row("Severity", error.severity.rawValue.capitalized)
             row("Domain", error.domain)
             if let code = error.code { row("Code", "\(code)") }

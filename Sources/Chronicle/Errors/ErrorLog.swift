@@ -33,6 +33,12 @@ public struct ErrorLog: ChronicleEntry {
 	
 	/// The full type name of the original error (e.g., "DecodingError", "URLError").
 	public let errorType: String
+
+	/// For an enum error, the case it was (e.g. "keyNotFound"); nil for other errors.
+	public let caseName: String?
+
+	/// The type name qualified by its case when there is one, e.g. "DecodingError.keyNotFound".
+	public var qualifiedType: String { caseName.map { "\(errorType).\($0)" } ?? errorType }
 	
 	/// The user info dictionary keys and string-representable values from NSError.
 	public let userInfo: [String: String]?
@@ -68,6 +74,7 @@ public struct ErrorLog: ChronicleEntry {
 		failureReason: String? = nil,
 		recoverySuggestion: String? = nil,
 		errorType: String,
+		caseName: String? = nil,
 		userInfo: [String: String]? = nil,
 		fullDescription: String,
 		severity: ErrorSeverity = .error,
@@ -89,6 +96,7 @@ public struct ErrorLog: ChronicleEntry {
 		self.failureReason = failureReason
 		self.recoverySuggestion = recoverySuggestion
 		self.errorType = errorType
+		self.caseName = caseName
 		self.userInfo = userInfo
 		self.fullDescription = fullDescription
 		self.severity = severity
@@ -111,7 +119,7 @@ public struct ErrorLog: ChronicleEntry {
 	// Custom Codable to handle the constant category
 	private enum CodingKeys: String, CodingKey {
 		case id, timestamp, category, domain, code, message, failureReason
-		case recoverySuggestion, errorType, userInfo, fullDescription
+		case recoverySuggestion, errorType, caseName, userInfo, fullDescription
 		case severity, context, callStackSymbols
 		case linkedNetworkLogID, tags, referenceURL, referenceID, sourceFile, sourceFunction, sourceLine
 	}
@@ -127,6 +135,7 @@ public struct ErrorLog: ChronicleEntry {
 		try container.encodeIfPresent(failureReason, forKey: .failureReason)
 		try container.encodeIfPresent(recoverySuggestion, forKey: .recoverySuggestion)
 		try container.encode(errorType, forKey: .errorType)
+		try container.encodeIfPresent(caseName, forKey: .caseName)
 		try container.encodeIfPresent(userInfo, forKey: .userInfo)
 		try container.encode(fullDescription, forKey: .fullDescription)
 		try container.encode(severity, forKey: .severity)
@@ -151,6 +160,7 @@ public struct ErrorLog: ChronicleEntry {
 		failureReason = try container.decodeIfPresent(String.self, forKey: .failureReason)
 		recoverySuggestion = try container.decodeIfPresent(String.self, forKey: .recoverySuggestion)
 		errorType = try container.decode(String.self, forKey: .errorType)
+		caseName = try container.decodeIfPresent(String.self, forKey: .caseName)
 		userInfo = try container.decodeIfPresent([String: String].self, forKey: .userInfo)
 		fullDescription = try container.decode(String.self, forKey: .fullDescription)
 		severity = try container.decode(ErrorSeverity.self, forKey: .severity)

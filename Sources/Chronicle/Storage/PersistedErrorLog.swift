@@ -15,6 +15,7 @@ final class PersistedErrorLog {
     var failureReason: String?
     var recoverySuggestion: String?
     var errorType: String
+    var caseName: String?
     var userInfoJSON: Data?
     var fullDescription: String
     var severity: String
@@ -37,6 +38,7 @@ final class PersistedErrorLog {
         failureReason: String?,
         recoverySuggestion: String?,
         errorType: String,
+        caseName: String? = nil,
         userInfoJSON: Data?,
         fullDescription: String,
         severity: String,
@@ -58,6 +60,7 @@ final class PersistedErrorLog {
         self.failureReason = failureReason
         self.recoverySuggestion = recoverySuggestion
         self.errorType = errorType
+        self.caseName = caseName
         self.userInfoJSON = userInfoJSON
         self.fullDescription = fullDescription
         self.severity = severity
@@ -89,6 +92,7 @@ final class PersistedErrorLog {
             failureReason: failureReason,
             recoverySuggestion: recoverySuggestion,
             errorType: errorType,
+            caseName: caseName,
             userInfo: userInfo,
             fullDescription: fullDescription,
             severity: ErrorSeverity(rawValue: severity) ?? .error,
@@ -120,6 +124,7 @@ final class PersistedErrorLog {
             failureReason: errorLog.failureReason,
             recoverySuggestion: errorLog.recoverySuggestion,
             errorType: errorLog.errorType,
+            caseName: errorLog.caseName,
             userInfoJSON: userInfoJSON,
             fullDescription: errorLog.fullDescription,
             severity: errorLog.severity.rawValue,

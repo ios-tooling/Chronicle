@@ -250,6 +250,24 @@ struct ErrorTrackerTests {
         #expect(errorLog.callStackSymbols?.count == 2)
     }
 
+    @Test("An enum error records its case; other errors do not")
+    func recordsEnumCase() async throws {
+        let (tracker, writer) = try makeTracker()
+
+        tracker.log(TestError.withMessage("payload missing"))
+        tracker.log(TestError.simple)
+        tracker.log(NSError(domain: "com.test", code: 7))
+        await writer.flush()
+
+        let errors = await tracker.recentErrors()
+        #expect(errors.count == 3)
+        #expect(errors[0].caseName == "withMessage")
+        #expect(errors[0].qualifiedType == "TestError.withMessage")
+        #expect(errors[1].caseName == "simple")
+        #expect(errors[2].caseName == nil)
+        #expect(errors[2].qualifiedType == "NSError")
+    }
+
     @Test("Log error with call stack capture")
     func logErrorWithCallStack() async throws {
         let (tracker, writer) = try makeTracker()
