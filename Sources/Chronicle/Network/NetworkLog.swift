@@ -24,6 +24,14 @@ public struct NetworkLog: ChronicleEntry {
 
 	// Metrics
 	public let metrics: NetworkMetrics
+
+	/// A size for display. A logger can keep a body's size while dropping the body itself
+	/// (Convey does when a server is configured not to record payloads); that size is shown
+	/// in brackets so the missing body is visible at a glance.
+	public static func sizeText(_ size: some BinaryInteger, bodyRecorded: Bool) -> String {
+		let text = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+		return bodyRecorded ? text : "[\(text)]"
+	}
 	
 	/// The error this request produced, if any: a transport failure recorded with the request, or one
 	/// a caller attributed to it afterwards through `NetworkLogLinkedError`.

@@ -40,7 +40,7 @@ struct NetworkLogRow: View {
                 }
 
                 if let size = log.responseBodySize {
-                    Text(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+                    Text(NetworkLog.sizeText(size, bodyRecorded: log.responseBody != nil))
                         .font(.caption.monospaced())
                         .foregroundStyle(.primary)
                 }

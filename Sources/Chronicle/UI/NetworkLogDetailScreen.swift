@@ -130,7 +130,7 @@ struct NetworkLogDetailScreen: View {
 			if let body = log.requestBody, !body.isEmpty {
 				DataBodyView(title: "Body", data: body)
 			} else if let size = log.requestBodySize {
-				row("Body Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+				row("Body Size", NetworkLog.sizeText(size, bodyRecorded: log.requestBody != nil))
 			}
 		}
 	}
@@ -143,7 +143,7 @@ struct NetworkLogDetailScreen: View {
 			if let body = log.responseBody, !body.isEmpty {
 				DataBodyView(title: "Body", data: body)
 			} else if let size = log.responseBodySize {
-				row("Body Size", ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+				row("Body Size", NetworkLog.sizeText(size, bodyRecorded: log.responseBody != nil))
 			}
 		}
 	}
@@ -153,8 +153,8 @@ struct NetworkLogDetailScreen: View {
 			if let duration = log.metrics.duration {
 				row("Duration", String(format: "%.0fms", duration * 1000))
 			}
-			row("Bytes Sent", ByteCountFormatter.string(fromByteCount: log.metrics.bytesSent, countStyle: .file))
-			row("Bytes Received", ByteCountFormatter.string(fromByteCount: log.metrics.bytesReceived, countStyle: .file))
+			row("Bytes Sent", NetworkLog.sizeText(log.metrics.bytesSent, bodyRecorded: log.requestBody != nil))
+			row("Bytes Received", NetworkLog.sizeText(log.metrics.bytesReceived, bodyRecorded: log.responseBody != nil))
 		}
 	}
 	

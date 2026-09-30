@@ -49,6 +49,26 @@ struct SwiftDataStorageTests {
         #expect(retrieved?.statusCode == 200)
     }
 
+    @Test("A size kept without its body survives storage and reads bracketed")
+    func storeAndRetrieveSizeWithoutBody() async throws {
+        let storage = try makeStorage()
+
+        let log = NetworkLog(
+            url: URL(string: "https://example.com")!,
+            method: "GET",
+            statusCode: 200,
+            responseBodySize: 2048,
+            metrics: NetworkMetrics(startTime: Date(), endTime: Date(), bytesSent: 0, bytesReceived: 2048)
+        )
+        await storage.store(log)
+
+        let retrieved = await storage.entries(matching: StorageQuery(categories: [.network])).first as? NetworkLog
+        #expect(retrieved?.responseBody == nil)
+        #expect(retrieved?.responseBodySize == 2048)
+        #expect(NetworkLog.sizeText(2048, bodyRecorded: false) == "[2 KB]")
+        #expect(NetworkLog.sizeText(2048, bodyRecorded: true) == "2 KB")
+    }
+
     @Test("Store and retrieve a flow event")
     func storeAndRetrieveFlowEvent() async throws {
         let storage = try makeStorage()
