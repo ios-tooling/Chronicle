@@ -83,6 +83,16 @@ ChronicleButton()
 
 The viewer supports filtering by entry category, current run vs. all history, and text search.
 
+### New-errors badge
+
+`Chronicle.newErrors` (a main-actor `@Observable` `NewErrorCounter`) counts errors logged in this app session; `Chronicle.newErrorCount` reads it and `Chronicle.clearNewErrors()` resets it. Only `.error` and `.critical` severities count, never cancellations. The count is in memory only (0 on each launch), opening the viewer clears it, and errors logged while the viewer is visible aren't counted. It updates on the main actor shortly after the log call returns.
+
+```swift
+ChronicleScreen()
+    .tabItem { Label("Log", systemImage: "list.bullet") }
+    .badge(Chronicle.newErrors.count)
+```
+
 ## Export
 
 ```swift

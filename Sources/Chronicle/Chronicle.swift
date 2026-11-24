@@ -29,6 +29,9 @@ public final class Chronicle: @unchecked Sendable {
     /// The shared Chronicle instance.
     public static let instance = Chronicle()
 
+    /// The number of errors logged in this app session; see `NewErrorCounter`.
+    public let newErrors = NewErrorCounter()
+
     private let lock = NSLock()
     private var _storage: SwiftDataStorage?
     private var _writer: StorageWriter?
@@ -111,7 +114,7 @@ public final class Chronicle: @unchecked Sendable {
     private func install(storage: SwiftDataStorage, configuration: ChronicleConfiguration, maxEntries: Int?) {
         let writer = StorageWriter(storage: storage)
         Task { await storage.setMaxEntries(maxEntries) }
-        let errors = ErrorTracker(storage: storage, writer: writer)
+        let errors = ErrorTracker(storage: storage, writer: writer, newErrors: newErrors)
         lock.withLock {
             self._launchDate = Date()
             self._configuration = configuration

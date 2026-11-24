@@ -6,10 +6,12 @@ import TagAlong
 public final class ErrorTracker: Sendable {
     private let storage: SwiftDataStorage
     private let writer: StorageWriter
+    let newErrors: NewErrorCounter
 
-    init(storage: SwiftDataStorage, writer: StorageWriter) {
+    init(storage: SwiftDataStorage, writer: StorageWriter, newErrors: NewErrorCounter = NewErrorCounter()) {
         self.storage = storage
         self.writer = writer
+        self.newErrors = newErrors
     }
 
     /// Logs any Swift `Error`, extracting all available information.
@@ -45,6 +47,7 @@ public final class ErrorTracker: Sendable {
         } else {
             writer.store(errorLog)
         }
+        if severity.countsAsNewError, !error.isCancellation { newErrors.record() }
 
         if ChronicleDebugger.isAttached {
             var message = "⚠️ [\(severity.rawValue.uppercased())] \(error.localizedDescription)"
@@ -59,6 +62,7 @@ public final class ErrorTracker: Sendable {
     /// Logs an ErrorLog entry directly.
     public func log(_ errorLog: ErrorLog) {
         writer.store(errorLog)
+        if errorLog.severity.countsAsNewError { newErrors.record() }
     }
 
     /// Returns recent error logs, up to the specified limit.

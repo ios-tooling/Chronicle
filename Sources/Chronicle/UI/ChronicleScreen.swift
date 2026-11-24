@@ -17,6 +17,8 @@ public struct ChronicleScreen: View {
                 legacyTabs
             }
         }
+        .onAppear { Chronicle.instance.newErrors.viewerAppeared() }
+        .onDisappear { Chronicle.instance.newErrors.viewerDisappeared() }
         .onChange(of: selectedTab) {
             model.showCurrentRunOnly = selectedTab == 0
         }
